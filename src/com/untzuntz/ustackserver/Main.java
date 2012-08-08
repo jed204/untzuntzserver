@@ -11,7 +11,6 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import com.untzuntz.ustackserver.peer.PeerFactory;
 import com.untzuntz.ustackserver.server.ServerFactory;
-import com.untzuntz.ustackserverapi.APIDocumentation;
 
 public class Main {
 
@@ -26,15 +25,12 @@ public class Main {
     	
     	if (args.length >= 3)
     	{
-    		port = Integer.valueOf(args[0]);
-    		peerPort = Integer.valueOf(args[1]);
-    		otherPeer = Integer.valueOf(args[2]);
+    		port = Integer.valueOf(args[1]);
+    		peerPort = Integer.valueOf(args[2]);
+    		otherPeer = Integer.valueOf(args[3]);
     	}
-
-    	if (args.length >= 4 && "api".equalsIgnoreCase(args[3]))
-    		System.setProperty("DocsOnly", "t");
     	
-    	Main main = new Main(port, peerPort, otherPeer);
+    	Main main = new Main(args[0], port, peerPort, otherPeer);
     	
 		main.run();
     }
@@ -48,7 +44,7 @@ public class Main {
     	return apiVersion;
     }
     
-    private Main(int p, int pp, int op) {
+    public Main(String code, int p, int pp, int op) {
 
     	port = p;
     	peerPort = pp;
@@ -56,15 +52,15 @@ public class Main {
     	
     	try {
     		
-//			Class apiClass = Class.forName("com.tuneswith.api.Setup");
-//			Object apiObj = apiClass.newInstance();
-//				
-//    		Method m = apiClass.getMethod("setup", null);
-//    		m.invoke(apiObj, null);
-//
-//    		m = apiClass.getMethod("getAPIVersion", null);
-//    		Object o = m.invoke(apiObj, null);
-//    		apiVersion = (String)o;
+			Class apiClass = Class.forName(code);
+			Object apiObj = apiClass.newInstance();
+				
+    		Method m = apiClass.getMethod("setup", null);
+    		m.invoke(apiObj, null);
+
+    		m = apiClass.getMethod("getAPIVersion", null);
+    		Object o = m.invoke(apiObj, null);
+    		apiVersion = (String)o;
 
     	} catch (Exception e) {
     		logger.warn("Failed to load API subset", e);
