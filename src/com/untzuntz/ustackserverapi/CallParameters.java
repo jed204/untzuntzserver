@@ -2,6 +2,7 @@ package com.untzuntz.ustackserverapi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -16,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.apache.commons.codec.binary.Base64;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 public class CallParameters {
@@ -182,6 +185,27 @@ public class CallParameters {
             throw new RuntimeException(UTF8_CHARSET + " is unsupported!", e);
         }
         return signature;
+    }
+    
+    public BasicDBList getParameterList() 
+    {
+    	BasicDBList ret = new BasicDBList();
+    	Map<String,List<String>> params = qsd.getParameters();
+		Iterator<String> it = params.keySet().iterator();
+		while (it.hasNext())
+		{
+			String param = it.next();
+			if (!"sig".equalsIgnoreCase(param))
+			{
+				List<String> val = params.get(param);
+				String valStr = "";
+				if (val.size() > 0)
+					valStr = val.get(0);
+				
+				ret.add(new BasicDBObject(param, valStr));
+			}
+		}
+		return ret;
     }
 	
 	public String getParameter(String name) {

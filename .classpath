@@ -10,7 +10,6 @@
 	<classpathentry kind="lib" path="lib/mail.jar"/>
 	<classpathentry kind="lib" path="lib/mongo-2.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/UStack.jar"/>
-	<classpathentry kind="lib" path="lib/TunesWithAmigos.jar"/>
 	<classpathentry kind="lib" path="lib/ostermillerutils.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.3.jar"/>

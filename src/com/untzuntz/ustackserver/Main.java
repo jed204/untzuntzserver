@@ -36,10 +36,7 @@ public class Main {
     	
     	Main main = new Main(port, peerPort, otherPeer);
     	
-    	if (args.length >= 4 && "api".equalsIgnoreCase(args[3]))
-    		APIDocumentation.createPdf("/Users/jdanner/Desktop/api.pdf", "Tunes With Amigos", main.getAPIVersion());
-    	else
-    		main.run();
+		main.run();
     }
 
     private int port;
@@ -59,15 +56,15 @@ public class Main {
     	
     	try {
     		
-			Class apiClass = Class.forName("com.tuneswith.api.Setup");
-			Object apiObj = apiClass.newInstance();
-				
-    		Method m = apiClass.getMethod("setup", null);
-    		m.invoke(apiObj, null);
-
-    		m = apiClass.getMethod("getAPIVersion", null);
-    		Object o = m.invoke(apiObj, null);
-    		apiVersion = (String)o;
+//			Class apiClass = Class.forName("com.tuneswith.api.Setup");
+//			Object apiObj = apiClass.newInstance();
+//				
+//    		Method m = apiClass.getMethod("setup", null);
+//    		m.invoke(apiObj, null);
+//
+//    		m = apiClass.getMethod("getAPIVersion", null);
+//    		Object o = m.invoke(apiObj, null);
+//    		apiVersion = (String)o;
 
     	} catch (Exception e) {
     		logger.warn("Failed to load API subset", e);
@@ -100,34 +97,6 @@ public class Main {
 		peerBootstrap.setPipelineFactory(new PeerFactory());
 
 		// Bind and start to accept incoming connections.
-		peerBootstrap.bind(new InetSocketAddress(peerPort));
-		
-		
-		
-//		ClientBootstrap clientBootstrap = new ClientBootstrap(
-//											new NioClientSocketChannelFactory(
-//													Executors.newCachedThreadPool(),
-//													Executors.newCachedThreadPool()));
-//		
-//		clientBootstrap.setPipelineFactory(new PeerClientFactory());
-//
-//		boolean success = false;
-//		while (!success)
-//		{
-//			ChannelFuture future = clientBootstrap.connect(new InetSocketAddress("localhost", otherPeer));
-//			Channel channel = future.awaitUninterruptibly().getChannel();
-//			if (future.isSuccess())
-//				success = true;
-//			
-//			if (!success)
-//				try { Thread.sleep(5000); } catch (Exception e) {}
-//		}
-		
-		
-//		bootstrap.setOption("child.tcpNoDelay", true);
-//		bootstrap.setOption("child.keepAlive", true);
-//		bootstrap.setOption("child.reuseAddress", true);
-//		bootstrap.setOption("child.connectTimeoutMillis", 30000);
-
+		peerBootstrap.bind(new InetSocketAddress(peerPort));	
 	}
 }
