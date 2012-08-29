@@ -1,9 +1,6 @@
 .svn
-build
 bin
-deploy
 logs
-dist
-output
 .DS_Store
-/build.local.properties
+target
+.settings
