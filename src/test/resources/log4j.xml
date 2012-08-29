@@ -2,20 +2,6 @@
 <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
 <log4j:configuration>
 
-    <appender name="LOGFILE" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="logs/JUnit.Test.log" />
-	  <param name="MaxFileSize" value="5000KB" />
-	  <param name="MaxBackupIndex" value="5" />
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern"
-              value="[%d{ISO8601}] %-5p - %-16c - %m %n" />
-        </layout>
-        <filter class="org.apache.log4j.varia.LevelRangeFilter">
-            <param name="LevelMin" value="INFO"/>
-            <param name="LevelMax" value="FATAL"/>
-        </filter>
-    </appender>
-
     <!-- append to standard output -->
     <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
 	  <param name="Target" value="System.out"/>
@@ -33,7 +19,6 @@
     <!--                           -->
     <root>
         <level value="all" />
-        <appender-ref ref="LOGFILE"/>
         <appender-ref ref="STDOUT"/>
     </root>
 </log4j:configuration>
