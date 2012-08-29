@@ -106,11 +106,8 @@
     </scm>
 	<distributionManagement>
 	  <repository>
-	    <id>bert</id>
-	    <url>http://bert.intelegrid.net/nexus/content/repositories/releases</url>
+	    <id>sonatype-nexus-staging</id>
+	    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 	  </repository>
 	</distributionManagement>
-    <repositories>
-	    <repository> <id>intelemage</id> <name>Intelemage Repository</name> <url>http://bert.intelegrid.net/nexus/content/groups/public/</url> </repository>
-    </repositories>
 </project>
