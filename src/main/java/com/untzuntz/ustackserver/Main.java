@@ -37,7 +37,8 @@ public class Main {
 
     private int port;
     private int peerPort;
-    private int otherPeer;
+    @SuppressWarnings("unused")
+	private int otherPeer;
     private String apiVersion;
     
     public String getAPIVersion() {
@@ -52,14 +53,14 @@ public class Main {
     	
     	try {
     		
-			Class apiClass = Class.forName(code);
+			Class<?> apiClass = Class.forName(code);
 			Object apiObj = apiClass.newInstance();
 				
-    		Method m = apiClass.getMethod("setup", null);
-    		m.invoke(apiObj, null);
+    		Method m = apiClass.getMethod("setup", (Class<?>)null);
+    		m.invoke(apiObj, (Object[])null);
 
-    		m = apiClass.getMethod("getAPIVersion", null);
-    		Object o = m.invoke(apiObj, null);
+    		m = apiClass.getMethod("getAPIVersion", (Class<?>)null);
+    		Object o = m.invoke(apiObj, (Object[])null);
     		apiVersion = (String)o;
 
     	} catch (Exception e) {

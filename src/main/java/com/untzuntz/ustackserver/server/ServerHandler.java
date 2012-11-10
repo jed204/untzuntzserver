@@ -6,7 +6,6 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URLDecoder;
 import java.util.Iterator;
 
 import org.apache.commons.codec.binary.Base64;

@@ -2,7 +2,6 @@ package com.untzuntz.ustackserverapi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -13,8 +12,8 @@ import java.util.TreeMap;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.log4j.Logger;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.mongodb.BasicDBList;

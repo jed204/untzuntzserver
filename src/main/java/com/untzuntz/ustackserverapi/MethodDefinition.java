@@ -237,6 +237,10 @@ public class MethodDefinition {
 		extraInfo = extra;
 	}
 	
+	public String getExtraInfo() {
+		return extraInfo;
+	}
+
 	private String sampleHttpMethod;
 	private String sampleCall;
 	public void setSampleCall(String httpMethod, String call) {
@@ -249,6 +253,18 @@ public class MethodDefinition {
 		sampleResponse = r;
 	}
 	
+	public String getSampleHttpMethod() {
+		return sampleHttpMethod;
+	}
+
+	public String getSampleCall() {
+		return sampleCall;
+	}
+
+	public String getSampleResponse() {
+		return sampleResponse;
+	}
+
 	public class APICallParam {
 		
 		public String name;

@@ -4,27 +4,18 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.jboss.netty.bootstrap.ClientBootstrap;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;
-import org.jboss.netty.handler.codec.http.DefaultHttpRequest;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpVersion;
 
 public class RunTest {
 
     static Logger           		logger               	= Logger.getLogger(RunTest.class);
 
-	private final static int TIMEOUT_MS = 45*1000;
-	private final static int INTERVAL_MS = 1* 1000;
+//	private final static int TIMEOUT_MS = 45*1000;
+//	private final static int INTERVAL_MS = 1* 1000;
 	
 	private long totalTime;
 	private long totalConnTime;
@@ -55,11 +46,11 @@ public class RunTest {
 		private long total;
 		private long ctotal;
 		private boolean stop;
-		private ClientBootstrap bootstrap;
-		private InetSocketAddress server;
+//		private ClientBootstrap bootstrap;
+//		private InetSocketAddress server;
 		public Worker(InetSocketAddress s, ClientBootstrap bs) {
-			server = s;
-			bootstrap = bs;
+//			server = s;
+//			bootstrap = bs;
 			stop = false;
 		}
 		
