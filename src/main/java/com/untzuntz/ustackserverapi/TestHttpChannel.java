@@ -155,6 +155,9 @@ public class TestHttpChannel implements Channel {
 	
 	public String getResponseString() {
 		
+		if (resp == null || resp.getContent() == null)
+			return "";
+		
 		return resp.getContent().toString(java.nio.charset.Charset.forName("UTF-8"));
 		
 	}
