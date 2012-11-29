@@ -56,11 +56,12 @@ public class Main {
 			Class<?> apiClass = Class.forName(code);
 			Object apiObj = apiClass.newInstance();
 				
-    		Method m = apiClass.getMethod("setup", (Class<?>)null);
+    		Method m = apiClass.getMethod("setup");
     		m.invoke(apiObj, (Object[])null);
 
-    		m = apiClass.getMethod("getAPIVersion", (Class<?>)null);
-    		Object o = m.invoke(apiObj, (Object[])null);
+    		m = apiClass.getMethod("getAPIVersion");
+    		
+    		Object o = m.invoke(apiObj);
     		apiVersion = (String)o;
 
     	} catch (Exception e) {
