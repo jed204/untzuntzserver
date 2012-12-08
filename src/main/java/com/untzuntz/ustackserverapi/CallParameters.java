@@ -2,6 +2,8 @@ package com.untzuntz.ustackserverapi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +39,7 @@ public class CallParameters {
 		return user;
 	}
 	
+	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {
 		qsd = new QueryStringDecoder(uri);
 		if (uri.indexOf("?") > -1)
@@ -44,10 +47,31 @@ public class CallParameters {
 		else
 			path = uri;
 		
+		if (qsd.getParameters() == null)
+			qsdMap = new HashMap<String,List<String>>();
+		else
+			qsdMap = new HashMap<String,List<String>>(qsd.getParameters());
+		
 		if (userName == null)
 			userName = getParameter("username");
 		if (userName == null)
 			userName = getParameter("userName");
+	}
+	
+	public void setParameterValue(String param, String val)
+	{
+		if (param == null)
+			return;
+		
+		if (val == null)
+		{
+			qsdMap.remove(param);
+			return;
+		}
+		
+		List<String> valList = new ArrayList<String>();
+		valList.add(val);
+		qsdMap.put(param, valList);
 	}
 	
 	public String getPath() {
@@ -209,7 +233,7 @@ public class CallParameters {
 	
 	public String getParameter(String name) {
 		
-		List<String> val = qsd.getParameters().get(name);
+		List<String> val = qsdMap.get(name);
 		if (val == null || val.size() == 0)
 			return null;
 		

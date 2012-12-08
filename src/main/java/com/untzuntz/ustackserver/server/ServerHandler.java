@@ -7,8 +7,8 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.List;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -32,14 +32,15 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
-import com.untzuntz.ustack.aaa.Authentication;
 import com.untzuntz.ustackserver.peer.PeerDelivery;
 import com.untzuntz.ustackserver.peer.PeerHandler;
 import com.untzuntz.ustackserverapi.APICalls;
+import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.APIResponse;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
+import com.untzuntz.ustackserverapi.params.APICallParam;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	
@@ -194,17 +195,24 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		if (cls.isAuthenticationRequired())
 		{
 			try {
-				
-				if ("true".equalsIgnoreCase(params.getParameter("s2")))
-					params.setUser(Authentication.authenticateUserHash(params.getParameter("username"), new String(Base64.decodeBase64(params.getParameter("accesscode").getBytes()))));
-				else
-					params.setUser(Authentication.authenticateUser(params.getParameter("username"), params.getParameter("accesscode")));
-				
-			} catch (Exception e) {
-				APIResponse.httpResponse(ctx.getChannel(), APIResponse.error("Invalid Username/Password"), HttpResponseStatus.UNAUTHORIZED);
-				logger.warn("Invalid User Login => " + params.getParameter("username") + " => Reason: " + e);
+				cls.getAuthMethod().authenticate(params);
+			} catch (APIException e) {
+				APIResponse.httpResponse(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.UNAUTHORIZED);
 				return;
 			}
+			
+//			try {
+//				
+//				if ("true".equalsIgnoreCase(params.getParameter("s2")))
+//					params.setUser(Authentication.authenticateUserHash(params.getParameter("username"), new String(Base64.decodeBase64(params.getParameter("accesscode").getBytes()))));
+//				else
+//					params.setUser(Authentication.authenticateUser(params.getParameter("username"), params.getParameter("accesscode")));
+//				
+//			} catch (Exception e) {
+//				APIResponse.httpResponse(ctx.getChannel(), APIResponse.error("Invalid Username/Password"), HttpResponseStatus.UNAUTHORIZED);
+//				logger.warn("Invalid User Login => " + params.getParameter("username") + " => Reason: " + e);
+//				return;
+//			}
 		}
 //		long lua = System.currentTimeMillis();
 //		long tlup = lup - lus;

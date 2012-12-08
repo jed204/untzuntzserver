@@ -15,7 +15,7 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import com.untzuntz.ustackserverapi.MethodDefinition.APICallParam;
+import com.untzuntz.ustackserverapi.params.APICallParam;
 
 public class APIDocumentation {
 
@@ -212,7 +212,7 @@ public class APIDocumentation {
 	private static void addSinceVersion(MethodDefinition method, PdfPTable table) {
 
         table.addCell("Since Version");
-        table.addCell(method.getSinceVersion());
+        table.addCell(method.getSinceVersion().getVersionId());
         
 	}
 	
@@ -243,14 +243,16 @@ public class APIDocumentation {
 		List<APICallParam> params = method.getAPIParameters();
 		for (APICallParam param : params)
 		{
-	        table.addCell(param.name);
-	        table.addCell(param.description);
-	        if (param.req)
-	        	table.addCell("Yes");
-	        else
-	        	table.addCell("No");
+	        table.addCell(param.getParamDetails().getName());
+	        table.addCell(param.getDescription());
+//	        if (param.req)
+//	        	table.addCell("Yes");
+//	        else
+//	        	table.addCell("No");
 	        
-	        table.addCell(param.since);
+        	table.addCell("TBD");
+
+	        table.addCell(param.getVersion().getVersionId());
 		}
 
 	}

@@ -1,14 +1,20 @@
 package com.untzuntz.ustackserverapi;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
+
+import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
+import com.untzuntz.ustackserverapi.params.APICallParam;
+import com.untzuntz.ustackserverapi.params.ParamInt;
+import com.untzuntz.ustackserverapi.params.Validated;
+import com.untzuntz.ustackserverapi.version.VersionInt;
 
 @SuppressWarnings("rawtypes")
 public class MethodDefinition {
@@ -24,12 +30,13 @@ public class MethodDefinition {
 	private boolean methodPOST;
 	private boolean methodPUT;
 	private boolean methodDELETE;
-	private boolean authenticationRequiredFlag;
+	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
 	private String methodName;
 	private String description;
-	private String sinceVersion;
+	private VersionInt sinceVersion;
+	private List<Object> paramVal;
 	private int order;
 	private String hashKey;
 	private int hashEnforcementLevel;
@@ -41,10 +48,11 @@ public class MethodDefinition {
 		this.path = path;
 		this.apiClass = apiClass;
 		this.methodName = methodName;
-		this.apiParams = new Vector<APICallParam>();
+		this.apiParams = new ArrayList<APICallParam>();
 		this.data = new HashMap<String,Object>();
 		this.objectInstances = new HashMap<Class,Object>();
 		this.methodInstances = new HashMap<String,Method>();
+		this.paramVal = new ArrayList<Object>();
 		this.order = 1000;
 	}
 	
@@ -69,11 +77,11 @@ public class MethodDefinition {
 		hashEnforcementLevel = l;
 	}
 	
-	public void setSinceVersion(String v) {
+	public void setSinceVersion(VersionInt v) {
 		sinceVersion = v;
 	}
 	
-	public String getSinceVersion() {
+	public VersionInt getSinceVersion() {
 		return sinceVersion;
 	}
 	
@@ -118,8 +126,8 @@ public class MethodDefinition {
 		description = d;
 	}
 
-	public MethodDefinition authRequired(boolean b) {
-		authenticationRequiredFlag = b;
+	public MethodDefinition authMethod(AuthenticationInt b) {
+		authMethod = b;
 		return this;
 	}
 
@@ -148,7 +156,11 @@ public class MethodDefinition {
 	}
 
 	public boolean isAuthenticationRequired() {
-		return authenticationRequiredFlag;
+		return authMethod != null;
+	}
+	
+	public AuthenticationInt getAuthMethod() {
+		return authMethod;
 	}
 	
 	public boolean isMethodGET() {
@@ -180,18 +192,36 @@ public class MethodDefinition {
 		
 		return true;
 	}
+
+	public void addRequiredParam(Validated val)
+	{
+		paramVal.add(val);
+	}
+	
+	public void addRequiredParam(ParamInt val)
+	{
+		paramVal.add(val);
+	}
 	
 	@SuppressWarnings({ "unchecked" })
 	public void handleCall(Channel channel, HttpRequest req, CallParameters callParams) throws Exception
 	{
-//		logger.info("Request URI : " + req.getUri());
-		for (APICallParam param : apiParams) {
-			
-//			logger.info("Checking Parameter [" + param.name + "] => Required: " + param.req);
-			if (param.req && callParams.getParameter(param.name) == null)
+		
+		for (Object val : paramVal)
+		{
+			if (val instanceof Validated)	
+				((Validated)val).validate(callParams);
+			else if (val instanceof ParamInt)
+				getParamter((ParamInt)val).validate(callParams);
+		}
+		
+		// Setup Default Values
+		for (APICallParam param : apiParams)
+		{
+			if (param.defaultValue != null &&
+				callParams.getParameter(param.getParamDetails().getName()) == null)
 			{
-				logger.warn("\tRequired Parameter - MISSING => " + param.name);
-				throw new InvalidAPIRequestException();
+				callParams.setParameterValue(param.getParamDetails().getName(), param.defaultValue);
 			}
 		}
 		
@@ -214,23 +244,43 @@ public class MethodDefinition {
 		m.invoke(apiInt, arglist);
 	}
 	
-	public void addParameter(String name, String description, boolean required) {
-		addParameter(name, description, required, null);
+	public APICallParam getParamter(ParamInt param) {
+		
+		for (APICallParam call : apiParams)
+			if (call.getParamDetails().equals(param))
+				return call;
+
+		return null;
+		
 	}
 	
-	public void addParameter(String name, String description, boolean required, String since) {
-		
-		APICallParam p = new APICallParam();
-		p.name = name;
-		p.description = description;
-		p.req = required;
-		if (since == null)
-			p.since = sinceVersion;
-		else
-			p.since = since;
-		apiParams.add(p);
-		
+	public void addParameter(APICallParam param) {
+		apiParams.add(param);
 	}
+
+	public void addParameter(APICallParam param, boolean required) {
+		apiParams.add(param);
+		addRequiredParam(param);
+	}
+	
+
+//	public void addParameter(String name, String description, boolean required) {
+//		addParameter(name, description, required, null);
+//	}
+//	
+//	public void addParameter(String name, String description, boolean required, String since) {
+//		
+//		APICallParam p = new APICallParam();
+//		p.name = name;
+//		p.description = description;
+//		p.req = required;
+//		if (since == null)
+//			p.since = sinceVersion;
+//		else
+//			p.since = since;
+//		apiParams.add(p);
+//		
+//	}
 	
 	private String extraInfo;
 	public void setExtraInfo(String extra) {
@@ -263,14 +313,5 @@ public class MethodDefinition {
 
 	public String getSampleResponse() {
 		return sampleResponse;
-	}
-
-	public class APICallParam {
-		
-		public String name;
-		public String description;
-		public boolean req;
-		public String since;
-		
 	}
 }
