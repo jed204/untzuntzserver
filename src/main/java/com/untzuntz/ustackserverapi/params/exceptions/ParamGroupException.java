@@ -1,4 +1,4 @@
-package com.untzuntz.ustackserverapi.params;
+package com.untzuntz.ustackserverapi.params.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;

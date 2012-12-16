@@ -21,6 +21,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
 public class CallParameters {
 
@@ -230,6 +231,16 @@ public class CallParameters {
 		}
 		return ret;
     }
+
+    public <T> boolean has(ParameterDefinitionInt<T> param)
+    {
+    	return param.hasValue( getParameter(param.getName()) );
+    }
+    
+    public <T> T get(ParameterDefinitionInt<T> param)
+    {
+    	return param.getValue( getParameter(param.getName()) );
+	}
 	
 	public String getParameter(String name) {
 		

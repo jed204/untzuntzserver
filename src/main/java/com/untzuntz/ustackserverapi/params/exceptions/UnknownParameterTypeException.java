@@ -1,7 +1,7 @@
-package com.untzuntz.ustackserverapi.params;
+package com.untzuntz.ustackserverapi.params.exceptions;
 
 import com.untzuntz.ustackserverapi.APIException;
-import com.untzuntz.ustackserverapi.ParamTypeInt;
+import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
 public class UnknownParameterTypeException extends APIException {
 
@@ -12,7 +12,7 @@ public class UnknownParameterTypeException extends APIException {
 	
 	private String paramTypeName;
 
-	public UnknownParameterTypeException(ParamTypeInt pti) {
+	public UnknownParameterTypeException(ParameterDefinitionInt pti) {
 		super();
 		paramTypeName = pti.getName();
 	}

@@ -12,8 +12,8 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.params.APICallParam;
-import com.untzuntz.ustackserverapi.params.ParamInt;
 import com.untzuntz.ustackserverapi.params.Validated;
+import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.version.VersionInt;
 
 @SuppressWarnings("rawtypes")
@@ -198,7 +198,7 @@ public class MethodDefinition {
 		paramVal.add(val);
 	}
 	
-	public void addRequiredParam(ParamInt val)
+	public void addRequiredParam(ParameterDefinitionInt val)
 	{
 		paramVal.add(val);
 	}
@@ -211,15 +211,15 @@ public class MethodDefinition {
 		{
 			if (val instanceof Validated)	
 				((Validated)val).validate(callParams);
-			else if (val instanceof ParamInt)
-				getParamter((ParamInt)val).validate(callParams);
+			else if (val instanceof ParameterDefinitionInt)
+				getParamter((ParameterDefinitionInt)val).validate(callParams);
 		}
 		
 		// Setup Default Values
 		for (APICallParam param : apiParams)
 		{
 			if (param.defaultValue != null &&
-				callParams.getParameter(param.getParamDetails().getName()) == null)
+				callParams.get(param.getParamDetails()) == null)
 			{
 				callParams.setParameterValue(param.getParamDetails().getName(), param.defaultValue);
 			}
@@ -244,7 +244,7 @@ public class MethodDefinition {
 		m.invoke(apiInt, arglist);
 	}
 	
-	public APICallParam getParamter(ParamInt param) {
+	public APICallParam getParamter(ParameterDefinitionInt param) {
 		
 		for (APICallParam call : apiParams)
 			if (call.getParamDetails().equals(param))

@@ -1,7 +1,7 @@
-package com.untzuntz.ustackserverapi.params;
+package com.untzuntz.ustackserverapi.params.exceptions;
 
 import com.untzuntz.ustackserverapi.APIException;
-import com.untzuntz.ustackserverapi.ParamTypeInt;
+import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
 public class ParamValueException extends APIException {
 
@@ -13,7 +13,7 @@ public class ParamValueException extends APIException {
 	private String paramTypeName;
 	private String message;
 
-	public ParamValueException(ParamTypeInt pti, String message) {
+	public ParamValueException(ParameterDefinitionInt pti, String message) {
 		super();
 		this.paramTypeName = pti.getName();
 		this.message = message;

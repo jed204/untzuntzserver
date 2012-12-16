@@ -1,12 +1,9 @@
 package com.untzuntz.ustackserverapi.params.types;
 
 import com.untzuntz.ustackserverapi.APIException;
-import com.untzuntz.ustackserverapi.ParamTypeInt;
-import com.untzuntz.ustackserverapi.params.BaseParam;
-import com.untzuntz.ustackserverapi.params.ParamValueException;
-import com.untzuntz.ustackserverapi.params.ValidatedParam;
+import com.untzuntz.ustackserverapi.params.exceptions.ParamValueException;
 
-public class LongParam extends BaseParam implements ParamTypeInt,ValidatedParam {
+public class LongParam extends BaseParam implements ParameterDefinitionInt<Long> {
 	
 	private Long minVal;
 	private Long maxVal;
@@ -16,8 +13,9 @@ public class LongParam extends BaseParam implements ParamTypeInt,ValidatedParam 
 	 * @param minVal
 	 * @param maxVal
 	 */
-	public LongParam(Long minVal, Long maxVal)
+	public LongParam(String n, String d, Long minVal, Long maxVal)
 	{
+		super(n, d);
 		this.minVal = minVal;
 		this.maxVal = maxVal;
 	}
@@ -26,8 +24,9 @@ public class LongParam extends BaseParam implements ParamTypeInt,ValidatedParam 
 	 * Setup a long parameter with just a maximum value
 	 * @param minLen
 	 */
-	public LongParam(Long maxVal)
+	public LongParam(String n, String d, Long maxVal)
 	{
+		super(n, d);
 		this.maxVal = maxVal;
 	}
 
@@ -66,6 +65,15 @@ public class LongParam extends BaseParam implements ParamTypeInt,ValidatedParam 
 		if (maxVal != null && intVal > maxVal)
 			throw new ParamValueException(this, "Long must be less than " + maxVal);
 		
+	}
+
+	@Override
+	public Long getValue(String data) {
+		try {
+			return Long.valueOf(data);
+		} catch (NumberFormatException nfe) {
+			return null;
+		}
 	}
 
 }

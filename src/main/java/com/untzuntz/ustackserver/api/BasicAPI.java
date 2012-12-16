@@ -20,6 +20,7 @@ import com.untzuntz.ustack.main.UForgotPasswordSvc;
 import com.untzuntz.ustackserverapi.APIResponse;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.MethodDefinition;
+import com.untzuntz.ustackserverapi.params.ParamNames;
 
 public class BasicAPI {
 
@@ -31,8 +32,8 @@ public class BasicAPI {
     	
     	DBObject resp = new BasicDBObject("serverSignature", serverSig);
     	String clientSig = "(NOT PROVIDED)";  
-    	if (callParams.getParameter("sig") != null)
-    		clientSig = callParams.getParameter("sig");
+    	if (callParams.get(ParamNames.RequestSignature) != null)
+    		clientSig = callParams.get(ParamNames.RequestSignature);
     	
     	resp.put("clientSignature", clientSig);
     	resp.put("signatureStatus", "Error");
@@ -44,10 +45,10 @@ public class BasicAPI {
 
     public void confirmEmailAddress(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
     {
-		UniqueReference ref = UniqueReference.getByUID( callParams.getParameter("uid") );
+		UniqueReference ref = UniqueReference.getByUID( callParams.get(ParamNames.UID) );
 		if (ref != null)
 		{
-			logger.info("Loaded unique reference from uid : " + callParams.getParameter("uid"));
+			logger.info("Loaded unique reference from uid : " + callParams.get(ParamNames.UID));
 			
 			ref.put("used", "true");
 			UniqueReference.save(ref, ref.getString("userName"));
@@ -76,7 +77,7 @@ public class BasicAPI {
     
 	public void forgotPassword(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
 	{
-		UserAccount usrAcct = UserAccount.getUser(callParams.getParameter("userName"));
+		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.UserName));
 		if (usrAcct != null && !usrAcct.isDisabled())
 		{
 			try {
@@ -95,9 +96,9 @@ public class BasicAPI {
 	
 	public void resetPassword(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
 	{
-		UserAccount usrAcct = UserAccount.getUser(callParams.getParameter("userName"));
+		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.UserName)); 
 		if (usrAcct != null && !usrAcct.isDisabled())
-		{
+		{ 
 			try {
 				UForgotPasswordSvc.sendResetPassword(usrAcct.getUserName(), getClientIPObject(channel, req), usrAcct.getUserName(), usrAcct.getPrimaryEmail(), usrAcct.getFullName(), (String)def.getData("template"), null);
 			} catch (Exception e) {
@@ -119,12 +120,12 @@ public class BasicAPI {
 		 * Main Authentication / Authorization
 		 * 
 		 */
-		if (callParams.getUserName() == null || callParams.getParameter("accesscode") == null || callParams.getUserName().length() == 0 || callParams.getParameter("accesscode").length() == 0)
+		if (callParams.getUserName() == null || callParams.get(ParamNames.AccessCode) == null || callParams.getUserName().length() == 0 || callParams.get(ParamNames.AccessCode).length() == 0)
 			throw new Exception("Invalid API Request");
 		
-		if (callParams.getParameter("deviceId") == null)
+		if (callParams.get(ParamNames.AccessCode) == null)
 		{
-			Authentication.authenticateUser(callParams.getUserName(), callParams.getParameter("accesscode"));
+			Authentication.authenticateUser(callParams.getUserName(), callParams.get(ParamNames.AccessCode));
 			
     		APIResponse.httpOk(channel, new BasicDBObject("status", "SUCCESS"));
 		}

@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
+import com.untzuntz.ustackserverapi.params.exceptions.ParamGroupException;
 
 public class AndParam implements Validated {
 

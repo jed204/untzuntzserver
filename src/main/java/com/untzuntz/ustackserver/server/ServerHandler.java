@@ -41,6 +41,7 @@ import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.APICallParam;
+import com.untzuntz.ustackserverapi.params.ParamNames;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	
@@ -180,13 +181,13 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			String sig = params.getRequestSignature(cls.getHashKey());
 			
 			boolean failed = true;
-			if (sig != null && params.getParameter("sig") != null && sig.equals(params.getParameter("sig")))
+			if (sig != null && params.has(ParamNames.RequestSignature) && sig.equals(params.get(ParamNames.RequestSignature)))
 				failed = false;
 			
 			if (failed)
-			{
+			{ 
 				if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
-					logger.warn("Request Signature Mismatch -> Client Sent [" + params.getParameter("sig") + "], we expected [" + params.getParameter("sig") + "]");
+					logger.warn("Request Signature Mismatch -> Client Sent [" + params.get(ParamNames.RequestSignature) + "], we expected [" + params.get(ParamNames.RequestSignature) + "]");
 				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
 					sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
 			}

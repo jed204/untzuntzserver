@@ -1,26 +1,34 @@
 package com.untzuntz.ustackserverapi.params.types;
 
 import com.untzuntz.ustackserverapi.APIException;
-import com.untzuntz.ustackserverapi.ParamTypeInt;
-import com.untzuntz.ustackserverapi.params.BaseParam;
-import com.untzuntz.ustackserverapi.params.ParamValueException;
-import com.untzuntz.ustackserverapi.params.ValidatedParam;
+import com.untzuntz.ustackserverapi.params.exceptions.ParamValueException;
 
 /**
  * Validates a string type with a min and max length (optional)
  */
-public class StringParam extends BaseParam implements ParamTypeInt,ValidatedParam {
+public class StringParam extends BaseParam implements ParameterDefinitionInt<String> {
 	
 	private Integer minLen;
 	private Integer maxLen;
+
+	/**
+	 * Setup core string parameter
+	 * 
+	 * @param n
+	 * @param d
+	 */
+	public StringParam(String n, String d) {
+		super(n, d);
+	}
 	
 	/**
 	 * Setup a string parameter with a min and max length
 	 * @param minLen
 	 * @param maxLen
 	 */
-	public StringParam(Integer minLen, Integer maxLen)
+	public StringParam(String n, String d, Integer minLen, Integer maxLen)
 	{
+		super(n, d);
 		this.minLen = minLen;
 		this.maxLen = maxLen;
 	}
@@ -29,8 +37,9 @@ public class StringParam extends BaseParam implements ParamTypeInt,ValidatedPara
 	 * Setup a string parameter with just a minimum length
 	 * @param minLen
 	 */
-	public StringParam(Integer minLen)
+	public StringParam(String n, String d, Integer minLen)
 	{
+		super(n, d);
 		this.minLen = minLen;
 	}
 	
@@ -64,5 +73,9 @@ public class StringParam extends BaseParam implements ParamTypeInt,ValidatedPara
 		
 	}
 
+	@Override
+	public String getValue(String cp) {
+		return cp;
+	}
 
 }

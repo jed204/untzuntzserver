@@ -1,31 +1,19 @@
 package com.untzuntz.ustackserverapi.params;
 
-import com.untzuntz.ustackserverapi.BasicParamTypes;
-import com.untzuntz.ustackserverapi.ParamTypeInt;
+import com.untzuntz.ustackserverapi.params.types.IntParam;
+import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
+import com.untzuntz.ustackserverapi.params.types.StringParam;
 
-public enum ParamNames implements ParamInt {
+public class ParamNames {
 
-	TestA("test_id_a", "This is a test description A", BasicParamTypes.Integer),
-	TestB("test_id_b", "This is a test description B", BasicParamTypes.Integer),
-	TestC("test_id_c", "This is a test description C", BasicParamTypes.Integer);
-	
-	private String name;
-	private String desc;
-	private ParamTypeInt type;
-	private ParamNames(String n, String d, ParamTypeInt t) {
-		this.name = n;
-		this.desc = d;
-		this.type = t;
-				
-	}
-	public String getName() {
-		return name;
-	}
-	public String getDescription() {
-		return desc;
-	}
-	public ParamTypeInt getType() {
-		return type;
-	}
+	public static final ParameterDefinitionInt<Integer> TestA = new IntParam("test_id_a", "This is a test description A");
+	public static final ParameterDefinitionInt<Integer> TestB = new IntParam("test_id_b", "This is a test description B");
+	public static final ParameterDefinitionInt<Integer> TestC = new IntParam("test_id_c", "This is a test description C");
+
+	public static final ParameterDefinitionInt<String> RequestSignature = new StringParam("sig", "Request Signature from the client");
+	public static final ParameterDefinitionInt<String> UID = new StringParam("uid", "A unique ID");
+	public static final ParameterDefinitionInt<String> UserName = new StringParam("userName", "Username");
+	public static final ParameterDefinitionInt<String> DeviceID = new StringParam("deviceId", "Device ID");
+	public static final ParameterDefinitionInt<String> AccessCode = new StringParam("accessCode", "Access Code");
 	
 }
