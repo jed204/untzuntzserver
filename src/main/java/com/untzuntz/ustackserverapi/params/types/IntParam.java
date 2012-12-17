@@ -1,7 +1,6 @@
 package com.untzuntz.ustackserverapi.params.types;
 
 import com.untzuntz.ustackserverapi.APIException;
-import com.untzuntz.ustackserverapi.params.ValidatedParam;
 import com.untzuntz.ustackserverapi.params.exceptions.ParamValueException;
 
 public class IntParam extends BaseParam implements ParameterDefinitionInt<Integer>
@@ -79,9 +78,17 @@ public class IntParam extends BaseParam implements ParameterDefinitionInt<Intege
 	}
 
 	@Override
-	public Integer getValue(String cp) {
+	public Integer getValue(String data) {
 		try {
-			return Integer.valueOf(cp);
+			
+			int ret = Integer.valueOf(data);
+			if (minVal != null && ret < minVal)
+				ret = minVal;
+			if (maxVal != null && ret > maxVal)
+				ret = maxVal;
+			
+			return ret; 
+			
 		} catch (NumberFormatException nfe) {
 			return null;
 		}

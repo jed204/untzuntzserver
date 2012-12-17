@@ -70,7 +70,16 @@ public class LongParam extends BaseParam implements ParameterDefinitionInt<Long>
 	@Override
 	public Long getValue(String data) {
 		try {
-			return Long.valueOf(data);
+			
+			
+			long ret = Long.valueOf(data);
+			if (minVal != null && ret < minVal)
+				ret = minVal;
+			if (maxVal != null && ret > maxVal)
+				ret = maxVal;
+			
+			return ret; 
+
 		} catch (NumberFormatException nfe) {
 			return null;
 		}

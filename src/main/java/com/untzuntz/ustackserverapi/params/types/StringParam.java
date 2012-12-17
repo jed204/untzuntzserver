@@ -74,8 +74,12 @@ public class StringParam extends BaseParam implements ParameterDefinitionInt<Str
 	}
 
 	@Override
-	public String getValue(String cp) {
-		return cp;
+	public String getValue(String data) {
+		
+		if (maxLen != null && data.length() > maxLen)
+			data = data.substring(0, maxLen);
+		
+		return data;
 	}
 
 }
