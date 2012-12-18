@@ -20,7 +20,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
 public class CallParameters {
@@ -28,17 +28,7 @@ public class CallParameters {
     static Logger           		logger               	= Logger.getLogger(CallParameters.class);
 
 	private QueryStringDecoder qsd;
-	private String userName;
-	private DBObject user;
 	private String path;
-	
-	public void setUser(DBObject u) { 
-		user = u;
-	}
-	
-	public DBObject getUser() {
-		return user;
-	}
 	
 	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {
@@ -52,11 +42,6 @@ public class CallParameters {
 			qsdMap = new HashMap<String,List<String>>();
 		else
 			qsdMap = new HashMap<String,List<String>>(qsd.getParameters());
-		
-		if (userName == null)
-			userName = getParameter("username");
-		if (userName == null)
-			userName = getParameter("userName");
 	}
 	
 	public void setParameterValue(String param, String val)
@@ -251,7 +236,16 @@ public class CallParameters {
 		return val.get(0);
 	}
 	
-	public String getUserName() {
-		return userName;
+	private Object authObject;
+	
+	public void setAuth(Object o) {
+		authObject = o;
 	}
+	
+    @SuppressWarnings("unchecked")
+	public <T> T auth(AuthenticationInt<T> authType)
+    {
+    	return (T)authObject;
+	}
+
 }

@@ -77,7 +77,7 @@ public class BasicAPI {
     
 	public void forgotPassword(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
 	{
-		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.UserName));
+		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.username));
 		if (usrAcct != null && !usrAcct.isDisabled())
 		{
 			try {
@@ -96,7 +96,7 @@ public class BasicAPI {
 	
 	public void resetPassword(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
 	{
-		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.UserName)); 
+		UserAccount usrAcct = UserAccount.getUser(callParams.get(ParamNames.username)); 
 		if (usrAcct != null && !usrAcct.isDisabled())
 		{ 
 			try {
@@ -113,25 +113,6 @@ public class BasicAPI {
 
 	}
 	
-	public void authentication(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams) throws Exception
-	{
-		/*
-		 * 
-		 * Main Authentication / Authorization
-		 * 
-		 */
-		if (callParams.getUserName() == null || callParams.get(ParamNames.AccessCode) == null || callParams.getUserName().length() == 0 || callParams.get(ParamNames.AccessCode).length() == 0)
-			throw new Exception("Invalid API Request");
-		
-		if (callParams.get(ParamNames.AccessCode) == null)
-		{
-			Authentication.authenticateUser(callParams.getUserName(), callParams.get(ParamNames.AccessCode));
-			
-    		APIResponse.httpOk(channel, new BasicDBObject("status", "SUCCESS"));
-		}
-		
-	}
-
 	public static DBObject getClientIPObject(Channel channel, HttpRequest req)
 	{
     	String clientIP = req.getHeader("X-Real-IP");

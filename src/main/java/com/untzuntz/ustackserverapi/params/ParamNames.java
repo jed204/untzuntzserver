@@ -12,8 +12,12 @@ public class ParamNames {
 
 	public static final ParameterDefinitionInt<String> RequestSignature = new StringParam("sig", "Request Signature from the client");
 	public static final ParameterDefinitionInt<String> UID = new StringParam("uid", "A unique ID");
-	public static final ParameterDefinitionInt<String> UserName = new StringParam("userName", "Username");
+	public static final ParameterDefinitionInt<String> username = new StringParam("username", "Username");
+	public static final ParameterDefinitionInt<String> password = new StringParam("password", "Username");
 	public static final ParameterDefinitionInt<String> DeviceID = new StringParam("deviceId", "Device ID");
-	public static final ParameterDefinitionInt<String> AccessCode = new StringParam("accessCode", "Access Code");
-	
+	public static final ParameterDefinitionInt<String> access_code = new StringParam("access_code", "Access Code");
+
+	public static final ParameterDefinitionInt<String> api_key = new StringParam("api_key", "Your API Key");
+	public static final ParameterDefinitionInt<String> client_id = new StringParam("client_id", "Your Client ID for the API");
+
 }

@@ -2,9 +2,10 @@ package com.untzuntz.ustackserverapi.auth;
 
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
+import com.untzuntz.ustackserverapi.MethodDefinition;
 
-public interface AuthenticationInt {
+public interface AuthenticationInt<T> {
 
-	public void authenticate(CallParameters params) throws APIException;
+	public T authenticationAuthorization(MethodDefinition method, CallParameters params) throws APIException;
 	
 }

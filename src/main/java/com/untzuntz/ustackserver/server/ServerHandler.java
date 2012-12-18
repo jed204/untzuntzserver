@@ -7,7 +7,6 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -32,6 +31,7 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
+import com.untzuntz.ustack.data.UserAccount;
 import com.untzuntz.ustackserver.peer.PeerDelivery;
 import com.untzuntz.ustackserver.peer.PeerHandler;
 import com.untzuntz.ustackserverapi.APICalls;
@@ -40,7 +40,6 @@ import com.untzuntz.ustackserverapi.APIResponse;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
-import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
@@ -58,7 +57,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)	throws Exception {
 		super.channelOpen(ctx, e);
-		logger.info(e.getChannel().getRemoteAddress() + " => Connection started");
+		logger.info(String.format("%s => Connection started", e.getChannel().getRemoteAddress()));
 	}
 
 	@Override
@@ -122,10 +121,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		{
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
 		}
-		else if ("realtime".equalsIgnoreCase(uri[1]))
-		{
-			handleRealtime(ctx, uri);
-		}
+//		else if ("realtime".equalsIgnoreCase(uri[1]))
+//		{
+//			handleRealtime(ctx, uri);
+//		}
 		else if ("api".equalsIgnoreCase(uri[1]))
 		{
 			handleAPI(ctx, req, params);
@@ -139,7 +138,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	{
 		String path = req.getUri().substring(5);
 		
-//		long lus = System.currentTimeMillis();
 		if (req.getMethod() == HttpMethod.POST)
 		{
 			if (!path.endsWith("?") && paramStr.length() > 0)
@@ -148,36 +146,30 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			path += paramStr;
 		}
 		
-		logger.info("Full Path => " + path);
-		
 		CallParameters params = new CallParameters(path);
 
 		path = params.getPath();
 
-		logger.info(ctx.getChannel().getRemoteAddress() + " => API Path: " + path);
+		logger.info(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.getParameter("client_ver")));
 		
-//		long lup = System.currentTimeMillis();
 		MethodDefinition cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
-			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown API Call Requested"), HttpResponseStatus.NOT_FOUND);
 			return;
 		}
-//		long lum = System.currentTimeMillis();
 		
 		if (!cls.isMethodEnabled(req.getMethod()))
 		{
-			logger.info(ctx.getChannel().getRemoteAddress() + " => API Path: " + path + " || Invalid Method: " + req.getMethod().toString());
-			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+			logger.info(String.format("%s => API Path: %s || Invalid Method: %s", ctx.getChannel().getRemoteAddress(), path, req.getMethod().toString()));
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid HTTP Method for API Call"), HttpResponseStatus.BAD_REQUEST);
 			return;
 		}
-//		long lumc = System.currentTimeMillis();
 		
 		if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_NONE)
 		{
 			// order parameters by alpha
 			// calculate hash
-			
 			String sig = params.getRequestSignature(cls.getHashKey());
 			
 			boolean failed = true;
@@ -187,58 +179,39 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			if (failed)
 			{ 
 				if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
-					logger.warn("Request Signature Mismatch -> Client Sent [" + params.get(ParamNames.RequestSignature) + "], we expected [" + params.get(ParamNames.RequestSignature) + "]");
+					logger.warn(String.format("%s [%s] Request Signature Mismatch -> Client Sent [%s], we expected [%s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.RequestSignature), sig));
 				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
-					sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST);
 			}
 		}
 		
 		if (cls.isAuthenticationRequired())
 		{
 			try {
-				cls.getAuthMethod().authenticate(params);
+				cls.getAuthMethod().authenticationAuthorization(cls, params);
 			} catch (APIException e) {
-				APIResponse.httpResponse(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.UNAUTHORIZED);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.UNAUTHORIZED);
 				return;
 			}
-			
-//			try {
-//				
-//				if ("true".equalsIgnoreCase(params.getParameter("s2")))
-//					params.setUser(Authentication.authenticateUserHash(params.getParameter("username"), new String(Base64.decodeBase64(params.getParameter("accesscode").getBytes()))));
-//				else
-//					params.setUser(Authentication.authenticateUser(params.getParameter("username"), params.getParameter("accesscode")));
-//				
-//			} catch (Exception e) {
-//				APIResponse.httpResponse(ctx.getChannel(), APIResponse.error("Invalid Username/Password"), HttpResponseStatus.UNAUTHORIZED);
-//				logger.warn("Invalid User Login => " + params.getParameter("username") + " => Reason: " + e);
-//				return;
-//			}
 		}
-//		long lua = System.currentTimeMillis();
-//		long tlup = lup - lus;
-//		long tlum = lum - lup;
-//		long tlua = lua - lumc;
-
-//		long start = System.currentTimeMillis();
+		
 		try {
 			cls.handleCall(ctx.getChannel(), req, params);
+		} catch (APIException apiErr) {
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST);
 		} catch (InvalidAPIRequestException iar) {
-			logger.warn("Bad API Call", iar);
-			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), iar);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST);
 		} catch (InvocationTargetException ierr) {
-			logger.warn("Bad API Call", ierr);
+			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), ierr);
 			if (ierr.getCause() != null)
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()));
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST);
 			else
-				sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST);
 		} catch (Exception err) {
-			logger.warn("Bad API Call", err);
-			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST));
+			logger.warn(String.format("%s [%s] Uncaught Exception during API call", ctx.getChannel().getRemoteAddress(), path), err);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST);
 		}
-//		long timing = System.currentTimeMillis() - start;
-//		logger.info(ctx.getChannel().getRemoteAddress() + " => API Complete: " + path + " [" + timing + " ms] lup: " + tlup + " | lum: " + tlum + " | lua: " + tlua);
-
 	}
 	
 	public void handleRealtime(ChannelHandlerContext ctx, String[] uri)
@@ -305,7 +278,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-		logger.warn("Error during iFlowConnect handling", e.getCause());
+		logger.warn("Error during API handling", e.getCause());
 		e.getChannel().close();
 		cleanup(e.getChannel());
 	}
@@ -329,6 +302,11 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
 		super.channelClosed(ctx, e);
 		cleanup(e.getChannel());
+
+		long timing = 0;
+		if (e.getChannel().getAttachment() != null)
+			timing = (System.currentTimeMillis() - (Long)e.getChannel().getAttachment());
+		logger.info(String.format("%s => Connection Completed [%d ms]", e.getChannel().getRemoteAddress(), timing));
 	}
 
 	@Override

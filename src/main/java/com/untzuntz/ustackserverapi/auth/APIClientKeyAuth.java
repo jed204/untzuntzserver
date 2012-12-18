@@ -10,28 +10,39 @@ import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 
-public class UserNamePasswordAuth implements AuthenticationInt<UserAccount> {
+public class APIClientKeyAuth implements AuthenticationInt<ClientData> {
 
 	@Override
-	public UserAccount authenticationAuthorization(MethodDefinition method, CallParameters params) throws APIException {
-		
-		UserAccount user = null;
+	public ClientData authenticationAuthorization(MethodDefinition method, CallParameters params) throws APIException {
+
+		ClientData ret = new ClientData();
 		try {
-			user = Authentication.authenticateUser(params.get(ParamNames.username), params.get(ParamNames.password));
+			
+			ret.api = Authentication.authenticateAPI(params.get(ParamNames.client_id), params.get(ParamNames.api_key));
+			
+			if (params.get(ParamNames.username) != null)
+			{
+				ret.userName = params.get(ParamNames.username);
+				ret.user = UserAccount.getUser(ret.userName);
+			}
+
+			
 		} catch (AuthenticationException e) {
-			throw new APIAuthenticationException("Bad Username/Password");
+			throw new APIAuthenticationException("Bad Client ID/API Key");
 		}
 		
 		if (method.isAuthorizationRequired())
 		{
 			try {
-				Authorization.authorizeUser(user, "*", null, method.getAuthGroup());
+				Authorization.authorizeAPI(ret.api, method.getAuthGroup());
 			} catch (AuthorizationException e) {
 				throw new APIAuthorizationException("Not Authorized");
 			}
 		}
 		
-		return user;
+		return ret; 
+
+		
 	}
 	
 }

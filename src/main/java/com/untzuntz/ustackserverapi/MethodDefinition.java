@@ -10,6 +10,7 @@ import org.jboss.netty.channel.Channel;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
+import com.untzuntz.ustack.aaa.UStackPermissionEnum;
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.Validated;
@@ -159,8 +160,22 @@ public class MethodDefinition {
 		return authMethod != null;
 	}
 	
-	public AuthenticationInt getAuthMethod() {
+	public AuthenticationInt<?> getAuthMethod() {
 		return authMethod;
+	}
+	
+	public boolean isAuthorizationRequired() {
+		return authGroup != null;
+	}
+	
+	private UStackPermissionEnum authGroup;
+	
+	public void authGroup(UStackPermissionEnum ag) {
+		authGroup = ag;
+	}
+	
+	public UStackPermissionEnum getAuthGroup() {
+		return authGroup;
 	}
 	
 	public boolean isMethodGET() {
@@ -241,6 +256,7 @@ public class MethodDefinition {
 		}
 		
 		Object[] arglist = new Object[]{ this, channel, req, callParams };
+		channel.setAttachment( new Long(System.currentTimeMillis()) );
 		m.invoke(apiInt, arglist);
 	}
 	

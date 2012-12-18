@@ -20,16 +20,26 @@ public class APIResponse {
 
     static Logger           		logger               	= Logger.getLogger(APIResponse.class);
 
+    public static String AccessControlAllowOrigin;
 	public static final String ContentTypeTextXML = "text/xml";
 	public static final String ContentTypeTextHTML = "text/html";
 	public static final String ContentTypeTextPlain = "text/plain";
 	public static final String ContentTypeJSON = "application/json";
+	
+	private static void addHeaders(Channel channel, HttpResponse res)
+	{
+		if (AccessControlAllowOrigin != null)	
+			res.setHeader("Access-Control-Allow-Origin", AccessControlAllowOrigin);
+		
+		if (channel.getAttachment() instanceof Long)
+			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
+	}
 
 	public static void httpOk(Channel channel, String text, String contentType)
 	{
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
 		res.setHeader("Content-type", contentType);
-		res.setHeader("Access-Control-Allow-Origin", "*");
+		addHeaders(channel, res);
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
@@ -40,18 +50,23 @@ public class APIResponse {
 		logger.warn("Returning API Response [" + channel.getRemoteAddress() + "] => " + text);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
-		res.setHeader("Access-Control-Allow-Origin", "*");
+		addHeaders(channel, res);
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
 	}
-	
+
 	public static void httpError(Channel channel, String text, String contentType)
 	{
+		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST);
+	}
+	
+	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status)
+	{
 		logger.warn("Returning API Error [" + channel.getRemoteAddress() + "] => " + text);
-		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
-		res.setHeader("Access-Control-Allow-Origin", "*");
+		addHeaders(channel, res);
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
@@ -70,6 +85,11 @@ public class APIResponse {
 	public static void httpError(Channel channel, DBObject dbObject)
 	{
 		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON);
+	}
+
+	public static void httpError(Channel channel, DBObject dbObject, HttpResponseStatus status)
+	{
+		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON, status);
 	}
 
 	public static DBObject getResponseObject(String status)
