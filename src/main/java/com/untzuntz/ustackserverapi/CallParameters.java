@@ -238,12 +238,12 @@ public class CallParameters {
 	
 	private Object authObject;
 	
-	public void setAuth(Object o) {
+	public void setAuthInfo(Object o) {
 		authObject = o;
 	}
 	
     @SuppressWarnings("unchecked")
-	public <T> T auth(AuthenticationInt<T> authType)
+	public <T> T getAuthInfo(AuthenticationInt<T> authType)
     {
     	return (T)authObject;
 	}

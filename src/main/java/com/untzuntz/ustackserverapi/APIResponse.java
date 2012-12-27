@@ -67,8 +67,10 @@ public class APIResponse {
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
 		addHeaders(channel, res);
+		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
+		
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
 	}
 

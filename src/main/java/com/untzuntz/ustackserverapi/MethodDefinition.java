@@ -56,7 +56,7 @@ public class MethodDefinition {
 		this.paramVal = new ArrayList<Object>();
 		this.order = 1000;
 	}
-	
+
 	public void setHashKey(int hashEnforcementLevel, String hashKey) {
 		setHashKey(hashKey);
 		setHashEnforcement(hashEnforcementLevel);

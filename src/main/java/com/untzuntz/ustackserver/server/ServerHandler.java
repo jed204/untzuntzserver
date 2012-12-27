@@ -31,7 +31,6 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
-import com.untzuntz.ustack.data.UserAccount;
 import com.untzuntz.ustackserver.peer.PeerDelivery;
 import com.untzuntz.ustackserver.peer.PeerHandler;
 import com.untzuntz.ustackserverapi.APICalls;
@@ -40,6 +39,7 @@ import com.untzuntz.ustackserverapi.APIResponse;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
+import com.untzuntz.ustackserverapi.auth.AuthTypes;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
@@ -166,11 +166,18 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
+		try {
+			AuthTypes.ClientKey.authenticationAuthorization(cls, params);
+		} catch (APIException e) {
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
+			return;
+		}
+		
 		if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_NONE)
 		{
 			// order parameters by alpha
 			// calculate hash
-			String sig = params.getRequestSignature(cls.getHashKey());
+			String sig = params.getRequestSignature(params.get(ParamNames.api_key));
 			
 			boolean failed = true;
 			if (sig != null && params.has(ParamNames.RequestSignature) && sig.equals(params.get(ParamNames.RequestSignature)))
@@ -188,26 +195,36 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		if (cls.isAuthenticationRequired())
 		{
 			try {
-				cls.getAuthMethod().authenticationAuthorization(cls, params);
+				params.setAuthInfo(cls.getAuthMethod().authenticationAuthorization(cls, params));
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.UNAUTHORIZED);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
 				return;
 			}
 		}
-		
+
 		try {
 			cls.handleCall(ctx.getChannel(), req, params);
 		} catch (APIException apiErr) {
+			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST);
 		} catch (InvalidAPIRequestException iar) {
 			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), iar);
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST);
 		} catch (InvocationTargetException ierr) {
-			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), ierr);
 			if (ierr.getCause() != null)
+			{
+				if (ierr.getCause() instanceof NullPointerException)
+					logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+				else
+					logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+					
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST);
+			}
 			else
+			{
+				logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), ierr);
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST);
+			}
 		} catch (Exception err) {
 			logger.warn(String.format("%s [%s] Uncaught Exception during API call", ctx.getChannel().getRemoteAddress(), path), err);
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST);

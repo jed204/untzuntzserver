@@ -4,13 +4,6 @@ package com.untzuntz.ustackserverapi.params.types;
 
 public abstract class BaseParam {
 
-//	public static ParameterDefinitionInt getParam(String name, String desc, Class type)
-//	{
-//		ParameterDefinitionInt ret = (ParameterDefinitionInt)type.newInstance();
-//		
-//		return ret;
-//	}
-//	
 	protected String name;
 	protected String desc;
 	
