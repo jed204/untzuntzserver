@@ -2,6 +2,7 @@ package com.untzuntz.ustackserverapi.params.types;
 
 
 
+
 public abstract class BaseParam {
 
 	protected String name;

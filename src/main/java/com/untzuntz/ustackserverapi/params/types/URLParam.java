@@ -36,6 +36,10 @@ public class URLParam extends BaseParam implements ParameterDefinitionInt<URL> {
 		this.forceType = forceType;
 	}
 
+	public String getTypeDescription() {
+		return "A string of text in the format of a uniform resource locator (ex: http://google.com/hello)";
+	}
+	
 	@Override
 	public void validate(String data) throws APIException {
 		

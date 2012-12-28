@@ -40,6 +40,10 @@ public class IntParam extends BaseParam implements ParameterDefinitionInt<Intege
 		this.maxVal = maxVal;
 	}
 
+	public String getTypeDescription() {
+		return "A number between " + Integer.MIN_VALUE + " and " + Integer.MAX_VALUE + " (ex: 504)";
+	}
+	
 	public Integer getMinVal() {
 		return minVal;
 	}

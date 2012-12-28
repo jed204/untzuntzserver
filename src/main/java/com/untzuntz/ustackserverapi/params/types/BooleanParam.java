@@ -11,6 +11,10 @@ public class BooleanParam extends BaseParam implements ParameterDefinitionInt<Bo
 	public BooleanParam(String n, String d) {
 		super(n, d);
 	}
+	
+	public String getTypeDescription() {
+		return "Boolean value must be 'true' or 'false' (ex: false)";
+	}
 
 	@Override
 	public void validate(String data) throws APIException {
@@ -20,7 +24,7 @@ public class BooleanParam extends BaseParam implements ParameterDefinitionInt<Bo
 		if ("false".equalsIgnoreCase(data))
 			return;
 
-		throw new ParamValueException(this, "Boolean value must be 'true' or 'false'");
+		throw new ParamValueException(this, getTypeDescription());
 		
 	}
 	

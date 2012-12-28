@@ -43,6 +43,10 @@ public class StringParam extends BaseParam implements ParameterDefinitionInt<Str
 		this.minLen = minLen;
 	}
 	
+	public String getTypeDescription() {
+		return "A string of text encoded in UTF-8 (ex: hello)";
+	}
+	
 	public Integer getMinLen() {
 		return minLen;
 	}

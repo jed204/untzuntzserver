@@ -6,6 +6,7 @@ public interface ParameterDefinitionInt<T> {
 
 	public String getName();
 	public String getDescription();
+	public String getTypeDescription();
 	public void validate(String data) throws APIException;
 	public T getValue(String src);
 	public boolean hasValue(String src);

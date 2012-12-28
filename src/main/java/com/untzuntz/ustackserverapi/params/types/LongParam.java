@@ -29,6 +29,10 @@ public class LongParam extends BaseParam implements ParameterDefinitionInt<Long>
 		super(n, d);
 		this.maxVal = maxVal;
 	}
+	
+	public String getTypeDescription() {
+		return "A number between " + Long.MIN_VALUE + " and " + Long.MAX_VALUE + " (ex: 544304)";
+	}
 
 	public Long getMinVal() {
 		return minVal;

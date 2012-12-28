@@ -1,6 +1,11 @@
 package com.untzuntz.ustackserver.params;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+
+import java.text.ParseException;
+import java.util.Calendar;
 
 import org.junit.Test;
 
@@ -12,11 +17,13 @@ import com.untzuntz.ustackserverapi.params.OrParam;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.Validated;
 import com.untzuntz.ustackserverapi.params.types.BooleanParam;
+import com.untzuntz.ustackserverapi.params.types.DateRangeParam;
 import com.untzuntz.ustackserverapi.params.types.IntParam;
 import com.untzuntz.ustackserverapi.params.types.LongParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
 import com.untzuntz.ustackserverapi.params.types.URLParam;
+import com.untzuntz.ustackserverapi.params.types.util.DateRange;
 import com.untzuntz.ustackserverapi.version.Versions;
 
 public class ParamTest {
@@ -25,7 +32,7 @@ public class ParamTest {
 	private APICallParam param2 = new APICallParam(ParamNames.TestB, Versions.Version100);
 	private APICallParam param3 = new APICallParam(ParamNames.TestC, Versions.Version100);
 
-	@Test public void testBasicParamTypes()
+	@Test public void testBasicParamTypes() throws ParseException
 	{
 		// String
 		assertException(new StringParam("test", "test", 5, 100), "1234"); // should fail - 4 < 5
@@ -68,6 +75,51 @@ public class ParamTest {
 		assertNoException(new URLParam("test", "test", "http"), "https://test.url.com"); // should pass - valid url and type
 		assertException(new URLParam("test", "test", "https"), "http://test.url.com"); // should pass - valid url and type
 		assertNoException(new URLParam("test", "test", "https"), "https://test.url.com"); // should pass - valid url and type
+		
+		// DateRange
+		assertEquals("20121201000000", DateRange.fixDate("20121201", true));
+		assertEquals("20121201050000", DateRange.fixDate("2012120105", true));
+		try { DateRange.fixDate("201", true); fail(); } catch (ParseException pe) { }
+		try { DateRange.fixDate("20120", true); fail(); } catch (ParseException pe) { }
+		assertEquals("20121201235959", DateRange.fixDate("20121201", false));
+
+		assertEquals("20121201235959", DateRange.df.format(new DateRange("20121201").getEnd()));
+		assertEquals("20121201000000", DateRange.df.format(new DateRange("20121201=>20121205").getStart()));
+		assertEquals("20121205235959", DateRange.df.format(new DateRange("20121201=>20121205").getEnd()));
+		assertNull(new DateRange(">20121201").getEnd());
+		assertEquals("20121201235959", DateRange.df.format(new DateRange(">20121201").getStart()));
+		assertNull(new DateRange("<20121201").getStart());
+		assertEquals("20121201000000", DateRange.df.format(new DateRange("<20121201").getEnd()));
+		
+		Calendar now = Calendar.getInstance();
+		now.set(Calendar.HOUR_OF_DAY, 0);
+		now.set(Calendar.MINUTE, 0);
+		now.set(Calendar.SECOND, 0);
+		now.set(Calendar.MILLISECOND, 0);
+		now.add(Calendar.DATE, -10);
+		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 10 days").getStart()));
+		now.add(Calendar.DATE, 10);
+		now.add(Calendar.DATE, 3 * -7);
+		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 3 weeks").getStart()));
+		now.add(Calendar.DATE, 3 * 7);
+		now.add(Calendar.MONTH, -8);
+		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 8 months").getStart()));
+		now.add(Calendar.MONTH, 8);
+		now.add(Calendar.YEAR, -2);
+		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 2 years").getStart()));
+		
+		assertException(new DateRangeParam("test", "test"), "201");
+		assertException(new DateRangeParam("test", "test"), "20121");
+		assertException(new DateRangeParam("test", "test"), "201213");
+		assertNoException(new DateRangeParam("test", "test"), "201212");
+		assertNoException(new DateRangeParam("test", "test"), "20121205");
+		assertNoException(new DateRangeParam("test", "test"), "20121205141512");
+		assertException(new DateRangeParam("test", "test"), "201212051415124");
+		assertException(new DateRangeParam("test", "test"), "20121205-20121210");
+		assertNoException(new DateRangeParam("test", "test"), "20121205=>20121210");
+		assertException(new DateRangeParam("test", "test"), ">20121205=>20121210");
+		assertNoException(new DateRangeParam("test", "test"), ">20121205");
+		assertNoException(new DateRangeParam("test", "test"), "<20121205");
 	}
 	
 	@Test public void testORParams()
