@@ -41,7 +41,15 @@ public class IntParam extends BaseParam implements ParameterDefinitionInt<Intege
 	}
 
 	public String getTypeDescription() {
-		return "A number between " + Integer.MIN_VALUE + " and " + Integer.MAX_VALUE + " (ex: 504)";
+		
+		String mv = "" + minVal;
+		if (minVal == null)
+			mv = "-2^31";
+		String mxv = "" + maxVal;
+		if (maxVal == null)
+			mxv = "2^31";
+		
+		return "A number between " + mv + " and " + mxv;
 	}
 	
 	public Integer getMinVal() {

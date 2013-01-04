@@ -1,0 +1,353 @@
+<!DOCTYPE HTML>
+<html xsl:version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title><xsl:value-of select="doc/systemName"/> API Documentation</title>
+		<link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="API Docs" charset="utf-8"/>
+	</head>
+	<body>
+
+	<div id="page-wrapper">
+		<div id="headerbar">
+		<a href="#top"><img id="nav-logo" src="{doc/logoUrl}" alt="Logo" /></a>
+	
+	  	<div class="headerbar-nav">
+	      <h2 id="toc-menu-button" class="headerbar-button">Navigation</h2>
+	      <div id="toc-menu" class="headerbar-menu">
+	      
+	          <div class="toc-column1">
+	              <div class="toc-section">
+	                  <h3>Full API Docs</h3>
+	                  <ul>
+		    	            <li><a href="#date_format">Date Format</a></li>
+		    	            <li><a href="#encoding">UTF-8 Encoding</a></li>
+		    	            <li><a href="#authentication">Authentication</a></li>
+			                <li><a href="#errors">Errors</a></li>
+		                    <li><a href="#catching_errors">Catching errors</a></li>
+					  </ul>
+				  </div>
+								  	                    
+	              <xsl:for-each select="doc/toc/N1/group">
+		          <div class="toc-section">
+	              	  <h4><xsl:value-of select="name"/></h4>
+	                  <ul>
+			          <xsl:for-each select="entry">
+			              <li><a href="#{internalname}"><xsl:value-of select="name"/></a></li>
+					  </xsl:for-each>	                    	
+	                  </ul>	
+	              </div>
+				  </xsl:for-each>	                    
+						
+	          </div>
+	
+	          <div class="toc-column2">
+	          	  <div class="toc-section">
+	          	  	&#160;
+	          	  </div>
+	          	  
+	              <xsl:for-each select="doc/toc/N2/group">
+		          <div class="toc-section">
+	              	  <h4><xsl:value-of select="name"/></h4>
+	                  <ul>
+			          <xsl:for-each select="entry">
+			              <li><a href="#{internalname}"><xsl:value-of select="name"/></a></li>
+					  </xsl:for-each>	                    	
+	                  </ul>	
+	              </div>
+				  </xsl:for-each>	                    
+						
+	          </div>
+	
+	          <div class="toc-column3">
+	          	  <div class="toc-section">
+	          	  	&#160;
+	          	  </div>
+	          	  
+	              <xsl:for-each select="doc/toc/N3/group">
+		          <div class="toc-section">
+	              	  <h4><xsl:value-of select="name"/></h4>
+	                  <ul>
+			          <xsl:for-each select="entry">
+			              <li><a href="#{internalname}"><xsl:value-of select="name"/></a></li>
+					  </xsl:for-each>	                    	
+	                  </ul>	
+	              </div>
+				  </xsl:for-each>	                    
+						
+	          </div>
+	          
+	          <div class="toc-column4">
+	          	  <div class="toc-section">
+	          	  	&#160;
+	          	  </div>
+	          	  
+	              <xsl:for-each select="doc/toc/N4/group">
+		          <div class="toc-section">
+	              	  <h4><xsl:value-of select="name"/></h4>
+	                  <ul>
+			          <xsl:for-each select="entry">
+			              <li><a href="#{internalname}"><xsl:value-of select="name"/></a></li>
+					  </xsl:for-each>	                    	
+	                  </ul>	
+	              </div>
+				  </xsl:for-each>	                    
+						
+	          </div>
+	          
+	          
+	      </div>
+	  </div>
+	
+	  <div class="headerbar-language">
+	      <a  class="headerbar-button active" href="?lang=curl">
+	          Curl
+	      </a>
+	  </div>
+	</div>
+		
+		<a id="top" name="top" class="old-style-anchor">&#160;</a>
+		<div id="main-content-wrapper">
+
+            <div class="method-section">
+                <div class="method-description">
+                    <h1>API Documentation</h1>
+
+                    <p>
+                        The <xsl:value-of select="doc/systemName"/> API is organized around
+                        <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
+                        The <xsl:value-of select="doc/systemName"/> API is designed to have predictable,
+                        resource-oriented URLs and to use HTTP response
+                        codes to indicate API errors.  We use built-in
+                        HTTP features, like HTTP authentication and
+                        HTTP verbs, which can be understood by
+                        off-the-shelf HTTP clients, and we
+                        support <a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">cross-origin
+                        resource sharing</a> to allow you to interact
+                        securely with our <xsl:value-of select="doc/systemName"/> API from a client-side web
+                        application (though you should remember that you should never expose your secret API key in any public website's client-side code).
+                        <a href="http://www.json.org/">JSON</a> will be
+                        returned in all responses from the <xsl:value-of select="doc/systemName"/> API, including errors.
+                    </p>
+
+                    <p>
+                        You should note that there is a 'test' server instance of
+                        the <xsl:value-of select="doc/systemName"/> API available. You should use the test server for all
+                        implementation and testing-related needs.
+                        The base URL and your client_id and api_key will likely be
+                        different in test vs. production.
+                    </p>
+
+                        <p><strong>The requests in the sidebar actually work.</strong> We'll perform
+                        the requests using your client ID <em><xsl:value-of select="/doc/client_id"/></em> 
+                        and your API key, <em><xsl:value-of select="/doc/api_key"/></em>
+                        </p>
+
+                </div>
+
+                <div class="method-example" id="api-summary-example">
+                    <h4>API Endpoint</h4>
+                    <code><xsl:value-of select="/doc/baseUrl"/></code>
+                    
+                    <h4>API Version</h4>
+                    <code><xsl:value-of select="/doc/version"/></code>
+                    
+                </div>
+            </div>
+
+			<a id="date_format" name="date_format" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Date Format</h3>
+                    All dates in the <xsl:value-of select="doc/systemName"/> API are strings in the format of <pre>yyyyMMddHHmmssZ</pre>
+                </div>
+                <div class="method-example">
+	                <h4>Example Date Value</h4>
+                	<code>20130103232034+0000</code>
+                	
+	                In Java, the below can be used to parse the dates returned:
+                	<code>SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmssZ")
+Date date = df.parse("20130103232034+0000");</code>
+                	
+                	In code format, which can be used in all programming languages that support strftime or strptime:
+                	<code>%Y%m%d%H%M%S%z</code>
+                </div>
+            </div>
+		
+			<a id="encoding" name="encoding" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>UTF-8 Encoding</h3>
+                    Every string passed to and from the <xsl:value-of select="doc/systemName"/> API needs to be UTF-8 encoded. 
+                    For maximum compatibility, normalize to 
+                    <a href="">Unicode Normalization Form C (NFC)</a> before UTF-8 encoding.
+                </div>
+                <div class="method-example">
+	                &#160;
+                </div>
+            </div>
+		
+			<a id="authentication" name="authentication" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Authentication</h3>
+                    <p>
+                        You authenticate to the <xsl:value-of select="doc/systemName"/> API by providing one of
+                        your API keys in the request.
+                        You can have multiple API keys
+                        active at one time.  Your API keys carry many
+                        privileges, so be sure to keep them secret!
+                    </p>
+
+                    <p>
+                        Authentication to the <xsl:value-of select="doc/systemName"/> API occurs via
+                        <a href="http://en.wikipedia.org/wiki/Basic_access_authentication">
+                        HTTP Basic Auth</a>.  Provide your client Id as the basic
+                        auth username and your API key as the basic auth password.
+                    </p>
+
+                    <p>
+                      All <xsl:value-of select="doc/systemName"/> API requests must be made
+                      over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
+                      Calls made over plain HTTP will fail.
+                    </p>
+                </div>
+                <div class="method-example">
+                
+					<code class="method-request"><span class="prompt {/doc/codeType}"/><xsl:value-of select="/doc/methods/method/codeSample"/> \
+   -u <xsl:value-of select="/doc/client_id"/>:<xsl:value-of select="/doc/api_key"/></code>                
+                
+                    <p>
+                        curl uses the -u flag to pass basic auth credentials.
+
+                        One of your test API keys has been filled into all the examples on the page, so you can test out any example right away.
+
+                    </p>
+                </div>
+            </div>
+		
+			<a id="errors" name="errors" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+                <div class="method-description">
+
+                    <h3>Errors</h3>
+                    <p>
+                        The <xsl:value-of select="doc/systemName"/> API uses conventional HTTP response codes to indicate
+                        success or failure of an API request.  In general,
+                        codes in the 2xx range indicate success, codes in the
+                        4xx range indicate an error that resulted from the
+                        provided information (e.g. a required parameter was
+                        missing, a charge failed, etc.), and codes in the 5xx
+                        range indicate an error with the API servers.
+                    </p>
+
+                    <p>
+                        Not all errors map cleanly onto HTTP response codes,
+                        however.  When a request is valid but does not complete
+                        successfully, we return a 400
+                        error code.
+                    </p>
+
+
+                    <p>
+                        All errors return
+                        JSON with a type (see 'type' in response) and
+                        message describing the particular problem to
+                        the developer.
+                    </p>
+
+                    <h5>Attributes</h5>
+                    <dl class="argument-list">
+                        <dt>type</dt>
+                        <dd></dd>
+                        <dd>The type of error returned (ParamValueException, etc)
+                            Generally you should not expect to see errors from the <xsl:value-of select="doc/systemName"/> API unless you're requesting
+                            invalid data or incorrectly requesting information.  API
+                            errors cover any other type of problem (e.g. a temporary problem with the API servers)
+                            and should turn up only very infrequently.
+                            
+                            Based on the type of error you may see additional information to utilize (param_value_error
+                            also provides a 'paramTypeName' and a 'message' so you can see why the parameter is causing an
+                            issue)
+                        </dd>
+
+                        <dt>message</dt>
+                        <dd></dd>
+                        <dd>A developer-facing message describing the error.</dd>
+                    </dl>
+                </div>
+                <div class="method-example">
+                    <h6>HTTP Status Code Summary</h6>
+                    <ul>
+                        <li><strong>200</strong> OK - Everything worked as expected.</li>
+                        <li><strong>400</strong> Bad Request - Often missing a required parameter.</li>
+                        <li><strong>401</strong> Unauthorized - No valid API key provided.</li>
+                        <li><strong>402</strong> Request Failed - Parameters were valid but request failed.</li>
+                        <li><strong>404</strong> Not Found - The requested item doesn't exist.</li>
+                        <li><strong>500, 502, 503, 504</strong> Server errors - something went wrong on the API server end.</li>
+                    </ul>
+                </div>
+
+                <div class="method-example">
+                  <h6>Errors</h6>
+                  
+                  <xsl:for-each select="doc/errors/error">
+   		              <code><strong>Type:</strong> <xsl:value-of select="name"/></code>
+	                  <xsl:value-of select="description"/>
+                  </xsl:for-each>
+                </div>
+            </div>
+		
+            <a id="catching_errors" name="catching_errors" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+              <div class="method-description">
+                <h4>Catching errors</h4>
+                <p>
+                  The API bindings can raise exceptions for many reasons, such as invalid
+                  parameters, authentication errors, and network unavailability. We recommend always trying
+                  to gracefully handle exceptions from our API.
+                </p>
+              </div>
+            </div>
+            
+        
+        	<xsl:for-each select="doc/methods/method">
+              
+			<a id="{internalname}" name="{internalname}" class="old-style-anchor">&#160;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4><xsl:value-of select="name"/></h4>
+                    <p>
+                        <xsl:value-of select="description"/>
+                    </p>
+
+                    <h5>Arguments</h5>
+                    <xsl:for-each select="arguments/argument">
+	                    <dl class="argument-list">
+	                        <dt><xsl:value-of select="name"/></dt>
+	                        <dd><xsl:value-of select="optionalRequired"/> <span><xsl:value-of select="default"/></span></dd>
+	                        <dd><xsl:value-of select="description"/></dd>
+	                        <dd class="argSince"><xsl:value-of select="since"/></dd>
+	                        <dd class="argType"><xsl:value-of select="type"/></dd>
+	                    </dl>
+					</xsl:for-each>
+					<xsl:if test="count(arguments/argument/*) &lt; 1">
+						<span class="noArgs">No arguments</span>
+					</xsl:if>
+					
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration"><xsl:value-of select="httpMethod"/> <xsl:value-of select="httpURL"/></code>
+
+                    <code class="method-request"><span class="prompt {/doc/codeType}"/><xsl:value-of select="codeSample"/> \
+   -u <xsl:value-of select="/doc/client_id"/>:<xsl:value-of select="/doc/api_key"/><xsl:value-of select="codeExtra"/></code>
+
+                    <code class="method-response"><xsl:value-of select="responseExample"/></code>
+                </div>
+            </div>
+			
+			</xsl:for-each>
+
+		</div>
+	</div>
+		
+	</body>
+</html>

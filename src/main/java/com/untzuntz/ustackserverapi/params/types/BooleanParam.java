@@ -13,7 +13,7 @@ public class BooleanParam extends BaseParam implements ParameterDefinitionInt<Bo
 	}
 	
 	public String getTypeDescription() {
-		return "Boolean value must be 'true' or 'false' (ex: false)";
+		return "Boolean value as 'true' or 'false'";
 	}
 
 	@Override

@@ -144,7 +144,7 @@ public class CallParameters {
      * @param s decoded string
      * @return  encoded string per RFC 3986
      */
-    private String percentEncodeRfc3986(String s) {
+    public static String percentEncodeRfc3986(String s) {
     	if (s == null)
     		return null;
     	
@@ -167,6 +167,9 @@ public class CallParameters {
      * @return              base64-encoded hmac value.
      */
     private String hmac(String key, String stringToSign) {
+    	
+    	if (key == null)
+    		return null;
     	
 		Mac mac = keys.get(key);
 		if (mac == null)

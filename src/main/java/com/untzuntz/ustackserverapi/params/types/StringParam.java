@@ -44,7 +44,16 @@ public class StringParam extends BaseParam implements ParameterDefinitionInt<Str
 	}
 	
 	public String getTypeDescription() {
-		return "A string of text encoded in UTF-8 (ex: hello)";
+		
+		String msg = "";
+		if (minLen != null && maxLen == null)
+			msg = " at least " + minLen + " chars long";
+		else if (minLen == null && maxLen != null)
+			msg = " at max " + minLen + " chars long";
+		else if (minLen != null && maxLen != null)
+			msg = " between " + minLen + " and " + maxLen + " chars long";
+		
+		return "A string of text" + msg;
 	}
 	
 	public Integer getMinLen() {

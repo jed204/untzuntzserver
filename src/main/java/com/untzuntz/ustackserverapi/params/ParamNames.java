@@ -17,10 +17,12 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<String> DeviceID = new StringParam("deviceId", "Device ID");
 	public static final ParameterDefinitionInt<String> access_code = new StringParam("access_code", "Access Code");
 
+
 	
 	public static final ParameterDefinitionInt<String> api_key = new StringParam("api_key", "Your API Key");
 	public static final ParameterDefinitionInt<String> client_id = new StringParam("client_id", "Your Client ID for the API");
-	public static final ParameterDefinitionInt<String> token = new StringParam("token", "User Token");
+	public static final ParameterDefinitionInt<String> token = new StringParam("token", "User Access Token");
+	public static final ParameterDefinitionInt<String> user_identifier = new StringParam("user_identifier", "User Identifier");
 	public static final ParameterDefinitionInt<String> secret = new StringParam("secret", "User Secret");
 
 }

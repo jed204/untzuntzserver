@@ -1,12 +1,14 @@
 package com.untzuntz.ustackserverapi.auth;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import com.untzuntz.ustack.aaa.Authorization;
-import com.untzuntz.ustack.data.APIMapping;
+import com.untzuntz.ustack.data.AccessToken;
+import com.untzuntz.ustack.data.AccessToken.AccessTokenDetails;
 import com.untzuntz.ustack.data.UserAccount;
 import com.untzuntz.ustack.exceptions.AuthorizationException;
 import com.untzuntz.ustackserverapi.APIException;
@@ -15,19 +17,18 @@ import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
-public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccount> {
+public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 
-    static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);
+    static Logger           		logger               	= Logger.getLogger(AccessTokenAuth.class);
  
     /**
      * 
      */
     public List<ParameterDefinitionInt<?>> getAuthenticationParameters() {
     	
-    	List<ParameterDefinitionInt<?>> ret = AuthTypes.ClientKey.getAuthenticationParameters();
+    	List<ParameterDefinitionInt<?>> ret = new ArrayList<ParameterDefinitionInt<?>>();
     	
-    	ret.add(ParamNames.user_identifier);
-    	ret.add(ParamNames.secret);
+    	ret.add(ParamNames.token);
     	
     	return ret;
     }
@@ -35,19 +36,17 @@ public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccoun
 	@Override
 	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
-		// Do the client id and api key auth
-		AuthTypes.ClientKey.authenticate(method, req, params);
-	
-		// get user info
-		UserAccount user = UserAccount.getByAPIToken(params.get(ParamNames.client_id), params.get(ParamNames.token));
-		if (user == null)
-			throw new APIAuthorizationException("Token parameter not provided - user not found");
+		//AuthTypes.ClientKey.authenticate(method, req, params);
+		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
+		if (details == null)
+			throw new APIAuthenticationException("Invalid Token");
+		if (details.expirationAge < System.currentTimeMillis())
+			throw new APIAuthenticationException("Token has expired");
 		
-		// validate user API secret against provided
-		APIMapping api = user.getAPIMapping(params.get(ParamNames.client_id));
-		if (!api.checkAPIKey( params.get(ParamNames.secret) ))
-			throw new APIAuthenticationException("Bad Token/Secret");
-
+		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
+		
+		// get user info
+		UserAccount user = UserAccount.getUser(details.userName);
 		if (method.getAuthenticationGroup() != null)
 		{
 			try {
@@ -60,6 +59,5 @@ public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccoun
 
 		return user;
 	}
-	
 
 }

@@ -7,8 +7,8 @@ UStackServerAPI = Core.extend({
 	appKey: null,
 	host: null,
 	secure: null,
-	username: null,
-	password: null,
+	clientId: null,
+	apiKey: null,
 	responseArea: null,
 
     $static: {

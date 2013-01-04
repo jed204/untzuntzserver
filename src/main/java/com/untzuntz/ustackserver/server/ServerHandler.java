@@ -7,6 +7,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -31,6 +32,7 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
+import com.untzuntz.ustack.main.UOpts;
 import com.untzuntz.ustackserver.peer.PeerDelivery;
 import com.untzuntz.ustackserver.peer.PeerHandler;
 import com.untzuntz.ustackserverapi.APICalls;
@@ -39,7 +41,7 @@ import com.untzuntz.ustackserverapi.APIResponse;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
-import com.untzuntz.ustackserverapi.auth.AuthTypes;
+import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
@@ -47,6 +49,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     static Logger           		logger               	= Logger.getLogger(ServerHandler.class);
     
     static final ConcurrentHashMap<String, ChannelGroup> channels = new ConcurrentHashMap<String, ChannelGroup>();
+    
+    static {
+        UOpts.addMessageBundle("com.untzuntz.ustack.resources.Messages");
+    }
     
     private HttpRequest request;
     private boolean readingChunks;
@@ -166,13 +172,26 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
-		try {
-			AuthTypes.ClientKey.authenticationAuthorization(cls, params);
-		} catch (APIException e) {
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
-			return;
+//		if (!cls.isClientKeyDisabled())
+//		{
+//			try {
+//				AuthTypes.ClientKey.authenticate(cls, req, params);
+//			} catch (APIException e) {
+//				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
+//				return;
+//			}
+//		}
+//		
+		if (cls.isAuthenticationRequired())
+		{
+			try {
+				params.setAuthInfo(cls.getAuthenticationMethod().authenticate(cls, req, params));
+			} catch (APIException e) {
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
+				return;
+			}
 		}
-		
+
 		if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_NONE)
 		{
 			// order parameters by alpha
@@ -192,16 +211,22 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			}
 		}
 		
-		if (cls.isAuthenticationRequired())
+		if (cls.isAuthorizationRequired())
 		{
 			try {
-				params.setAuthInfo(cls.getAuthMethod().authenticationAuthorization(cls, params));
+				List<AuthorizationInt> auths = cls.getAuthorizationMethods();
+				for (AuthorizationInt auth : auths)	
+					auth.authorize(cls, params);
+			} catch (ClassCastException cce) {
+				logger.error(String.format("%s [%s] Authorization failed due to an invalid authentication/authorization combo", ctx.getChannel().getRemoteAddress(), path), cce);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.BAD_REQUEST);
+				return;
 			} catch (APIException e) {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
 				return;
 			}
 		}
-
+		
 		try {
 			cls.handleCall(ctx.getChannel(), req, params);
 		} catch (APIException apiErr) {

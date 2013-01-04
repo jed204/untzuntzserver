@@ -12,6 +12,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import com.untzuntz.ustack.aaa.UStackPermissionEnum;
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
+import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.Validated;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
@@ -31,6 +32,7 @@ public class MethodDefinition {
 	private boolean methodPOST;
 	private boolean methodPUT;
 	private boolean methodDELETE;
+	private boolean disableClientKeyCheck;
 	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
@@ -39,12 +41,37 @@ public class MethodDefinition {
 	private VersionInt sinceVersion;
 	private List<Object> paramVal;
 	private int order;
+	private String overrideResponse;
 	private String hashKey;
+	private String docGroup;
 	private int hashEnforcementLevel;
 	private List<APICallParam> apiParams;
+	private List<AuthorizationInt> authorizationMethods;
 	private HashMap<Class,Object> objectInstances;
 	private HashMap<String,Method> methodInstances;
 
+	public String getDocumentationGroup() {
+		return docGroup;
+	}
+	
+	public MethodDefinition setDocumentationGroup(String dg) {
+		docGroup = dg;
+		return this;
+	}
+	
+	public List<Object> getParameterValidation() {
+		return paramVal;
+	}
+	
+	public boolean isClientKeyDisabled() {
+		return disableClientKeyCheck;
+	}
+	
+	public MethodDefinition disableClientKeyCheck() {
+		disableClientKeyCheck = true;
+		return this;
+	}
+	
 	public MethodDefinition(String path, Class apiClass, String methodName) {
 		this.path = path;
 		this.apiClass = apiClass;
@@ -54,6 +81,7 @@ public class MethodDefinition {
 		this.objectInstances = new HashMap<Class,Object>();
 		this.methodInstances = new HashMap<String,Method>();
 		this.paramVal = new ArrayList<Object>();
+		this.authorizationMethods = new ArrayList<AuthorizationInt>();
 		this.order = 1000;
 	}
 
@@ -76,6 +104,14 @@ public class MethodDefinition {
 	
 	public void setHashEnforcement(int l) {
 		hashEnforcementLevel = l;
+	}
+	
+	public void overrideDocumentationResponse(String or) {
+		overrideResponse = or;
+	}
+	
+	public String getOverrideDocumentationResponse() {
+		return overrideResponse;
 	}
 	
 	public void setSinceVersion(VersionInt v) {
@@ -127,8 +163,17 @@ public class MethodDefinition {
 		description = d;
 	}
 
-	public MethodDefinition authMethod(AuthenticationInt b) {
+	public MethodDefinition authenticationMethod(AuthenticationInt b) {
 		authMethod = b;
+		return this;
+	}
+	
+	public List<AuthorizationInt> getAuthorizationMethods() {
+		return authorizationMethods;
+	}
+	
+	public MethodDefinition addAuthorizationMethod(AuthorizationInt a) {
+		authorizationMethods.add(a);
 		return this;
 	}
 
@@ -160,22 +205,22 @@ public class MethodDefinition {
 		return authMethod != null;
 	}
 	
-	public AuthenticationInt<?> getAuthMethod() {
+	public AuthenticationInt<?> getAuthenticationMethod() {
 		return authMethod;
 	}
 	
 	public boolean isAuthorizationRequired() {
-		return authGroup != null;
+		return authorizationMethods.size() > 0;
 	}
 	
-	private UStackPermissionEnum authGroup;
+	private UStackPermissionEnum authenticationGroup;
 	
-	public void authGroup(UStackPermissionEnum ag) {
-		authGroup = ag;
+	public void authenticationGroup(UStackPermissionEnum ag) {
+		authenticationGroup = ag;
 	}
 	
-	public UStackPermissionEnum getAuthGroup() {
-		return authGroup;
+	public UStackPermissionEnum getAuthenticationGroup() {
+		return authenticationGroup;
 	}
 	
 	public boolean isMethodGET() {
@@ -228,6 +273,11 @@ public class MethodDefinition {
 				((Validated)val).validate(callParams);
 			else if (val instanceof ParameterDefinitionInt)
 				getParamter((ParameterDefinitionInt)val).validate(callParams);
+			else if (val instanceof APICallParam)
+				getParamter(((APICallParam)val).getParamDetails()).validate(callParams);
+			else
+				logger.warn("Unknown Parameter Validation Type: " + val);
+				
 		}
 		
 		// Setup Default Values
@@ -279,7 +329,6 @@ public class MethodDefinition {
 		addRequiredParam(param);
 	}
 	
-
 //	public void addParameter(String name, String description, boolean required) {
 //		addParameter(name, description, required, null);
 //	}
