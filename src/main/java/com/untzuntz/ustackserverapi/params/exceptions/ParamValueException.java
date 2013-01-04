@@ -1,9 +1,10 @@
 package com.untzuntz.ustackserverapi.params.exceptions;
 
 import com.untzuntz.ustackserverapi.APIException;
+import com.untzuntz.ustackserverapi.APIExceptionDocumentation;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
-public class ParamValueException extends APIException {
+public class ParamValueException extends APIException implements APIExceptionDocumentation {
 
 	/**
 	 * 
@@ -25,6 +26,11 @@ public class ParamValueException extends APIException {
 	
 	public String getMessage() {
 		return message;
+	}
+
+	@Override
+	public String getReason() {
+		return "The request parameter is not valid";
 	}
 
 }

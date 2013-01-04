@@ -21,6 +21,14 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 
     static Logger           		logger               	= Logger.getLogger(AccessTokenAuth.class);
  
+    public String getAuthenticationDescription() {
+    	return "Access token in request parameters required.";
+    }
+
+    public boolean isBasicAuth() {
+    	return false;
+    }
+
     /**
      * 
      */

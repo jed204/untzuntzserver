@@ -13,5 +13,7 @@ public interface AuthenticationInt<T> {
 
 	public T authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException;
 	public List<ParameterDefinitionInt<?>> getAuthenticationParameters();
+	public String getAuthenticationDescription();
+	public boolean isBasicAuth();
 	
 }

@@ -15,7 +15,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
-import org.bson.BasicBSONObject;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -30,8 +29,6 @@ import org.w3c.dom.Document;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.untzuntz.ustack.data.APIClient;
-import com.untzuntz.ustack.data.APIMapping;
 import com.untzuntz.ustack.data.UniqueReference;
 import com.untzuntz.ustack.data.UserAccount;
 import com.untzuntz.ustack.main.UForgotPasswordSvc;
@@ -78,7 +75,9 @@ public class BasicAPI {
 		    String clientId = callParams.get(ParamNames.client_id);
 		    String apiKey = callParams.get(ParamNames.api_key);
 		    
-		    Document doc = APIDocumentation.getDocumentationXML((String)def.getData("baseUrl"), "curl", clientId, apiKey, 12, documentationDefaults);
+		    String baseUrl = (String)def.getData("baseUrl");
+		    
+		    Document doc = APIDocumentation.getDocumentationXML(baseUrl, "curl", clientId, apiKey, 12, documentationDefaults);
 		    DOMSource xml = new DOMSource(doc);
 		    StreamSource xsl = new StreamSource(xslReader) ;
 		    Transformer transformer = tFactory.newTransformer(xsl);

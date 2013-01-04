@@ -5,6 +5,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -48,7 +50,6 @@ public class APIDocumentation {
     static Logger           		logger               	= Logger.getLogger(APIDocumentation.class);
 
 	public static String SystemName;
-	public static String baseUrl;
 	public static String logoUrl;
 	public static String version;
 	
@@ -58,7 +59,7 @@ public class APIDocumentation {
 	    return lsSerializer.writeToString(doc);   
 	}
 	
-	public static org.w3c.dom.Document getDocumentationXML(String baseUrl, String codeType, String client_id, String api_key, int methodsPerColumn, HashMap<String,String> documentationDefaults) throws ParserConfigurationException, UnsupportedEncodingException
+	public static org.w3c.dom.Document getDocumentationXML(String baseUrl, String codeType, String client_id, String api_key, int methodsPerColumn, HashMap<String,String> documentationDefaults) throws ParserConfigurationException, UnsupportedEncodingException, InstantiationException, IllegalAccessException, JSONException
 	{
 		if (methodsPerColumn == -1)
 			methodsPerColumn = 10;
@@ -97,6 +98,18 @@ public class APIDocumentation {
         org.w3c.dom.Element code = doc.createElement("codeType");
         code.setTextContent(codeType);
         docs.appendChild(code);
+
+        org.w3c.dom.Element errorsXml = doc.createElement("errors");
+        docs.appendChild(errorsXml);
+        
+        List<APIException> errors = APICalls.getErrors();
+        for (APIException error : errors)
+        {
+            org.w3c.dom.Element errorXml = doc.createElement("error");
+            errorsXml.appendChild(errorXml);
+            
+            addErrorInformation(doc, errorXml, error);
+        }
         
         List<MethodDefinition> methods = APICalls.getMethods();
         
@@ -148,7 +161,7 @@ public class APIDocumentation {
         		addNode(doc, tocEntry, "internalname", method.getMethodName().toLowerCase());
         		parentToc.appendChild(tocEntry);
 	        	
-	            addMethodInformation(doc, methodXml, client_id, api_key, method, documentationDefaults);
+	            addMethodInformation(doc, methodXml, baseUrl, client_id, api_key, method, documentationDefaults);
         	}
         	
         	cnt++;
@@ -171,7 +184,37 @@ public class APIDocumentation {
         return doc;
 	}
 	
-	private static void addMethodInformation(org.w3c.dom.Document doc, org.w3c.dom.Element parent, String client_id, String api_key,  MethodDefinition def, HashMap<String,String> exampleParameterValues) throws UnsupportedEncodingException {
+	private static void addErrorInformation(org.w3c.dom.Document doc, org.w3c.dom.Element parent, APIException error) throws JSONException
+	{
+		addNode(doc, parent, "name", error.getClass().getSimpleName());
+		addNode(doc, parent, "description", ((APIExceptionDocumentation)error).getReason());
+		
+        org.w3c.dom.Element extras = doc.createElement("extras");
+        parent.appendChild(extras);
+
+		final Field[] fields = error.getClass().getDeclaredFields();
+		for (int i = 0; i < fields.length; i++) {
+			final Field f = fields[i];
+			String fieldName = f.getName();
+			if (!"serialVersionUID".equals(fieldName))
+			{
+	            org.w3c.dom.Element field = doc.createElement("field");
+	            extras.appendChild(field);
+	    		addNode(doc, field, "name", fieldName);
+			}
+		}
+		
+		try {
+			logger.info("Outputting type: " + error.getClass().getSimpleName());
+			JSONTokener tokener = new JSONTokener(error.toDBObject() + ""); //tokenize the ugly JSON string
+			JSONObject finalResult = new JSONObject(tokener); // convert it to JSON object
+			addNode(doc, parent, "responseExample", finalResult.toString(3));
+		} catch (Exception e) {
+			logger.error("failed to output example", e);
+		}
+	}
+	
+	private static void addMethodInformation(org.w3c.dom.Document doc, org.w3c.dom.Element parent, String baseUrl, String client_id, String api_key,  MethodDefinition def, HashMap<String,String> exampleParameterValues) throws UnsupportedEncodingException {
 		
 		addNode(doc, parent, "name", def.getMethodName());
 		addNode(doc, parent, "internalname", def.getMethodName().toLowerCase());
@@ -305,8 +348,15 @@ public class APIDocumentation {
     	if (dashDMode && def.isMethodGET() && csStr.length() > 0)
         	csStr.append( " \\\n   -G");
 
-		addNode(doc, parent, "codeSample", start + baseUrl + def.getPath() + csStr.toString());
+		if (def.getAuthenticationMethod() != null)
+		{
+			addNode(doc, parent, "authenticationInfo", def.getAuthenticationMethod().getAuthenticationDescription());
+	    	if (def.getAuthenticationMethod().isBasicAuth())
+	        	csStr.append( " \\\n   -u " + client_id + ": " + api_key);
+		}
 
+		addNode(doc, parent, "codeSample", start + baseUrl + def.getPath() + csStr.toString());
+		
 		if (def.getOverrideDocumentationResponse() != null)
 			addNode(doc, parent, "responseExample", def.getOverrideDocumentationResponse());
 		else

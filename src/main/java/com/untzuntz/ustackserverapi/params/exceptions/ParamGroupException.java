@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.untzuntz.ustackserverapi.APIException;
+import com.untzuntz.ustackserverapi.APIExceptionDocumentation;
 
-public class ParamGroupException extends APIException {
+public class ParamGroupException extends APIException implements APIExceptionDocumentation {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,6 +28,11 @@ public class ParamGroupException extends APIException {
 	
 	public List<APIException> getChildExceptions() {
 		return childExceptions;
+	}
+
+	@Override
+	public String getReason() {
+		return "One or more request parameters are invalid";
 	}
 	
 }

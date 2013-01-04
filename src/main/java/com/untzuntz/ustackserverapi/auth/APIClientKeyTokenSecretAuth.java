@@ -19,6 +19,14 @@ public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccoun
 
     static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);
  
+    public String getAuthenticationDescription() {
+    	return "Your client ID/API Key via HTTP Basic Authentication and a user identifier and secret (in request parameters) required.";
+    }
+    
+    public boolean isBasicAuth() {
+    	return true;
+    }
+
     /**
      * 
      */

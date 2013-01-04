@@ -24,6 +24,14 @@ public class APIClientKeyAuth implements AuthenticationInt<Boolean> {
 
     static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);
 
+    public String getAuthenticationDescription() {
+    	return "Your client ID/API Key via HTTP Basic Authentication required.";
+    }
+
+    public boolean isBasicAuth() {
+    	return true;
+    }
+    
     public List<ParameterDefinitionInt<?>> getAuthenticationParameters() {
     	
     	List<ParameterDefinitionInt<?>> ret = new ArrayList<ParameterDefinitionInt<?>>();

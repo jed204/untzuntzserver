@@ -209,6 +209,11 @@ Date date = df.parse("20130103232034+0000");</code>
                       over <a href="http://en.wikipedia.org/wiki/HTTP_Secure">HTTPS</a>.
                       Calls made over plain HTTP will fail.
                     </p>
+                    
+                    <p>
+                      <strong>Note:</strong> Different calls may have a different mechanism for authentication based on the
+                      usage pattern of the call.
+                    </p>
                 </div>
                 <div class="method-example">
                 
@@ -269,9 +274,6 @@ Date date = df.parse("20130103232034+0000");</code>
                             issue)
                         </dd>
 
-                        <dt>message</dt>
-                        <dd></dd>
-                        <dd>A developer-facing message describing the error.</dd>
                     </dl>
                 </div>
                 <div class="method-example">
@@ -289,9 +291,14 @@ Date date = df.parse("20130103232034+0000");</code>
                 <div class="method-example">
                   <h6>Errors</h6>
                   
+                  Below are the errors, by type, that you can expect to receive.
+                  
                   <xsl:for-each select="doc/errors/error">
-   		              <code><strong>Type:</strong> <xsl:value-of select="name"/></code>
-	                  <xsl:value-of select="description"/>
+   		              <code><strong><xsl:value-of select="name"/></strong></code>
+   		              <xsl:value-of select="description"/>
+	                  <code class="method-response"><xsl:value-of select="responseExample"/>&#160;</code>
+	                  
+	                  
                   </xsl:for-each>
                 </div>
             </div>
@@ -332,13 +339,22 @@ Date date = df.parse("20130103232034+0000");</code>
 					<xsl:if test="count(arguments/argument/*) &lt; 1">
 						<span class="noArgs">No arguments</span>
 					</xsl:if>
+
+					<p>
+                    <h5>Authentication</h5>
+                    <p>
+                        <xsl:value-of select="authenticationInfo"/>
+                        <xsl:if test="count(authenticationInfo) &lt; 1"> 
+							<span class="noArgs">No authentication</span>
+						</xsl:if>
+                    </p>
 					
+					</p>					
                 </div>
                 <div class="method-example">
                     <code class="method-declaration"><xsl:value-of select="httpMethod"/> <xsl:value-of select="httpURL"/></code>
 
-                    <code class="method-request"><span class="prompt {/doc/codeType}"/><xsl:value-of select="codeSample"/> \
-   -u <xsl:value-of select="/doc/client_id"/>:<xsl:value-of select="/doc/api_key"/><xsl:value-of select="codeExtra"/></code>
+                    <code class="method-request"><span class="prompt {/doc/codeType}"/><xsl:value-of select="codeSample"/></code>
 
                     <code class="method-response"><xsl:value-of select="responseExample"/></code>
                 </div>

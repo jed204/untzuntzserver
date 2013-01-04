@@ -7,6 +7,16 @@ import java.util.List;
 import java.util.Map;
 
 public class APICalls {
+
+	static final List<APIException> errors = new ArrayList<APIException>();
+	
+	public static List<APIException> getErrors() {
+		return errors;
+	}
+	
+	public static void addException(APIException e) {
+		errors.add(e);
+	}
 	
     static final Map<String, MethodDefinition> routing = new HashMap<String, MethodDefinition>();
 

@@ -18,6 +18,14 @@ import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
 public class UserNamePasswordAuth implements AuthenticationInt<UserAccount> {
 
+    public String getAuthenticationDescription() {
+    	return "Username and password combo (in request parameters) required.";
+    }
+
+    public boolean isBasicAuth() {
+    	return false;
+    }
+
     public List<ParameterDefinitionInt<?>> getAuthenticationParameters() {
     	
     	List<ParameterDefinitionInt<?>> ret = new ArrayList<ParameterDefinitionInt<?>>();

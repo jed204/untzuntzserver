@@ -43,8 +43,11 @@ abstract public class APIException extends Exception {
 			if (!"serialVersionUID".equals(fieldName))
 			{
 				f.setAccessible(true);
+				System.out.println("\tOutputting field : " + fieldName);
 				try {
-					obj.put(fieldName, f.get(this));
+					Object o = f.get(this);
+					if (!(o instanceof Exception))
+						obj.put(fieldName, o);
 				} catch (IllegalArgumentException e) {
 				} catch (IllegalAccessException e) {
 				}
