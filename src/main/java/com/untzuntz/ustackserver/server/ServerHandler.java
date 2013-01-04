@@ -127,10 +127,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		{
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
 		}
-//		else if ("realtime".equalsIgnoreCase(uri[1]))
-//		{
-//			handleRealtime(ctx, uri);
-//		}
 		else if ("api".equalsIgnoreCase(uri[1]))
 		{
 			handleAPI(ctx, req, params);
@@ -172,16 +168,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
-//		if (!cls.isClientKeyDisabled())
-//		{
-//			try {
-//				AuthTypes.ClientKey.authenticate(cls, req, params);
-//			} catch (APIException e) {
-//				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
-//				return;
-//			}
-//		}
-//		
 		if (cls.isAuthenticationRequired())
 		{
 			try {

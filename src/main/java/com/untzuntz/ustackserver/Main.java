@@ -9,7 +9,6 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import com.untzuntz.ustackserver.peer.PeerFactory;
 import com.untzuntz.ustackserver.server.ServerFactory;
 
 public class Main {
@@ -20,36 +19,25 @@ public class Main {
 
 		DOMConfigurator.configure("log4j.xml");
     	int port = 8081;
-    	int peerPort = 8082;
-    	int otherPeer = 8084;
     	
-    	if (args.length >= 3)
-    	{
+    	if (args.length >= 1)
     		port = Integer.valueOf(args[1]);
-    		peerPort = Integer.valueOf(args[2]);
-    		otherPeer = Integer.valueOf(args[3]);
-    	}
     	
-    	Main main = new Main(args[0], port, peerPort, otherPeer);
+    	Main main = new Main(args[0], port);
     	
 		main.run();
     }
 
     private int port;
-    private int peerPort;
-    @SuppressWarnings("unused")
-	private int otherPeer;
     private String apiVersion;
     
     public String getAPIVersion() {
     	return apiVersion;
     }
     
-    public Main(String code, int p, int pp, int op) {
+    public Main(String code, int p) {
 
     	port = p;
-    	peerPort = pp;
-    	otherPeer = op;
     	
     	try {
     		
@@ -72,7 +60,7 @@ public class Main {
     	
 	public void run() {
 		
-		logger.info("Staring client server on port " + port + ", peer server on " + peerPort);
+		logger.info("Staring client server on port " + port);
 		
 		ServerBootstrap bootstrap = new ServerBootstrap(
 											new NioServerSocketChannelFactory(
@@ -85,16 +73,5 @@ public class Main {
 		
 		// Bind and start to accept incoming connections.
 		bootstrap.bind(new InetSocketAddress(port));
-		
-		ServerBootstrap peerBootstrap = new ServerBootstrap(
-											new NioServerSocketChannelFactory(
-													Executors.newCachedThreadPool(),
-													Executors.newCachedThreadPool()));
-
-		// Set up the event pipeline factory.
-		peerBootstrap.setPipelineFactory(new PeerFactory());
-
-		// Bind and start to accept incoming connections.
-		peerBootstrap.bind(new InetSocketAddress(peerPort));	
 	}
 }

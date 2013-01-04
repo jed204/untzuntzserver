@@ -38,10 +38,13 @@ public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccoun
 		// Do the client id and api key auth
 		AuthTypes.ClientKey.authenticate(method, req, params);
 	
+		if (params.get(ParamNames.user_identifier) == null)
+			throw new APIAuthorizationException("Missing User Idenfitier Value");
+		
 		// get user info
-		UserAccount user = UserAccount.getByAPIToken(params.get(ParamNames.client_id), params.get(ParamNames.token));
+		UserAccount user = UserAccount.getByAPIToken(params.get(ParamNames.client_id), params.get(ParamNames.user_identifier));
 		if (user == null)
-			throw new APIAuthorizationException("Token parameter not provided - user not found");
+			throw new APIAuthorizationException("Invalid User Idenfitier Value");
 		
 		// validate user API secret against provided
 		APIMapping api = user.getAPIMapping(params.get(ParamNames.client_id));

@@ -24,8 +24,6 @@ public class APIClientKeyAuth implements AuthenticationInt<Boolean> {
 
     static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);
 
-	public static boolean autoPass;
-	
     public List<ParameterDefinitionInt<?>> getAuthenticationParameters() {
     	
     	List<ParameterDefinitionInt<?>> ret = new ArrayList<ParameterDefinitionInt<?>>();
@@ -35,9 +33,6 @@ public class APIClientKeyAuth implements AuthenticationInt<Boolean> {
 	@Override
 	public Boolean authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
-		if (autoPass)
-			return true;
-		
 		String clientId = params.get(ParamNames.client_id);
 		String apiKey = params.get(ParamNames.api_key);
 		String authHeader = null;
