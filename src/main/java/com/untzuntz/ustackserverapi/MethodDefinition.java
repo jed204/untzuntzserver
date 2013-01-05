@@ -32,7 +32,6 @@ public class MethodDefinition {
 	private boolean methodPOST;
 	private boolean methodPUT;
 	private boolean methodDELETE;
-	private boolean disableClientKeyCheck;
 	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
@@ -49,7 +48,8 @@ public class MethodDefinition {
 	private List<AuthorizationInt> authorizationMethods;
 	private HashMap<Class,Object> objectInstances;
 	private HashMap<String,Method> methodInstances;
-
+	private boolean allowNoClientVer;
+	
 	public String getDocumentationGroup() {
 		return docGroup;
 	}
@@ -63,12 +63,12 @@ public class MethodDefinition {
 		return paramVal;
 	}
 	
-	public boolean isClientKeyDisabled() {
-		return disableClientKeyCheck;
+	public boolean isClientVerCheckDisabled() {
+		return allowNoClientVer;
 	}
 	
-	public MethodDefinition disableClientKeyCheck() {
-		disableClientKeyCheck = true;
+	public MethodDefinition disableClientVerCheck() {
+		allowNoClientVer = true;
 		return this;
 	}
 	

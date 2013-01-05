@@ -42,6 +42,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.untzuntz.ustack.aaa.Authorization;
 import com.untzuntz.ustackserverapi.params.APICallParam;
+import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.Validated;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
@@ -267,6 +268,20 @@ public class APIDocumentation {
         }
         
         List<APICallParam> args = def.getAPIParameters();
+        
+        if (!def.isClientVerCheckDisabled())
+        {
+            org.w3c.dom.Element argument = doc.createElement("argument");
+            arguments.appendChild(argument);
+            
+    		addNode(doc, argument, "name", ParamNames.client_ver.getName());
+    		addNode(doc, argument, "description", ParamNames.client_ver.getDescription());
+			addNode(doc, argument, "type", "Type: " + ParamNames.client_ver.getTypeDescription());
+			addNode(doc, argument, "optionalRequired", "required");
+			reqParams.add(ParamNames.client_ver.getName() + "=" + getExampleParamValue(def.getMethodName(), ParamNames.client_ver.getName(), exampleParameterValues));
+        }
+        
+
         for (APICallParam arg : args) 
         {
         	boolean required = isParamRequired(def, arg.getParamDetails().getName());
@@ -291,7 +306,7 @@ public class APIDocumentation {
     		if (arg.getVersion() != null)
     			addNode(doc, argument, "since", "Since: " + arg.getVersion().getVersionId());
         }
-
+        
         boolean hasAnd = false;
         boolean dashDMode = true;
         StringBuffer params = new StringBuffer();

@@ -6,11 +6,9 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
-import com.untzuntz.ustack.aaa.Authorization;
 import com.untzuntz.ustack.data.AccessToken;
 import com.untzuntz.ustack.data.AccessToken.AccessTokenDetails;
 import com.untzuntz.ustack.data.UserAccount;
-import com.untzuntz.ustack.exceptions.AuthorizationException;
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.MethodDefinition;
@@ -53,19 +51,7 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 		
 		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
 		
-		// get user info
-		UserAccount user = UserAccount.getUser(details.userName);
-		if (method.getAuthenticationGroup() != null)
-		{
-			try {
-				Authorization.authorizeUser(user, "*", null, method.getAuthenticationGroup());
-			} catch (AuthorizationException e) {
-				logger.warn("Client [" + user.getUserName() + "] tried to accesss '" + method.getPath() + "' but does not have permission '" + method.getAuthenticationGroup() + "' => " + e.getMessage());
-				throw new APIAuthorizationException("User Not Authorized");
-			}
-		}
-
-		return user;
+		return UserAccount.getUser(details.userName);
 	}
 
 }

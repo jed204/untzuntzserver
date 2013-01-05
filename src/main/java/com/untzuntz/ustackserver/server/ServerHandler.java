@@ -152,8 +152,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 
 		path = params.getPath();
 
-		logger.info(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.getParameter("client_ver")));
-		
+		logger.info(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.client_ver)));
+
 		MethodDefinition cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
@@ -161,6 +161,12 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
+		if (!cls.isClientVerCheckDisabled() && (params.get(ParamNames.client_ver) == null || params.get(ParamNames.client_ver).length() == 0))
+		{
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Client Version not provided"), HttpResponseStatus.BAD_REQUEST);
+			return;
+		}
+
 		if (!cls.isMethodEnabled(req.getMethod()))
 		{
 			logger.info(String.format("%s => API Path: %s || Invalid Method: %s", ctx.getChannel().getRemoteAddress(), path, req.getMethod().toString()));
