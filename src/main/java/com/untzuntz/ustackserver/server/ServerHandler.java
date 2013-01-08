@@ -5,6 +5,7 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
@@ -312,7 +313,12 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-		logger.warn("Error during API handling", e.getCause());
+		
+		if (e.getCause() instanceof IOException)
+			logger.info(String.format("%s => Client closed their request", e.getChannel().getRemoteAddress()));
+		else
+			logger.warn(String.format("%s => Error during API handling [%s]", e.getChannel().getRemoteAddress(), e.getCause()), e.getCause());
+		
 		e.getChannel().close();
 		cleanup(e.getChannel());
 	}
