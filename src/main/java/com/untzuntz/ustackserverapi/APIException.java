@@ -43,7 +43,6 @@ abstract public class APIException extends Exception {
 			if (!"serialVersionUID".equals(fieldName))
 			{
 				f.setAccessible(true);
-				System.out.println("\tOutputting field : " + fieldName);
 				try {
 					Object o = f.get(this);
 					if (!(o instanceof Exception))

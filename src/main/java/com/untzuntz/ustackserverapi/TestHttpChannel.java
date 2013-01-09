@@ -1,14 +1,20 @@
 package com.untzuntz.ustackserverapi;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.UUID;
 
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelConfig;
 import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.stream.ChunkedStream;
 
 public class TestHttpChannel implements Channel {
 
@@ -121,11 +127,44 @@ public class TestHttpChannel implements Channel {
 		return null;
 	}
 
+	public File getOutputFile() {
+		return outputFile;
+	}
+	
+	private File outputFile;
 	private HttpResponse resp;
 	public ChannelFuture write(Object arg0) {
 		
 		if (arg0 instanceof HttpResponse)
 			resp = (HttpResponse)arg0;
+		else if (arg0 instanceof ChunkedStream)
+		{
+			String fileName = "tmpfile." + UUID.randomUUID() + "-" + Thread.currentThread().getName().replace("/", "").replace("#", "").replace(" ", "") + ".tmp";
+			outputFile = new File(getTempDir(), fileName);
+			BufferedOutputStream out = null;
+
+			ChunkedStream cs = (ChunkedStream)arg0;
+			try {
+				out = new BufferedOutputStream(new FileOutputStream(outputFile));
+				
+				while (cs.hasNextChunk())
+				{
+					Object nc = cs.nextChunk();
+					if (nc instanceof ChannelBuffer)
+					{
+						ChannelBuffer buf = (ChannelBuffer)nc;
+						out.write(buf.array());
+					}
+					else
+						System.err.println("Unknown chunk type => " + nc.getClass().getName());
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try { out.close(); } catch (Exception e) {}
+			}
+		}
 		else
 			resp = null;
 		
@@ -147,8 +186,11 @@ public class TestHttpChannel implements Channel {
 	}
 	
 	public int getResponseCode() {
-		if (resp == null)
+		if (resp == null && outputFile == null)
 			return 550;
+		
+		if (outputFile != null)
+			return 200;
 		
 		return resp.getStatus().getCode();
 	}
@@ -176,5 +218,32 @@ public class TestHttpChannel implements Channel {
 		
 		
 	}
+
+    public static String getTempDir()
+    {
+        String fileSeparator = File.separator;
+    	String ret = System.getProperty("java.io.tempdir");
+    	if (ret == null)
+    		ret = System.getProperty("java.io.tmpdir");
+    	
+    	if (ret == null)
+    	{
+    		String osName = System.getProperty("os.name");
+    		if (osName == null)
+    			return fileSeparator + "tmp" + fileSeparator;
+
+    		if (osName.toLowerCase().indexOf("windows") > -1)
+    		{
+    			return fileSeparator + "windows" + fileSeparator + "temp" + fileSeparator;
+    		}
+    		
+			return fileSeparator + "tmp" + fileSeparator;
+    	}
+
+    	if ( !ret.endsWith( fileSeparator ) )
+    		ret += fileSeparator;
+
+    	return ret;
+    }
 
 }
