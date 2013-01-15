@@ -49,6 +49,8 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 		if (details.expirationAge < System.currentTimeMillis())
 			throw new APIAuthenticationException("Token has expired");
 		
+//		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
+		
 		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
 		
 		return UserAccount.getUser(details.userName);
