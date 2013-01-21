@@ -122,7 +122,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		
 		if ("index.html".equalsIgnoreCase(uri[1]))
 		{
-			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain");
+			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain", null);
 		}
 		else if ("favicon.ico".equalsIgnoreCase(uri[1]) || uri.length < 1)
 		{
@@ -158,20 +158,20 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		MethodDefinition cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown API Call Requested"), HttpResponseStatus.NOT_FOUND);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown API Call Requested"), HttpResponseStatus.NOT_FOUND, params);
 			return;
 		}
 		
 		if (!cls.isClientVerCheckDisabled() && (params.get(ParamNames.client_ver) == null || params.get(ParamNames.client_ver).length() == 0))
 		{
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Client Version not provided"), HttpResponseStatus.BAD_REQUEST);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Client Version not provided"), HttpResponseStatus.BAD_REQUEST, params);
 			return;
 		}
 
 		if (!cls.isMethodEnabled(req.getMethod()))
 		{
 			logger.info(String.format("%s => API Path: %s || Invalid Method: %s", ctx.getChannel().getRemoteAddress(), path, req.getMethod().toString()));
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid HTTP Method for API Call"), HttpResponseStatus.BAD_REQUEST);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid HTTP Method for API Call"), HttpResponseStatus.BAD_REQUEST, params);
 			return;
 		}
 		
@@ -180,7 +180,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			try {
 				params.setAuthInfo(cls.getAuthenticationMethod().authenticate(cls, req, params));
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST, params);
 				return;
 			}
 		}
@@ -200,7 +200,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
 					logger.warn(String.format("%s [%s] Request Signature Mismatch -> Client Sent [%s], we expected [%s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.RequestSignature), sig));
 				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
-					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST);
+					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST, params);
 			}
 		}
 		
@@ -212,10 +212,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					auth.authorize(cls, params);
 			} catch (ClassCastException cce) {
 				logger.error(String.format("%s [%s] Authorization failed due to an invalid authentication/authorization combo", ctx.getChannel().getRemoteAddress(), path), cce);
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.BAD_REQUEST);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.BAD_REQUEST, params);
 				return;
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST, params);
 				return;
 			}
 		}
@@ -224,10 +224,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			cls.handleCall(ctx.getChannel(), req, params);
 		} catch (APIException apiErr) {
 			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
 		} catch (InvalidAPIRequestException iar) {
 			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), iar);
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST, params);
 		} catch (InvocationTargetException ierr) {
 			if (ierr.getCause() != null)
 			{
@@ -236,16 +236,16 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				else
 					logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
 					
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, params);
 			}
 			else
 			{
 				logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), ierr);
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST, params);
 			}
 		} catch (Exception err) {
 			logger.warn(String.format("%s [%s] Uncaught Exception during API call", ctx.getChannel().getRemoteAddress(), path), err);
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST);
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST, params);
 		}
 	}
 	

@@ -17,7 +17,8 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<String> password = new StringParam("password", "Username");
 	public static final ParameterDefinitionInt<String> DeviceID = new StringParam("deviceId", "Device ID");
 	public static final ParameterDefinitionInt<String> access_code = new StringParam("access_code", "Access Code");
-
+	public static final ParameterDefinitionInt<String> json_callback = new StringParam("json_callback", "JSON Callback Function name");
+	
 
 	
 	public static final ParameterDefinitionInt<String> api_key = new StringParam("api_key", "Your API Key");
