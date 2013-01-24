@@ -203,7 +203,20 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST, params);
 			}
 		}
+
+		/*
+		 * Verify parameters of call - set default values
+		 */
+		try {
+			cls.validateCall(params);
+		} catch (APIException apiErr) {
+			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
+			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+		}
 		
+		/*
+		 * Authorize call
+		 */
 		if (cls.isAuthorizationRequired())
 		{
 			try {
@@ -220,6 +233,9 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			}
 		}
 		
+		/*
+		 * Do the actual call
+		 */
 		try {
 			cls.handleCall(ctx.getChannel(), req, params);
 		} catch (APIException apiErr) {

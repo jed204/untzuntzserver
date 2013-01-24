@@ -41,6 +41,7 @@ import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.untzuntz.ustack.aaa.Authorization;
+import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.Validated;
@@ -265,6 +266,23 @@ public class APIDocumentation {
 				
 				reqParams.add(arg.getName() + "=" + getExampleParamValue(def.getMethodName(), arg.getName(), exampleParameterValues));
 	        }
+	        
+	        for (AuthorizationInt ai : def.getAuthorizationMethods())
+	        {
+		        List<ParameterDefinitionInt<?>> params = ai.getAuthenticationParameters();
+		        for (ParameterDefinitionInt<?> arg : params) 
+		        {
+		            org.w3c.dom.Element argument = doc.createElement("argument");
+		            arguments.appendChild(argument);
+		            
+		    		addNode(doc, argument, "name", arg.getName());
+		    		addNode(doc, argument, "description", arg.getDescription());
+		    		addNode(doc, argument, "optionalRequired", "required");
+					addNode(doc, argument, "type", "Type: " + arg.getTypeDescription());
+					
+					reqParams.add(arg.getName() + "=" + getExampleParamValue(def.getMethodName(), arg.getName(), exampleParameterValues));
+		        }
+	        }
         }
         
         List<APICallParam> args = def.getAPIParameters();
@@ -280,7 +298,6 @@ public class APIDocumentation {
 			addNode(doc, argument, "optionalRequired", "required");
 			reqParams.add(ParamNames.client_ver.getName() + "=" + getExampleParamValue(def.getMethodName(), ParamNames.client_ver.getName(), exampleParameterValues));
         }
-        
 
         for (APICallParam arg : args) 
         {
@@ -307,6 +324,23 @@ public class APIDocumentation {
     			addNode(doc, argument, "since", "Since: " + arg.getVersion().getVersionId());
         }
         
+        /**
+         * Varies parameters are in place to aid in documentation - this may be changed
+         */
+        List<ParameterDefinitionInt<?>> varies = def.getVariesParams();
+        for (ParameterDefinitionInt<?> arg : varies) 
+        {
+            org.w3c.dom.Element argument = doc.createElement("argument");
+            arguments.appendChild(argument);
+            
+    		addNode(doc, argument, "name", arg.getName());
+    		addNode(doc, argument, "description", arg.getDescription());
+    		addNode(doc, argument, "optionalRequired", "varies");
+			addNode(doc, argument, "type", "Type: " + arg.getTypeDescription());
+			
+			reqParams.add(arg.getName() + "=" + getExampleParamValue(def.getMethodName(), arg.getName(), exampleParameterValues));
+        }
+
         boolean hasAnd = false;
         boolean dashDMode = true;
         StringBuffer params = new StringBuffer();

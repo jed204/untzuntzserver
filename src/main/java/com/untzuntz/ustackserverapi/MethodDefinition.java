@@ -39,6 +39,7 @@ public class MethodDefinition {
 	private String description;
 	private VersionInt sinceVersion;
 	private List<Object> paramVal;
+	private List<ParameterDefinitionInt<?>> variesParams;
 	private int order;
 	private String overrideResponse;
 	private String hashKey;
@@ -81,6 +82,7 @@ public class MethodDefinition {
 		this.objectInstances = new HashMap<Class,Object>();
 		this.methodInstances = new HashMap<String,Method>();
 		this.paramVal = new ArrayList<Object>();
+		this.variesParams = new ArrayList<ParameterDefinitionInt<?>>();
 		this.authorizationMethods = new ArrayList<AuthorizationInt>();
 		this.order = 1000;
 	}
@@ -263,10 +265,24 @@ public class MethodDefinition {
 		paramVal.add(val);
 	}
 	
-	@SuppressWarnings({ "unchecked" })
-	public void handleCall(Channel channel, HttpRequest req, CallParameters callParams) throws Exception
+	public void addVariesParam(ParameterDefinitionInt val)
 	{
-		
+		variesParams.add(val);
+	}
+	
+	public void addVariesParams(List<ParameterDefinitionInt<?>> vals)
+	{
+		variesParams.addAll(vals);
+	}
+	
+	public List<ParameterDefinitionInt<?>> getVariesParams()
+	{
+		return variesParams;
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	public void validateCall(CallParameters callParams) throws APIException
+	{
 		for (Object val : paramVal)
 		{
 			if (val instanceof Validated)	
@@ -290,6 +306,11 @@ public class MethodDefinition {
 			}
 		}
 		
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	public void handleCall(Channel channel, HttpRequest req, CallParameters callParams) throws Exception
+	{
 		Object apiInt = objectInstances.get(apiClass);
 		Method m = methodInstances.get(methodName);
 		if (m == null)
