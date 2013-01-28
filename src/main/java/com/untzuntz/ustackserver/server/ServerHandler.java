@@ -64,7 +64,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)	throws Exception {
 		super.channelOpen(ctx, e);
-		logger.info(String.format("%s => Connection started", e.getChannel().getRemoteAddress()));
+		logger.debug(String.format("%s => Connection started", e.getChannel().getRemoteAddress()));
 	}
 
 	@Override
@@ -153,8 +153,9 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 
 		path = params.getPath();
 
-		logger.info(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.client_ver)));
-
+		logger.debug(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.client_ver)));
+		long apiCallStart = System.currentTimeMillis();
+		
 		MethodDefinition cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
@@ -263,6 +264,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			logger.warn(String.format("%s [%s] Uncaught Exception during API call", ctx.getChannel().getRemoteAddress(), path), err);
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST, params);
 		}
+		
+		long apiCallFinish = System.currentTimeMillis();
+		logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.app_name), params.get(ParamNames.client_ver), (apiCallFinish - apiCallStart)));
+
 	}
 	
 	public void handleRealtime(ChannelHandlerContext ctx, String[] uri)
@@ -362,7 +367,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		long timing = 0;
 		if (e.getChannel().getAttachment() != null)
 			timing = (System.currentTimeMillis() - (Long)e.getChannel().getAttachment());
-		logger.info(String.format("%s => Connection Completed [%d ms]", e.getChannel().getRemoteAddress(), timing));
+		logger.info(String.format("%s => Connection Closed [%d ms]", e.getChannel().getRemoteAddress(), timing));
 	}
 
 	@Override
