@@ -64,7 +64,7 @@ public class APIDocumentation {
 	public static org.w3c.dom.Document getDocumentationXML(String baseUrl, String codeType, String client_id, String api_key, int methodsPerColumn, HashMap<String,String> documentationDefaults) throws ParserConfigurationException, UnsupportedEncodingException, InstantiationException, IllegalAccessException, JSONException
 	{
 		if (methodsPerColumn == -1)
-			methodsPerColumn = 10;
+			methodsPerColumn = 14;
 		
 		DocumentBuilderFactory dbfac = DocumentBuilderFactory.newInstance();
 		DocumentBuilder docBuilder = dbfac.newDocumentBuilder();
@@ -128,7 +128,7 @@ public class APIDocumentation {
         
         HashMap<String,org.w3c.dom.Element> tocGroups = new HashMap<String,org.w3c.dom.Element>();
         
-        int cnt = 3;
+        int cnt = 1;
         int tocColIdx = 1;
         
         org.w3c.dom.Element methodsXml = doc.createElement("methods");
@@ -401,7 +401,7 @@ public class APIDocumentation {
 		{
 			addNode(doc, parent, "authenticationInfo", def.getAuthenticationMethod().getAuthenticationDescription());
 	    	if (def.getAuthenticationMethod().isBasicAuth())
-	        	csStr.append( " \\\n   -u " + client_id + ": " + api_key);
+	        	csStr.append( " \\\n   -u " + client_id + ":" + api_key);
 		}
 
 		addNode(doc, parent, "codeSample", start + baseUrl + def.getPath() + csStr.toString());
@@ -410,15 +410,17 @@ public class APIDocumentation {
 			addNode(doc, parent, "responseExample", def.getOverrideDocumentationResponse());
 		else
 		{
+			String requestStr = String.format("%sclient_id=%s&api_key=%s&app_name=api_docs", params.toString(), client_id, api_key);
+			String resp = null;
 			try {
-				String resp = handleCall(def.getPath(), params.toString() + "client_id=" + client_id + "&api_key=" + api_key);
+				resp = handleCall(def.getPath(), requestStr);
 				
 				JSONTokener tokener = new JSONTokener(resp); //tokenize the ugly JSON string
 				JSONObject finalResult = new JSONObject(tokener); // convert it to JSON object
 				
 				addNode(doc, parent, "responseExample", finalResult.toString(3));
 			} catch (Exception e) {
-				logger.warn("Error generating documentation", e);
+				logger.warn("Error generating documentation. Request was:\n" + def.getPath() + "?" + requestStr + "\nResponse is:\n" + resp, e);
 				addNode(doc, parent, "responseExample", "(ERROR)");
 			}
 		}
@@ -456,6 +458,7 @@ public class APIDocumentation {
 		} catch (InvalidAPIRequestException e) {
 			channel.write(BAD_REQ); // simulate a general API failure
 		} catch (Exception iar) {
+			logger.error("Failed to process sample call", iar);
 			channel.write(BAD_REQ); // simulate a general API failure
 		}
 		

@@ -42,6 +42,13 @@ public class DateRange {
 	
 	private void process(String data) throws ParseException
 	{
+		if (data == null)
+		{
+			start = null;
+			end = null;
+			return;
+		}
+		
 		if (data.toLowerCase().startsWith("last "))
 		{
 			int amount = 0;

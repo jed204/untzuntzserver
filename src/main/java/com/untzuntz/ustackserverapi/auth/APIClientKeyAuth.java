@@ -63,6 +63,9 @@ public class APIClientKeyAuth implements AuthenticationInt<Boolean> {
 			authHeader = Base64.decode(authHeader);
 			
 			String[] spl = authHeader.split(":");
+			if (spl.length != 2)
+				throw new APIAuthenticationException("Bad Client ID/API Key (Invalid)");
+				
 			clientId = spl[0];
 			apiKey = spl[1];
 			
