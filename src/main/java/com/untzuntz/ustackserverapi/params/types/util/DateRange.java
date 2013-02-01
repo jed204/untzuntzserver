@@ -147,7 +147,16 @@ public class DateRange {
 				if (fix.length() == 4)
 					fix.append("12");
 				if (fix.length() == 6)
-					fix.append("31");
+				{
+					int month = Integer.valueOf(fix.substring(4, 6));
+					int append = 31;
+					if (month % 2 == 0)
+						append = 30;
+					if (month == 2)
+						append = 28;
+					
+					fix.append(append);
+				}
 				if (fix.length() == 8)
 					fix.append("23");
 				if (fix.length() == 10)

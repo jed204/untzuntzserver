@@ -120,6 +120,20 @@ public class ParamTest {
 		assertException(new DateRangeParam("test", "test"), ">20121205=>20121210");
 		assertNoException(new DateRangeParam("test", "test"), ">20121205");
 		assertNoException(new DateRangeParam("test", "test"), "<20121205");
+		
+		DateRange range = null;
+		
+		range = new DateRange("201301");
+		assertEquals("20130101000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130131235959", DateRange.df.format(range.getEnd()));
+		
+		range = new DateRange("201302");
+		assertEquals("20130201000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130228235959", DateRange.df.format(range.getEnd()));
+		
+		range = new DateRange("201304");
+		assertEquals("20130401000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130430235959", DateRange.df.format(range.getEnd()));
 	}
 	
 	@Test public void testORParams()
