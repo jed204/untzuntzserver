@@ -19,6 +19,7 @@ import com.untzuntz.ustackserverapi.params.Validated;
 import com.untzuntz.ustackserverapi.params.types.BooleanParam;
 import com.untzuntz.ustackserverapi.params.types.DateRangeParam;
 import com.untzuntz.ustackserverapi.params.types.IntParam;
+import com.untzuntz.ustackserverapi.params.types.JSONParam;
 import com.untzuntz.ustackserverapi.params.types.LongParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
@@ -134,6 +135,11 @@ public class ParamTest {
 		range = new DateRange("201304");
 		assertEquals("20130401000000", DateRange.df.format(range.getStart()));
 		assertEquals("20130430235959", DateRange.df.format(range.getEnd()));
+		
+		// JSON
+		assertException(new JSONParam("test", "test"), "RANDODATA"); // should fail - not a valid JSON string
+		assertNoException(new JSONParam("test", "test"), "{ hello : \"Test\" }"); // should fail - not a valid JSON string
+
 	}
 	
 	@Test public void testORParams()

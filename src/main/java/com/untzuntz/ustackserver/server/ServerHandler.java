@@ -201,7 +201,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
 					logger.warn(String.format("%s [%s] Request Signature Mismatch -> Client Sent [%s], we expected [%s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.RequestSignature), sig));
 				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
+				{
 					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST, params);
+					return;
+				}
 			}
 		}
 
@@ -213,6 +216,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		} catch (APIException apiErr) {
 			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+			return;
 		}
 		
 		/*
@@ -248,12 +252,21 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		} catch (InvocationTargetException ierr) {
 			if (ierr.getCause() != null)
 			{
-				if (ierr.getCause() instanceof NullPointerException)
-					logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+				if (ierr.getCause() instanceof APIException)
+				{
+					APIException apiErr = (APIException)ierr.getCause();
+					logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
+					APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+				}
 				else
-					logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+				{
+					if (ierr.getCause() instanceof NullPointerException)
+						logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+					else
+						logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+					APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, params);
+				}
 					
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, params);
 			}
 			else
 			{

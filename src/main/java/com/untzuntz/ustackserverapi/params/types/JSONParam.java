@@ -3,6 +3,7 @@ package com.untzuntz.ustackserverapi.params.types;
 import org.bson.BasicBSONObject;
 
 import com.mongodb.util.JSON;
+import com.mongodb.util.JSONParseException;
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.params.exceptions.ParamValueException;
 
@@ -13,13 +14,20 @@ public class JSONParam extends BaseParam implements ParameterDefinitionInt<Basic
 	}
 	
 	public String getTypeDescription() {
-		return "A properly formatted JSON text (ex: { key : \"value\" })";
+		return "Properly formatted JSON text (ex: { key : \"value\" })";
 	}
 
 	@Override
 	public void validate(String data) throws APIException {
 		
-		BasicBSONObject bs = (BasicBSONObject)JSON.parse(data);
+		System.out.println("Field named [" + this.getName() + "] => Data [" + data + "]");
+		
+		BasicBSONObject bs = null;
+		try {
+			bs = (BasicBSONObject)JSON.parse(data);
+		} catch (JSONParseException jpe) {
+			throw new ParamValueException(this, "Could not parse parameter");
+		}
 		
 		if (bs != null)
 			return;
@@ -29,9 +37,14 @@ public class JSONParam extends BaseParam implements ParameterDefinitionInt<Basic
 	
 	@Override
 	public BasicBSONObject getValue(String data) {
+
+		BasicBSONObject bs = null;
+		try {
+			bs = (BasicBSONObject)JSON.parse(data);
+		} catch (Exception jpe) {}
 		
-		return (BasicBSONObject)JSON.parse(data);
-		
+		return bs;
+				
 	}
 
 }
