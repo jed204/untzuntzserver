@@ -52,6 +52,9 @@ public class XMLParam extends BaseParam implements ParameterDefinitionInt<Docume
 
 	private Document getDocument(String data) throws APIException
 	{
+		if (data == null)
+			return null;
+		
 		Document ret = null;
 		try
 		{
