@@ -20,8 +20,10 @@ import com.untzuntz.ustackserverapi.params.types.BooleanParam;
 import com.untzuntz.ustackserverapi.params.types.DateRangeParam;
 import com.untzuntz.ustackserverapi.params.types.IntParam;
 import com.untzuntz.ustackserverapi.params.types.JSONParam;
+import com.untzuntz.ustackserverapi.params.types.LongArrayParam;
 import com.untzuntz.ustackserverapi.params.types.LongParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
+import com.untzuntz.ustackserverapi.params.types.StringArrayParam;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
 import com.untzuntz.ustackserverapi.params.types.URLParam;
 import com.untzuntz.ustackserverapi.params.types.util.DateRange;
@@ -140,6 +142,21 @@ public class ParamTest {
 		assertException(new JSONParam("test", "test"), "RANDODATA"); // should fail - not a valid JSON string
 		assertNoException(new JSONParam("test", "test"), "{ hello : \"Test\" }"); // should fail - not a valid JSON string
 
+		// String Array
+		assertNoException(new StringArrayParam("test", "test"), "Hello,Test1"); // should pass
+		assertException(new StringArrayParam("test", "test", 3), "Hello,Test1"); // should fail -- need at least 3 items
+		assertNoException(new StringArrayParam("test", "test", 3), "Hello,Test1,Test2"); // should pass -- need at least 3 items
+		assertNoException(new StringArrayParam("test", "test", 1, 3), "Hello,Test1"); // should fail -- need at least 3 items
+		assertException(new StringArrayParam("test", "test", 2, 3), "Hello"); // should pass -- need at least 3 items
+		assertNoException(new StringArrayParam("test", "test", 2, 3), "Hello,Test1,Test2"); // should pass -- need at least 3 items
+		
+		// Long Array
+		assertNoException(new LongArrayParam("test", "test"), "123,421"); // should pass
+		assertException(new LongArrayParam("test", "test", 3), "123,421"); // should fail -- need at least 3 items
+		assertNoException(new LongArrayParam("test", "test", 3), "123,421,444"); // should pass -- need at least 3 items
+		assertNoException(new LongArrayParam("test", "test", 1, 3), "123,421"); // should fail -- need at least 3 items
+		assertException(new LongArrayParam("test", "test", 2, 3), "123"); // should pass -- need at least 3 items
+		assertNoException(new LongArrayParam("test", "test", 2, 3), "123,421,241"); // should pass -- need at least 3 items
 	}
 	
 	@Test public void testORParams()

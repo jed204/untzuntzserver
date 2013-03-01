@@ -45,7 +45,10 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 		//AuthTypes.ClientKey.authenticate(method, req, params);
 		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
 		if (details == null)
+		{
+			logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
 			throw new APIAuthenticationException("Invalid Token");
+		}
 		if (details.expirationAge < System.currentTimeMillis())
 			throw new APIAuthenticationException("Token has expired");
 		

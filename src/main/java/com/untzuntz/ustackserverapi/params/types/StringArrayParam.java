@@ -64,10 +64,11 @@ public class StringArrayParam extends BaseParam implements ParameterDefinitionIn
 		if (data == null && minSize != null)
 			throw new ParamValueException(this, "String array must have at least " + minSize + " items");
 
-		if (minSize != null && data.length() < minSize)
+		String[] ret = data.split(",");
+		if (minSize != null && ret.length < minSize)
 			throw new ParamValueException(this, "String array must have at least " + minSize + " items");
 	
-		if (maxSize != null && data.length() > maxSize)
+		if (maxSize != null && ret.length > maxSize)
 			throw new ParamValueException(this, "String array cannot have more than " + maxSize + " items");
 		
 	}
