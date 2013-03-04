@@ -14,6 +14,7 @@ import org.jboss.netty.channel.ChannelFactory;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 
 public class TestHttpChannel implements Channel {
@@ -137,6 +138,50 @@ public class TestHttpChannel implements Channel {
 		
 		if (arg0 instanceof HttpResponse)
 			resp = (HttpResponse)arg0;
+		else if (arg0 instanceof String)
+		{
+			if (outputFile != null)
+			{
+				BufferedOutputStream out = null;
+				try {
+					out = new BufferedOutputStream(new FileOutputStream(outputFile, true));
+					out.write(((String)arg0).getBytes());	
+					out.flush();
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					try { out.close(); } catch (Exception e) {}
+				}
+			}
+		}
+		else if (arg0 instanceof ChunkedInput)
+		{
+			String fileName = "tmpfile." + UUID.randomUUID() + "-" + Thread.currentThread().getName().replace("/", "").replace("#", "").replace(" ", "") + ".tmp";
+			outputFile = new File(getTempDir(), fileName);
+			BufferedOutputStream out = null;
+
+			ChunkedInput cs = (ChunkedInput)arg0;
+			try {
+				out = new BufferedOutputStream(new FileOutputStream(outputFile));
+				
+				while (cs.hasNextChunk())
+				{
+					Object nc = cs.nextChunk();
+					if (nc instanceof ChannelBuffer)
+					{
+						ChannelBuffer buf = (ChannelBuffer)nc;
+						out.write(buf.array());
+					}
+					else
+						System.err.println("Unknown chunk type => " + nc.getClass().getName());
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try { out.close(); } catch (Exception e) {}
+			}
+		}
 		else if (arg0 instanceof ChunkedStream)
 		{
 			String fileName = "tmpfile." + UUID.randomUUID() + "-" + Thread.currentThread().getName().replace("/", "").replace("#", "").replace(" ", "") + ".tmp";
@@ -166,7 +211,9 @@ public class TestHttpChannel implements Channel {
 			}
 		}
 		else
+		{
 			resp = null;
+		}
 		
 		return new TestChannelFuture();
 	}

@@ -65,6 +65,9 @@ public class LongArrayParam extends BaseParam implements ParameterDefinitionInt<
 		if (data == null && minSize != null)
 			throw new ParamValueException(this, "Long array must have at least " + minSize + " items");
 
+		if (data == null)
+			throw new ParamValueException(this, "The Long array has no value");
+		
 		Long[] ret = getLongs(data.split(","));
 		if (minSize != null && ret.length < minSize)
 			throw new ParamValueException(this, "Long array must have at least " + minSize + " items");

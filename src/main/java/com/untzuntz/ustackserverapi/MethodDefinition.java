@@ -347,7 +347,8 @@ public class MethodDefinition {
 
 	public void addParameter(APICallParam param, boolean required) {
 		apiParams.add(param);
-		addRequiredParam(param);
+		if (required)
+			addRequiredParam(param);
 	}
 	
 //	public void addParameter(String name, String description, boolean required) {
