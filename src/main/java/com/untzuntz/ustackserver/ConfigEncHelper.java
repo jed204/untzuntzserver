@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
@@ -18,28 +19,36 @@ public class ConfigEncHelper {
 	public static void main(String[] args) throws Exception {
 
 		if (args.length < 1) {
-			System.err.println("ConfigEncHelper [file to encrypt]");
+			System.err.println("ConfigEncHelper [file to encrypt] <outputfile>");
 			return;
 		}
 
+		String name = null;
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
-		System.out.print("Data Name (unique): ");
-		String name = br.readLine();
-		System.out.print("Database (ex: test@localhost): ");
-		String db = br.readLine();
-		if (db.indexOf("@") == -1)
+		if (args.length == 2)
 		{
-			System.err.println("Invalid database name");
-			System.exit(1);
+			// output to a file
+		}
+		else
+		{
+	
+			System.out.print("Data Name (unique): ");
+			name = br.readLine();
+			System.out.print("Database (ex: test@localhost): ");
+			String db = br.readLine();
+			if (db.indexOf("@") == -1)
+			{
+				System.err.println("Invalid database name");
+				System.exit(1);
+			}
+			
+			String dbName = db.substring(0, db.indexOf("@"));
+			String dbLoc = db.substring(db.indexOf("@") + 1);
+			
+			UOpts.setAppName(dbName);
+			System.setProperty(UAppCfg.MONGO_DB_HOST, dbLoc);
 		}
 		
-		String dbName = db.substring(0, db.indexOf("@"));
-		String dbLoc = db.substring(db.indexOf("@") + 1);
-		
-		UOpts.setAppName(dbName);
-		System.setProperty(UAppCfg.MONGO_DB_HOST, dbLoc);
-
 		System.out.print("Passphrase: ");
 		String passphrase = null;
 
@@ -74,16 +83,31 @@ public class ConfigEncHelper {
 		}
 		in.close();
 		
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		ce.encrypt(srcData.toString(), out);
+		String readBack = null;
+		if (name != null)
+		{
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			ce.encrypt(srcData.toString(), out);
+			
+			ExternalAPIParams params = ExternalAPIParams.createExternalAPIParams(name, out);
+			params.save("ceh");
 		
-		ExternalAPIParams params = ExternalAPIParams.createExternalAPIParams(name, out);
-		params.save("ceh");
-	
-		// readback
-		params = ExternalAPIParams.getByName(name);
-		
-		String readBack = ce.decrypt(params.getKeyDataStream());
+			// readback
+			params = ExternalAPIParams.getByName(name);
+			
+			readBack = ce.decrypt(params.getKeyDataStream());
+		}
+		else
+		{
+			// write to the provided file
+			File encFile = new File(args[1]);
+			FileOutputStream out = new FileOutputStream(encFile);
+			ce.encrypt(srcData.toString(), out);
+			out.close();
+			
+			FileInputStream rbin = new FileInputStream(encFile);
+			readBack = ce.decrypt(rbin);
+		}
 		
 		if (!srcData.toString().equals(readBack))
 		{
