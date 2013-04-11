@@ -280,7 +280,6 @@ public class MethodDefinition {
 		return variesParams;
 	}
 	
-	@SuppressWarnings({ "unchecked" })
 	public void validateCall(CallParameters callParams) throws APIException
 	{
 		for (Object val : paramVal)
@@ -300,7 +299,7 @@ public class MethodDefinition {
 		for (APICallParam param : apiParams)
 		{
 			if (param.defaultValue != null &&
-				callParams.get(param.getParamDetails()) == null)
+				callParams.getParameter(param.getParamDetails().getName()) == null)
 			{
 				callParams.setParameterValue(param.getParamDetails().getName(), param.defaultValue);
 			}

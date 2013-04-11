@@ -23,6 +23,7 @@ import com.untzuntz.ustackserverapi.params.types.JSONParam;
 import com.untzuntz.ustackserverapi.params.types.LongArrayParam;
 import com.untzuntz.ustackserverapi.params.types.LongParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
+import com.untzuntz.ustackserverapi.params.types.RegexParam;
 import com.untzuntz.ustackserverapi.params.types.StringArrayParam;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
 import com.untzuntz.ustackserverapi.params.types.URLParam;
@@ -157,6 +158,15 @@ public class ParamTest {
 		assertNoException(new LongArrayParam("test", "test", 1, 3), "123,421"); // should fail -- need at least 3 items
 		assertException(new LongArrayParam("test", "test", 2, 3), "123"); // should pass -- need at least 3 items
 		assertNoException(new LongArrayParam("test", "test", 2, 3), "123,421,241"); // should pass -- need at least 3 items
+		
+		// Regex
+		assertNoException(new RegexParam("test", "test", "[a-z]+", true), "abc");
+		assertNoException(new RegexParam("test", "test", "[A-Z]+", true), "ABC");
+		assertException(new RegexParam("test", "test", "[a-z]+", true), "ABC");
+		assertException(new RegexParam("test", "test", "[A-Z]+", true), "abc");
+		assertException(new RegexParam("test", "test", "[a-z]+", true), "2ab");
+		assertException(new RegexParam("test", "test", "[A-Z]+", true), "1AB");
+		assertNoException(new RegexParam("test", "test", "[A-Za-z0-9]+", true), "itemTest1");
 	}
 	
 	@Test public void testORParams()
