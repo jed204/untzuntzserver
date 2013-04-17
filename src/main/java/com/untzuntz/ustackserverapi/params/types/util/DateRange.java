@@ -85,6 +85,50 @@ public class DateRange {
 			
 			start = now.getTime();
 		}
+		else if (data.endsWith(" days"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.DATE, Integer.valueOf( data.substring(0, data.length() - 5) ));
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			start = now.getTime();
+		}
+		else if (data.endsWith(" weeks"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.DATE, Integer.valueOf( data.substring(0, data.length() - 6) ) * 7);
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			start = now.getTime();
+		}
+		else if (data.endsWith(" months"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.MONTH, Integer.valueOf( data.substring(0, data.length() - 7) ));
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			start = now.getTime();
+		}
+		else if (data.endsWith(" years"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.YEAR, Integer.valueOf( data.substring(0, data.length() - 6) ));
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			start = now.getTime();
+		}
 		else if (data.indexOf("=>") > -1)
 		{
 			int rangeIdx = data.indexOf("=>");
