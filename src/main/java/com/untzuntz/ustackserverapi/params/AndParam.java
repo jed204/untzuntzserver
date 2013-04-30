@@ -7,6 +7,12 @@ import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.params.exceptions.ParamGroupException;
 
+/**
+ * AND multiple parameters together to ensure more than one value is required (probably used with an OrParam)
+ * 
+ * @author jdanner
+ *
+ */
 public class AndParam implements Validated {
 
 	private String name;

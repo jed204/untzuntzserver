@@ -1,8 +1,11 @@
 package com.untzuntz.ustackserverapi.params.types;
 
-
-
-
+/**
+ * Helper class to capture standard info for a parameter (name and description)
+ * 
+ * @author jdanner
+ *
+ */
 public abstract class BaseParam {
 
 	protected String name;

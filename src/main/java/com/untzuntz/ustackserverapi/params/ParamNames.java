@@ -4,6 +4,12 @@ import com.untzuntz.ustackserverapi.params.types.IntParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
 
+/**
+ * Some basic and common parameter names
+ * 
+ * @author jdanner
+ *
+ */
 public class ParamNames {
 
 	public static final ParameterDefinitionInt<Integer> TestA = new IntParam("test_id_a", "This is a test description A");

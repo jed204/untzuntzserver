@@ -15,6 +15,12 @@ import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
+/**
+ * Authentication method for an access token (temporary access value)
+ * 
+ * @author jdanner
+ *
+ */
 public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 
     static Logger           		logger               	= Logger.getLogger(AccessTokenAuth.class);

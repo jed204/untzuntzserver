@@ -7,6 +7,12 @@ import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.params.exceptions.ParamGroupException;
 
+/**
+ * Provide validation against one set of parameters OR another
+ * 
+ * @author jdanner
+ *
+ */
 public class OrParam implements Validated {
 
 	private String name;

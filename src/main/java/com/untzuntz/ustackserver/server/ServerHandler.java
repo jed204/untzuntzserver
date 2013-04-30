@@ -50,9 +50,11 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     static Logger           		logger               	= Logger.getLogger(ServerHandler.class);
     
     static final ConcurrentHashMap<String, ChannelGroup> channels = new ConcurrentHashMap<String, ChannelGroup>();
+    private static final boolean stackDumpErrors;
     
     static {
         UOpts.addMessageBundle("com.untzuntz.ustack.resources.Messages");
+        stackDumpErrors = "true".equals(System.getProperty("StackDumpErrors"));
     }
     
     private HttpRequest request;
@@ -263,7 +265,12 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					if (ierr.getCause() instanceof NullPointerException)
 						logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
 					else
-						logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+					{
+						if (stackDumpErrors)
+							logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+						else
+							logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+					}
 					APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, params);
 				}
 					

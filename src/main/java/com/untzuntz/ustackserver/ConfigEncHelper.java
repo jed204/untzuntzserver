@@ -116,7 +116,7 @@ public class ConfigEncHelper {
 			System.err.println("There was an error during the encryption/decryption test. Data did not match!");
 		}
 		else
-			System.out.println("Data successfully read back");
+			System.out.println("Data successfully read back => " + readBack);
 	}
 
 }

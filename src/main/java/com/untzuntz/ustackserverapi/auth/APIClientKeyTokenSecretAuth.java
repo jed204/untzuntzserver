@@ -13,6 +13,13 @@ import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
+/**
+ * Validates an API client ID and it's key via Basic HTTP auth as well as a user Id and secret via parameters
+ * 
+ * 
+ * @author jdanner
+ *
+ */
 public class APIClientKeyTokenSecretAuth implements AuthenticationInt<UserAccount> {
 
     static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);

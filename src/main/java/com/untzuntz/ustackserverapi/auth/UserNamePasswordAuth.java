@@ -16,6 +16,12 @@ import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
+/**
+ * Authentication method for username/password combo in HTTP request params
+ * 
+ * @author jdanner
+ *
+ */
 public class UserNamePasswordAuth implements AuthenticationInt<UserAccount> {
 
     public String getAuthenticationDescription() {

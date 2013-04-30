@@ -20,6 +20,12 @@ import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
+/**
+ * Validates an API client ID and API key via HTTP Basic Auth
+ * 
+ * @author jdanner
+ *
+ */
 public class APIClientKeyAuth implements AuthenticationInt<Boolean> {
 
     static Logger           		logger               	= Logger.getLogger(APIClientKeyAuth.class);

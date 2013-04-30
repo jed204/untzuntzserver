@@ -5,6 +5,12 @@ import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.version.VersionInt;
 
+/**
+ * An API call parameter definition
+ * 
+ * @author jdanner
+ *
+ */
 public class APICallParam implements Validated {
 
 	public ParameterDefinitionInt paramDetails;

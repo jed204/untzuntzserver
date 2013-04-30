@@ -1,6 +1,11 @@
 package com.untzuntz.ustackserverapi.auth;
 
-
+/**
+ * Some standard authentication methods
+ * 
+ * @author jdanner
+ *
+ */
 public class AuthTypes {
 
 	public static final UserNamePasswordAuth UserNamePassword = new UserNamePasswordAuth();
