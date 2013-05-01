@@ -7,6 +7,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.List;
 
@@ -152,10 +153,13 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		}
 		
 		CallParameters params = new CallParameters(path);
+		params.setRemoteIpAddress( ((InetSocketAddress)ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress() );
+		if (req.getHeader("X-Real-IP") != null)
+			params.setRemoteIpAddress( req.getHeader("X-Real-IP") );
 
 		path = params.getPath();
 
-		logger.debug(String.format("%s => API Path: %s [Client Ver: %s]", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.client_ver)));
+		logger.debug(String.format("%s => API Path: %s [Client Ver: %s]", params.getRemoteIpAddress(), path, params.get(ParamNames.client_ver)));
 		long apiCallStart = System.currentTimeMillis();
 		
 		MethodDefinition cls = APICalls.getCallByURI(path);

@@ -34,4 +34,7 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<String> user_identifier = new StringParam("user_identifier", "User Identifier");
 	public static final ParameterDefinitionInt<String> secret = new StringParam("secret", "User Secret");
 
+	public static final ParameterDefinitionInt<String> recaptcha_challenge_field = new StringParam("recaptcha_challenge_field", "Captcha Challenge", 1, 255);
+	public static final ParameterDefinitionInt<String> recaptcha_response_field = new StringParam("recaptcha_response_field", "Captcha Response", 1, 255);
+
 }

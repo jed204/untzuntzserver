@@ -29,6 +29,7 @@ public class CallParameters {
 
 	private QueryStringDecoder qsd;
 	private String path;
+	private String remoteIpAddress;
 	
 	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {
@@ -44,6 +45,14 @@ public class CallParameters {
 			qsdMap = new HashMap<String,List<String>>(qsd.getParameters());
 	}
 	
+	public String getRemoteIpAddress() {
+		return remoteIpAddress;
+	}
+
+	public void setRemoteIpAddress(String remoteIpAddress) {
+		this.remoteIpAddress = remoteIpAddress;
+	}
+
 	public void setParameterValue(String param, String val)
 	{
 		if (param == null)
