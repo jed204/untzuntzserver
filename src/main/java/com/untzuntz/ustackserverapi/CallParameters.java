@@ -16,10 +16,12 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
+import org.bson.BasicBSONObject;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
+import com.mongodb.util.JSON;
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
@@ -43,6 +45,22 @@ public class CallParameters {
 			qsdMap = new HashMap<String,List<String>>();
 		else
 			qsdMap = new HashMap<String,List<String>>(qsd.getParameters());
+		
+		if (qsdMap.get("x_object") != null)
+		{
+			try {
+				BasicBSONObject bs = (BasicBSONObject)JSON.parse(getParameter("x_object"));
+				if (bs != null)
+				{
+					Iterator<String> it = bs.keySet().iterator();
+					while (it.hasNext())
+					{
+						String key = it.next();
+						setParameterValue(key, bs.get(key) + "");
+					}
+				}
+			} catch (Exception jpe) {}
+		}
 	}
 	
 	public String getRemoteIpAddress() {

@@ -9,7 +9,13 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
+import com.mongodb.DBObject;
+import com.untzuntz.ustack.aaa.ResourceDefinition;
+import com.untzuntz.ustack.aaa.ResourceLink;
+import com.untzuntz.ustack.aaa.RoleDefinition;
+import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustackserver.server.ServerFactory;
+import com.untzuntz.ustackserverapi.util.APIPerms;
 
 public class Main {
 
@@ -58,7 +64,47 @@ public class Main {
     	
     }
     	
-	public void run() {
+    public static ResourceDefinition setupAPIResource() throws Exception
+    {
+    	ResourceDefinition rs = ResourceDefinition.getByInternalName("API");
+		
+		if (rs == null)
+		{
+			rs = ResourceDefinition.createResource("API", ResourceDefinition.TYPE_APIACCESS);
+			rs.setInternalName("API");
+			
+			RoleDefinition role = new RoleDefinition("API Manager");
+			role.addPermission(APIPerms.APIClientManager.getPermission());
+			role.addPermission(APIPerms.APIResourceManager.getPermission());
+			role.addPermission(APIPerms.APIRoleManager.getPermission());
+			rs.addRole(role);
+			rs.save("Initial Run");
+		}
+
+		return rs;
+    }
+    
+	public void run() throws Exception {
+		
+		// check if we have at least one API client
+		long clientCnt = APIClient.getDBCollection().count();
+		if (clientCnt == 0)
+		{
+			// create initial API client with rights to manage resources and other API clients
+			APIClient client = APIClient.createAPI("Initial Run", "admin-api");
+			
+			// add rights
+			ResourceDefinition rs = setupAPIResource();
+			
+			ResourceLink rl = new ResourceLink(rs, "API Manager");
+			client.addResourceLink(rl);
+			client.save("Initial Run");
+			
+			DBObject k = (DBObject)client.getAPIKeys().get(0);
+			
+			// output key to log for user to grab
+ 			logger.info(String.format("Initial API Client/Key: %s/%s", client.getClientId(), client.getKey((String)k.get("uid"))));
+		}
 		
 		logger.info("Staring client server on port " + port);
 		

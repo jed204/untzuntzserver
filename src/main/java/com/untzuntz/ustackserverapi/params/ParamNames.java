@@ -1,7 +1,11 @@
 package com.untzuntz.ustackserverapi.params;
 
+import org.bson.BasicBSONObject;
+
 import com.untzuntz.ustackserverapi.params.types.IntParam;
+import com.untzuntz.ustackserverapi.params.types.JSONParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
+import com.untzuntz.ustackserverapi.params.types.StringArrayParam;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
 
 /**
@@ -26,8 +30,23 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<String> access_code = new StringParam("access_code", "Access Code");
 	public static final ParameterDefinitionInt<String> json_callback = new StringParam("json_callback", "JSON Callback Function name");
 	
+	public static final ParameterDefinitionInt<Integer> page = new IntParam("page", "Page number (starts at 0)", 0, null);
+	public static final ParameterDefinitionInt<Integer> items_per_page = new IntParam("items_per_page", "Number of items per page", 1, 100);
+	public static final ParameterDefinitionInt<Integer> items_per_page_no_max = new IntParam("items_per_page", "Number of items per page", 1, 9999);
 
+	public static final ParameterDefinitionInt<String> resource_name = new StringParam("resource_name", "Resource Name", 1, 255);
+	public static final ParameterDefinitionInt<String> resource_type = new StringParam("resource_type", "Resource Type", 1, 255);
+	public static final ParameterDefinitionInt<String> link_action_class = new StringParam("link_action_class", "Link action class", 1, 255);
+	public static final ParameterDefinitionInt<String> support_email = new StringParam("support_email", "Support email address", 1, 255);
+	public static final ParameterDefinitionInt<String> internal_name = new StringParam("internal_name", "Resource Internal Name", 1, 255);
+	public static final ParameterDefinitionInt<String[]> managed_by = new StringArrayParam("managed_by", "A list of partners that are managed by this resource");
+	public static final ParameterDefinitionInt<String[]> can_manage = new StringArrayParam("can_manage", "A list of partners that this resource can manage");
+	public static final ParameterDefinitionInt<String> role_name = new StringParam("role_name", "Role Name", 1, 255);
+	public static final ParameterDefinitionInt<String> permission = new StringParam("permission", "Permission Name", 1, 255);
 	
+	public static final ParameterDefinitionInt<String> target_client_id = new StringParam("target_client_id", "Target Client ID for the API");
+	
+	public static final ParameterDefinitionInt<BasicBSONObject> x_object = new JSONParam("x_object", "A JSON Object");
 	public static final ParameterDefinitionInt<String> api_key = new StringParam("api_key", "Your API Key");
 	public static final ParameterDefinitionInt<String> client_id = new StringParam("client_id", "Your Client ID for the API");
 	public static final ParameterDefinitionInt<String> token = new StringParam("token", "User Access Token");

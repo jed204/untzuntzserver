@@ -18,11 +18,19 @@ public class ReCaptchaUtil {
 	 */
 	public static void validateReCaptcha(String privateKey, CallParameters callParams) throws BadRequestException
 	{
+		if ("PASS".equals(System.getProperty("ReCaptchaTest")))
+			return;
+		if ("FAIL".equals(System.getProperty("ReCaptchaTest")))
+        	throw new BadRequestException("Invalid Captcha");
+		
 		ReCaptchaImpl reCaptcha = new ReCaptchaImpl();
         reCaptcha.setPrivateKey(privateKey);
 
         String challenge = callParams.get(ParamNames.recaptcha_challenge_field);
         String uresponse = callParams.get(ParamNames.recaptcha_response_field);
+        if (challenge == null || uresponse == null)
+        	throw new BadRequestException("'recaptcha_challenge_field' and 'recaptcha_response_field' parameters are required");
+        
         ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(callParams.getRemoteIpAddress(), challenge, uresponse);
 
         if (!reCaptchaResponse.isValid())
