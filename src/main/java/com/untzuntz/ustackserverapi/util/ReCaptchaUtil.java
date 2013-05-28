@@ -31,6 +31,7 @@ public class ReCaptchaUtil {
         if (challenge == null || uresponse == null)
         	throw new BadRequestException("'recaptcha_challenge_field' and 'recaptcha_response_field' parameters are required");
         
+        System.out.println(String.format("ReCaptcha from '%s' | Challenge [%s], Response [%s]", callParams.getRemoteIpAddress(), challenge, uresponse));
         ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(callParams.getRemoteIpAddress(), challenge, uresponse);
 
         if (!reCaptchaResponse.isValid())

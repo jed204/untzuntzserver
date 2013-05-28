@@ -1,4 +1,4 @@
-package com.untzuntz.ustackserverapi.util;
+package com.untzuntz.ustackserver.util;
 
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.junit.Assert.assertEquals;

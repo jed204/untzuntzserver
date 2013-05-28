@@ -7,6 +7,8 @@ import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFutureListener;
+import org.jboss.netty.handler.codec.http.Cookie;
+import org.jboss.netty.handler.codec.http.CookieEncoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
@@ -42,11 +44,22 @@ public class APIResponse {
 			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
 	}
 
-	public static void httpOk(Channel channel, String text, String contentType, CallParameters params)
+	public static void httpOk(Channel channel, String text, String contentType, CallParameters params, Cookie[] cookie)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
 		res.setHeader("Content-type", contentType);
+		
+		if (cookie != null)
+		{
+			for (int i = 0; i < cookie.length; i++)
+			{
+				CookieEncoder cookieEncoder = new CookieEncoder(true);
+				cookieEncoder.addCookie(cookie[i]);
+				res.addHeader("Set-Cookie", cookieEncoder.encode());
+			}
+		}
+		
 		addHeaders(channel, res, jsonpFunction);
 		if (jsonpFunction != null)
 		{
@@ -106,9 +119,14 @@ public class APIResponse {
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
 	}
 
+	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params, Cookie[] cookies)
+	{
+		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies);
+	}
+	
 	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params)
 	{
-		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params);
+		httpOk(channel, dbObject, params, null);
 	}
 	
 	public static void httpResponse(Channel channel, DBObject dbObject, HttpResponseStatus status, CallParameters params)

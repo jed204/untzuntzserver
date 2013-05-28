@@ -17,9 +17,9 @@ import com.untzuntz.ustack.aaa.RoleDefinition;
 import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustackserver.Main;
 import com.untzuntz.ustackserver.api.PermissionsAPI;
+import com.untzuntz.ustackserver.util.BaseTest;
+import com.untzuntz.ustackserver.util.TestCallParams;
 import com.untzuntz.ustackserverapi.params.ParamNames;
-import com.untzuntz.ustackserverapi.util.BaseTest;
-import com.untzuntz.ustackserverapi.util.TestCallParams;
 
 public class PermissionAPITest extends BaseTest {
 

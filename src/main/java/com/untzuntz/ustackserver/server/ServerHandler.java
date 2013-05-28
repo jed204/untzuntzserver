@@ -10,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -23,6 +24,8 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
+import org.jboss.netty.handler.codec.http.Cookie;
+import org.jboss.netty.handler.codec.http.CookieDecoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpChunk;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -125,7 +128,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		
 		if ("index.html".equalsIgnoreCase(uri[1]))
 		{
-			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain", null);
+			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain", null, null);
 		}
 		else if ("favicon.ico".equalsIgnoreCase(uri[1]) || uri.length < 1)
 		{
@@ -156,6 +159,27 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		params.setRemoteIpAddress( ((InetSocketAddress)ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress() );
 		if (req.getHeader("X-Real-IP") != null)
 			params.setRemoteIpAddress( req.getHeader("X-Real-IP") );
+		if (req.getHeader("X-Country-Code") != null)
+			params.setRemoteCountry( req.getHeader("X-Country-Code") );
+		else
+			params.setRemoteCountry("UNK");
+		if (params.get(ParamNames.app_name) == null)
+			params.setParameterValue( ParamNames.app_name.getName(), req.getHeader("User-Agent") );
+		
+		if (params.get(ParamNames.token) == null && req.getHeader("Cookie") != null)
+		{
+			Set<Cookie> cookies = new CookieDecoder().decode(req.getHeader("Cookie"));
+			Iterator<Cookie> it = cookies.iterator();
+			while (it.hasNext())
+			{
+				Cookie cookie = it.next();
+				if ("UNTZ".equals(cookie.getName()))
+				{
+					logger.info("\t Cookie for 'UNTZ' found => " + cookie.getValue());
+					params.setParameterValue(ParamNames.token.getName(), cookie.getValue());
+				}
+			}
+		}
 
 		path = params.getPath();
 
@@ -239,7 +263,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.BAD_REQUEST, params);
 				return;
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST, params);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
 				return;
 			}
 		}

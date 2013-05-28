@@ -25,6 +25,8 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 
     static Logger           		logger               	= Logger.getLogger(AccessTokenAuth.class);
  
+    public static final String CookieTokenName = "UNTZ";
+    
     public String getAuthenticationDescription() {
     	return "Access token in request parameters required.";
     }

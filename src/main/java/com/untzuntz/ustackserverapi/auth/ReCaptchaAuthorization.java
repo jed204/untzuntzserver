@@ -3,6 +3,8 @@ package com.untzuntz.ustackserverapi.auth;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.untzuntz.ustack.data.UniqueReference;
+import com.untzuntz.ustack.data.UniqueReference.UniqueLinkStatus;
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.MethodDefinition;
@@ -40,6 +42,12 @@ public class ReCaptchaAuthorization implements AuthorizationInt {
 	 */
 	public void authorize(MethodDefinition method, CallParameters callParams) throws APIException
 	{
+		if (callParams.get(ParamNames.UID) != null && Boolean.TRUE.equals( (Boolean)method.getData("AllowUIDOverride")))
+		{
+			if (UniqueReference.getLinkStatus(callParams.get(ParamNames.UID)).equals(UniqueLinkStatus.active))
+				return;
+		}
+		
 		ReCaptchaUtil.validateReCaptcha(reCaptchaPrivateKey, callParams);
 	}
 

@@ -1,4 +1,4 @@
-package com.untzuntz.ustackserverapi.util;
+package com.untzuntz.ustackserver.util;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
