@@ -1,6 +1,8 @@
 package com.untzuntz.ustackserverapi.auth;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -50,16 +52,22 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 	@Override
 	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
+		logger.info("Running Auth Method now!");
+		
 		//AuthTypes.ClientKey.authenticate(method, req, params);
 		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
+		
 		if (details == null)
 		{
 			logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
 			throw new APIAuthenticationException("Invalid Token");
 		}
 		if (details.expirationAge < System.currentTimeMillis())
+		{
+			logger.info(String.format("%s/%s | Access Token expired at '%s'", details.userName, details.clientId, new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.expirationAge))));
 			throw new APIAuthenticationException("Token has expired");
-		
+		}
+
 //		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
 		
 		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);

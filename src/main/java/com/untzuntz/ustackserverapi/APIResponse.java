@@ -101,7 +101,7 @@ public class APIResponse {
 	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
-		logger.warn("Returning API Error [" + channel.getRemoteAddress() + "] => " + text);
+		logger.warn(String.format("Returning API Error [%d | %s] => %s", status.getCode(), channel.getRemoteAddress(), text));
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
 		addHeaders(channel, res, jsonpFunction);

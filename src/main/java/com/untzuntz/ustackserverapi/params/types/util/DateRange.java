@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.Logger;
+
 /**
  * Process a date range from a string
  * 
@@ -30,6 +32,7 @@ import java.util.Date;
  */
 public class DateRange {
 
+	static 		Logger           	logger                  = Logger.getLogger(DateRange.class);	
 	public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 	static 
 	{

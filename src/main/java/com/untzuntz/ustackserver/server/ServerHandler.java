@@ -206,12 +206,14 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
+		logger.info("auth required? " + cls.isAuthenticationRequired());
+		
 		if (cls.isAuthenticationRequired())
 		{
 			try {
 				params.setAuthInfo(cls.getAuthenticationMethod().authenticate(cls, req, params));
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.BAD_REQUEST, params);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.UNAUTHORIZED, params);
 				return;
 			}
 		}
