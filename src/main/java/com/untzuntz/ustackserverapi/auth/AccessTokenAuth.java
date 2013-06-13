@@ -52,8 +52,6 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 	@Override
 	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
-		logger.info("Running Auth Method now!");
-		
 		//AuthTypes.ClientKey.authenticate(method, req, params);
 		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
 		

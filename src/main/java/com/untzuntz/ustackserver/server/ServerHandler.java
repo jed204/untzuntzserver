@@ -206,8 +206,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		}
 		
-		logger.info("auth required? " + cls.isAuthenticationRequired());
-		
 		if (cls.isAuthenticationRequired())
 		{
 			try {

@@ -218,6 +218,21 @@ public class DateRange {
 		return date;
 	}
 	
+	public String toString() {
+		
+		StringBuffer ret = new StringBuffer();
+		
+		if (start != null && end != null)
+			ret.append(df.format(start)).append("->").append(df.format(end));
+		else if (start != null)
+			ret.append(">").append(df.format(start));
+		else if (end != null)
+			ret.append("<").append(df.format(end));
+		
+		return ret.toString();
+		
+	}
+	
 	/**
 	 * Returns a date based on the format of yyyyMMddHHmmss
 	 * 
