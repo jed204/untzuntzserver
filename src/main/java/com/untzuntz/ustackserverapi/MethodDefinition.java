@@ -13,6 +13,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import com.untzuntz.ustack.aaa.UStackPermissionEnum;
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
+import com.untzuntz.ustackserverapi.exceptions.BadRequestException;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.Validated;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
@@ -280,16 +281,29 @@ public class MethodDefinition {
 		return variesParams;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void validateCall(CallParameters callParams) throws APIException
 	{
 		for (Object val : paramVal)
 		{
-			if (val instanceof Validated)	
-				((Validated)val).validate(callParams);
+			if (val instanceof APICallParam)
+			{
+				APICallParam param = getParamter(((APICallParam)val).getParamDetails());
+				if (callParams.get(param.getParamDetails()) == null)
+					throw new BadRequestException(String.format("%s is a required parameter", param.getParamDetails().getName()));
+				
+				param.validate(callParams);
+			}
 			else if (val instanceof ParameterDefinitionInt)
-				getParamter((ParameterDefinitionInt)val).validate(callParams);
-			else if (val instanceof APICallParam)
-				getParamter(((APICallParam)val).getParamDetails()).validate(callParams);
+			{
+				APICallParam param = getParamter((ParameterDefinitionInt)val);
+				if (callParams.get(param.getParamDetails()) == null)
+					throw new BadRequestException(String.format("%s is a required parameter", param.getParamDetails().getName()));
+				
+				param.validate(callParams);
+			}
+			else if (val instanceof Validated)	
+				((Validated)val).validate(callParams);
 			else
 				logger.warn("Unknown Parameter Validation Type: " + val);
 				

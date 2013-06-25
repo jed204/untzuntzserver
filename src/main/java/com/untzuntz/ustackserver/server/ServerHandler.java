@@ -260,10 +260,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					auth.authorize(cls, params);
 			} catch (ClassCastException cce) {
 				logger.error(String.format("%s [%s] Authorization failed due to an invalid authentication/authorization combo", ctx.getChannel().getRemoteAddress(), path), cce);
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.BAD_REQUEST, params);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.FORBIDDEN, params);
 				return;
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.FORBIDDEN, params);
 				return;
 			}
 		}
