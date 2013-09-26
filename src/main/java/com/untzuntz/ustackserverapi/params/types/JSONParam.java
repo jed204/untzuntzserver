@@ -1,5 +1,7 @@
 package com.untzuntz.ustackserverapi.params.types;
 
+import java.util.List;
+
 import org.bson.BasicBSONObject;
 
 import com.mongodb.util.JSON;
@@ -9,8 +11,15 @@ import com.untzuntz.ustackserverapi.params.exceptions.ParamValueException;
 
 public class JSONParam extends BaseParam implements ParameterDefinitionInt<BasicBSONObject>
 {
+	private List<String> filterFields;
+	
 	public JSONParam(String n, String d) {
 		super(n, d);
+	}
+	
+	public JSONParam(String n, String d, List<String> filterFields) {
+		super(n, d);
+		this.filterFields = filterFields;
 	}
 	
 	public String getTypeDescription() {
@@ -42,6 +51,15 @@ public class JSONParam extends BaseParam implements ParameterDefinitionInt<Basic
 		try {
 			bs = (BasicBSONObject)JSON.parse(data);
 		} catch (Exception jpe) {}
+		
+		/*
+		 * Clear out fields that are filtered
+		 */
+		if (filterFields != null)
+		{
+			for (String fieldName : filterFields)
+				bs.removeField(fieldName);
+		}
 		
 		return bs;
 				
