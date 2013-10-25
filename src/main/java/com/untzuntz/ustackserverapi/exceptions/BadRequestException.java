@@ -1,5 +1,7 @@
 package com.untzuntz.ustackserverapi.exceptions;
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.APIExceptionDocumentation;
 
@@ -17,6 +19,13 @@ public class BadRequestException extends APIException implements APIExceptionDoc
 	public BadRequestException(String message)
 	{
 		super(message);
+		this.message = message;
+	}
+
+	public BadRequestException(String message, HttpResponseStatus status)
+	{
+		super(message);
+		this.status = status;
 		this.message = message;
 	}
 

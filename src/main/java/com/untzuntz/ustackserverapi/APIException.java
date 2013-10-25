@@ -2,6 +2,8 @@ package com.untzuntz.ustackserverapi;
 
 import java.lang.reflect.Field;
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -15,6 +17,7 @@ abstract public class APIException extends Exception {
 	private static final long serialVersionUID = 1L;
 	@SuppressWarnings("unused")
 	private long raisedTime;
+	protected HttpResponseStatus status;
 
 	public APIException() { 
 		super();
@@ -24,6 +27,12 @@ abstract public class APIException extends Exception {
 	public APIException(String msg) {
 		super(msg);
 		setTime();
+	}
+	
+	public HttpResponseStatus getHttpStatus() {
+		if (status == null)
+			return HttpResponseStatus.FORBIDDEN;
+		return status;
 	}
 	
 	private void setTime() {

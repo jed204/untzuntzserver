@@ -3,6 +3,8 @@ package com.untzuntz.ustackserverapi.util;
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.exceptions.BadRequestException;
 import com.untzuntz.ustackserverapi.params.ParamNames;
@@ -35,7 +37,7 @@ public class ReCaptchaUtil {
         ReCaptchaResponse reCaptchaResponse = reCaptcha.checkAnswer(callParams.getRemoteIpAddress(), challenge, uresponse);
 
         if (!reCaptchaResponse.isValid())
-        	throw new BadRequestException("Invalid Captcha");
+        	throw new BadRequestException("Invalid Captcha", new HttpResponseStatus(418, "Invalid Recaptcha"));
 	}
 	
 	

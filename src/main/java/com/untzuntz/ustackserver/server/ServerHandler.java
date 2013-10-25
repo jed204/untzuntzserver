@@ -263,7 +263,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.FORBIDDEN, params);
 				return;
 			} catch (APIException e) {
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), HttpResponseStatus.FORBIDDEN, params);
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), e.getHttpStatus(), params);
 				return;
 			}
 		}
