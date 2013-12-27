@@ -29,6 +29,7 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<String> DeviceID = new StringParam("deviceId", "Device ID");
 	public static final ParameterDefinitionInt<String> access_code = new StringParam("access_code", "Access Code");
 	public static final ParameterDefinitionInt<String> json_callback = new StringParam("json_callback", "JSON Callback Function name");
+	public static final ParameterDefinitionInt<String> json_response_code_inject = new StringParam("json_response_code_inject", "If set to false, the response code will NOT be included in the JSON and the HTTP response overridden");
 	
 	public static final ParameterDefinitionInt<Integer> page = new IntParam("page", "Page number (starts at 0)", 0, null);
 	public static final ParameterDefinitionInt<Integer> items_per_page = new IntParam("items_per_page", "Number of items per page", 1, 100);

@@ -8,6 +8,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,16 @@ import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.multipart.Attribute;
+import org.jboss.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
+import org.jboss.netty.handler.codec.http.multipart.DiskAttribute;
+import org.jboss.netty.handler.codec.http.multipart.DiskFileUpload;
+import org.jboss.netty.handler.codec.http.multipart.FileUpload;
+import org.jboss.netty.handler.codec.http.multipart.HttpDataFactory;
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
+import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder.EndOfDataDecoderException;
+import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData;
+import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
 import org.jboss.netty.handler.timeout.IdleStateAwareChannelUpstreamHandler;
 import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
@@ -48,6 +59,7 @@ import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.ParamNames;
+import com.untzuntz.ustackserverapi.util.UploadedFile;
 
 public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	
@@ -65,7 +77,19 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     private boolean readingChunks;
     private String userName;
     private boolean realtimeEnabled;
+    private List<UploadedFile> uploadedFiles;
     private final StringBuilder buf = new StringBuilder();
+
+    private static final HttpDataFactory factory = new DefaultHttpDataFactory(0); // Disk if size exceed MINSIZE
+
+    private HttpPostRequestDecoder decoder;
+    static {
+        DiskFileUpload.deleteOnExitTemporaryFile = true; // should delete file
+                                                         // on exit (in normal
+                                                         // exit)
+        DiskAttribute.deleteOnExitTemporaryFile = true; // should delete file on
+                                                        // exit (in normal exit)
+    }    
     
 	@Override
 	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e)	throws Exception {
@@ -78,6 +102,11 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 
 		if (!readingChunks) {
 
+            if (decoder != null) {
+                decoder.cleanFiles();
+                decoder = null;
+            }
+
 			Object msg = e.getMessage();
 			if (msg instanceof HttpRequest)
 			{
@@ -86,13 +115,17 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					send100Continue(e);
 				}
 				
-				if (request.isChunked()) {
+				String uri = request.getUri().substring(5);
+				MethodDefinition cls = APICalls.getCallByURI(uri);
+				if (cls != null && cls.isExpectingFile())
+					decoder = new HttpPostRequestDecoder(factory, request);
+				
+				if (request.isChunked())
 					readingChunks = true;
-				}
 				else
 				{
-					ChannelBuffer content = request.getContent();
-					handleHttpRequest(ctx, (HttpRequest)msg, content.toString(CharsetUtil.UTF_8) );
+					String params = getParamsFromRequest();
+					handleHttpRequest(ctx, (HttpRequest)msg, params, cls );
 				}
 			}
 
@@ -100,13 +133,17 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		else
 		{
 			HttpChunk chunk = (HttpChunk) e.getMessage();
+			if (decoder != null)
+                decoder.offer(chunk);
+
 			if (chunk.isLast()) {
 				readingChunks = false;
-				handleHttpRequest(ctx, request, buf.toString() );
+				String params = getParamsFromRequest();
+				handleHttpRequest(ctx, request, params, null );
 			}
-			else {
+			else if (decoder == null) 
 				buf.append(chunk.getContent().toString(CharsetUtil.UTF_8));
-			}
+			
 		}
 	}
 	
@@ -115,6 +152,45 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		e.getChannel().write(response);
 	}
 	
+	private String getParamsFromRequest() throws EndOfDataDecoderException, IOException {
+		String params = null;
+		if (decoder != null)
+		{
+			StringBuffer paramBuf = new StringBuffer();
+			try {
+				while (decoder.hasNext())
+				{
+					InterfaceHttpData data = decoder.next();
+					if (data.getHttpDataType() == HttpDataType.Attribute)
+					{
+						if (paramBuf.length() > 0)
+							paramBuf.append("&");
+	
+						Attribute attribute = (Attribute) data;
+						paramBuf.append(attribute.getName()).append("=").append(attribute.getValue());
+					}
+					else if (data.getHttpDataType() == HttpDataType.FileUpload)
+					{
+						if (uploadedFiles == null)
+							uploadedFiles = new ArrayList<UploadedFile>();
+	
+		                FileUpload fileUpload = (FileUpload) data;
+		                if (fileUpload.isCompleted())
+		                	uploadedFiles.add( new UploadedFile(fileUpload.getFile(), fileUpload.getFilename(), fileUpload.getContentType()) );
+					}
+				}
+			} catch (EndOfDataDecoderException e) {}
+			params = paramBuf.toString();
+		}
+		else
+		{
+			ChannelBuffer content = request.getContent();
+			params = content.toString(CharsetUtil.UTF_8);
+		}
+
+		return params;
+	}
+		
 	@Override
 	public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) throws Exception {
 		super.channelIdle(ctx, e);
@@ -122,7 +198,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			logger.info(e.getChannel().getRemoteAddress() + " => IDLE : " + e.getLastActivityTimeMillis() + " - " + e.getState());
 	}
 
-	private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req, String params) throws Exception {
+	private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req, String params, MethodDefinition cls) throws Exception {
 		
 		String[] uri = req.getUri().split("/");
 		
@@ -135,18 +211,27 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
 		}
 		else if ("api".equalsIgnoreCase(uri[1]))
-		{
-			handleAPI(ctx, req, params);
-		}
+			doAPICall(resolveAPICall(ctx, req, params, cls));
 		else
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
 
 	}
 	
-	private void handleAPI(ChannelHandlerContext ctx, HttpRequest req, String paramStr)
+	/**
+	 * Looks at the URL and parameters to determine the caller's ability to make this call
+	 * 
+	 * @param ctx
+	 * @param req
+	 * @param paramStr
+	 * @return
+	 */
+	private CallInstance resolveAPICall(ChannelHandlerContext ctx, HttpRequest req, String paramStr, MethodDefinition cls)
 	{
 		String path = req.getUri().substring(5);
 		
+		/*
+		 * Setup Parameters
+		 */
 		if (req.getMethod() == HttpMethod.POST)
 		{
 			if (!path.endsWith("?") && paramStr.length() > 0)
@@ -166,6 +251,9 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		if (params.get(ParamNames.app_name) == null)
 			params.setParameterValue( ParamNames.app_name.getName(), req.getHeader("User-Agent") );
 		
+		/*
+		 * Check for Token in Cookie
+		 */
 		if (params.get(ParamNames.token) == null && req.getHeader("Cookie") != null)
 		{
 			Set<Cookie> cookies = new CookieDecoder().decode(req.getHeader("Cookie"));
@@ -183,39 +271,58 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 
 		path = params.getPath();
 
+		/*
+		 * Timing
+		 */
 		logger.debug(String.format("%s => API Path: %s [Client Ver: %s]", params.getRemoteIpAddress(), path, params.get(ParamNames.client_ver)));
 		long apiCallStart = System.currentTimeMillis();
 		
-		MethodDefinition cls = APICalls.getCallByURI(path);
+		/*
+		 * Determine the actual call
+		 */
+		if (cls == null)
+			cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown API Call Requested"), HttpResponseStatus.NOT_FOUND, params);
-			return;
+			return null;
 		}
 		
+		/*
+		 * Check if the client has provided a version #
+		 */
 		if (!cls.isClientVerCheckDisabled() && (params.get(ParamNames.client_ver) == null || params.get(ParamNames.client_ver).length() == 0))
 		{
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Client Version not provided"), HttpResponseStatus.BAD_REQUEST, params);
-			return;
+			return null;
 		}
 
-		if (!cls.isMethodEnabled(req.getMethod()))
+		/*
+		 * Confirm HTTP Method - only if there is no JSONP
+		 */
+		if (params.get(ParamNames.json_callback) == null && !cls.isMethodEnabled(req.getMethod()))
 		{
 			logger.info(String.format("%s => API Path: %s || Invalid Method: %s", ctx.getChannel().getRemoteAddress(), path, req.getMethod().toString()));
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid HTTP Method for API Call"), HttpResponseStatus.BAD_REQUEST, params);
-			return;
+			return null;
 		}
-		
+
+		/*
+		 * Confirm the caller is authenticated to make this call
+		 */
 		if (cls.isAuthenticationRequired())
 		{
 			try {
 				params.setAuthInfo(cls.getAuthenticationMethod().authenticate(cls, req, params));
 			} catch (APIException e) {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.getMessage()), HttpResponseStatus.UNAUTHORIZED, params);
-				return;
+				return null;
 			}
 		}
 
+		/*
+		 * Check the call hash
+		 */
 		if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_NONE)
 		{
 			// order parameters by alpha
@@ -233,7 +340,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
 				{
 					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), HttpResponseStatus.BAD_REQUEST, params);
-					return;
+					return null;
 				}
 			}
 		}
@@ -246,7 +353,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		} catch (APIException apiErr) {
 			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
-			return;
+			return null;
 		}
 		
 		/*
@@ -261,60 +368,91 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			} catch (ClassCastException cce) {
 				logger.error(String.format("%s [%s] Authorization failed due to an invalid authentication/authorization combo", ctx.getChannel().getRemoteAddress(), path), cce);
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), HttpResponseStatus.FORBIDDEN, params);
-				return;
+				return null;
 			} catch (APIException e) {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), e.getHttpStatus(), params);
-				return;
+				return null;
 			}
 		}
+
+		// Setup the response object
+		CallInstance ret = new CallInstance();
+		ret.cls = cls;
+		ret.ctx = ctx;
+		ret.req = req;
+		ret.params = params;
+		ret.path = path;
+		ret.apiCallStart = apiCallStart;
+		ret.params.setUploadedFiles(uploadedFiles);
+		return ret;
+	}
+	
+	private class CallInstance {
+		MethodDefinition cls;
+		ChannelHandlerContext ctx;
+		HttpRequest req;
+		CallParameters params;
+		String path;
+		long apiCallStart;
+	}
+	
+	/**
+	 * Make the actual API call into the code
+	 * 
+	 * @param callInstance
+	 */
+	private void doAPICall(CallInstance callInstance)
+	{		
+		if (callInstance == null)
+			return;
 		
 		/*
 		 * Do the actual call
 		 */
 		try {
-			cls.handleCall(ctx.getChannel(), req, params);
+			callInstance.cls.handleCall(callInstance.ctx.getChannel(), callInstance.req, callInstance.params);
 		} catch (APIException apiErr) {
-			logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+			logger.warn(String.format("%s [%s] API Exception => %s", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, apiErr));
+			APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 		} catch (InvalidAPIRequestException iar) {
-			logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), iar);
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST, params);
+			logger.warn(String.format("%s [%s] Bad API Call", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path), iar);
+			APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error("Invalid Request to API Call"), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 		} catch (InvocationTargetException ierr) {
 			if (ierr.getCause() != null)
 			{
 				if (ierr.getCause() instanceof APIException)
 				{
 					APIException apiErr = (APIException)ierr.getCause();
-					logger.warn(String.format("%s [%s] API Exception => %s", ctx.getChannel().getRemoteAddress(), path, apiErr));
-					APIResponse.httpError(ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, params);
+					logger.warn(String.format("%s [%s] API Exception => %s", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, apiErr));
+					APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 				}
 				else
 				{
 					if (ierr.getCause() instanceof NullPointerException)
-						logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+						logger.warn(String.format("%s [%s] Bad API Call => %s", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, ierr.getCause()), ierr.getCause());
 					else
 					{
 						if (stackDumpErrors)
-							logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()), ierr.getCause());
+							logger.warn(String.format("%s [%s] Bad API Call => %s", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, ierr.getCause()), ierr.getCause());
 						else
-							logger.warn(String.format("%s [%s] Bad API Call => %s", ctx.getChannel().getRemoteAddress(), path, ierr.getCause()));
+							logger.warn(String.format("%s [%s] Bad API Call => %s", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, ierr.getCause()));
 					}
-					APIResponse.httpError(ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, params);
+					APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error(ierr.getCause().getMessage()), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 				}
 					
 			}
 			else
 			{
-				logger.warn(String.format("%s [%s] Bad API Call", ctx.getChannel().getRemoteAddress(), path), ierr);
-				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST, params);
+				logger.warn(String.format("%s [%s] Bad API Call", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path), ierr);
+				APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error("Bad Request to API Call"), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 			}
 		} catch (Exception err) {
-			logger.warn(String.format("%s [%s] Uncaught Exception during API call", ctx.getChannel().getRemoteAddress(), path), err);
-			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST, params);
+			logger.warn(String.format("%s [%s] Uncaught Exception during API call", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path), err);
+			APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error("Unknown Error"), HttpResponseStatus.BAD_REQUEST, callInstance.params);
 		}
 		
 		long apiCallFinish = System.currentTimeMillis();
-		logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", ctx.getChannel().getRemoteAddress(), path, params.get(ParamNames.app_name), params.get(ParamNames.client_ver), (apiCallFinish - apiCallStart)));
+		logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, callInstance.params.get(ParamNames.app_name), callInstance.params.get(ParamNames.client_ver), (apiCallFinish - callInstance.apiCallStart)));
 
 	}
 	
@@ -405,6 +543,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					channels.remove(userName);
 			}
 		}
+		
+        if (decoder != null) {
+            decoder.cleanFiles();
+        }		
 	}
 
 	@Override

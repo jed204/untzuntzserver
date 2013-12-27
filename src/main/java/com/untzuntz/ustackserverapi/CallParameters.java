@@ -24,6 +24,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.util.JSON;
 import com.untzuntz.ustackserverapi.auth.AuthenticationInt;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
+import com.untzuntz.ustackserverapi.util.UploadedFile;
 
 public class CallParameters {
 
@@ -33,6 +34,7 @@ public class CallParameters {
 	private String path;
 	private String remoteIpAddress;
 	private String remoteIpCountry;
+	private List<UploadedFile> uploadedFiles;
 	
 	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {
@@ -62,6 +64,14 @@ public class CallParameters {
 				}
 			} catch (Exception jpe) {}
 		}
+	}
+	
+	public List<UploadedFile> getUploadedFiles() {
+		return uploadedFiles;
+	}
+	
+	public void setUploadedFiles(List<UploadedFile> files) {
+		uploadedFiles = files;
 	}
 	
 	public String getRemoteIpAddress() {

@@ -33,6 +33,7 @@ public class MethodDefinition {
 	private boolean methodPOST;
 	private boolean methodPUT;
 	private boolean methodDELETE;
+	private boolean expectingFile;
 	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
@@ -51,6 +52,14 @@ public class MethodDefinition {
 	private HashMap<Class,Object> objectInstances;
 	private HashMap<String,Method> methodInstances;
 	private boolean allowNoClientVer;
+	
+	public boolean isExpectingFile() { 
+		return expectingFile;
+	}
+	
+	public void fileToBeUploaded() {
+		expectingFile = true;
+	}
 	
 	public String getDocumentationGroup() {
 		return docGroup;

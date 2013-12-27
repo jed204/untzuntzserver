@@ -62,16 +62,37 @@ public class APIResponse {
 		
 		addHeaders(channel, res, jsonpFunction);
 		if (jsonpFunction != null)
-		{
-			StringBuffer json = new StringBuffer();
-			json.append(jsonpFunction);
-			json.append("(").append(text).append(");");
-			text = json.toString();
-		}
+			text = handleJSONPResponse(res, jsonpFunction, text, params);
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
+	}
+
+	/**
+	 * Inject 'httpResponseCode' into the stream if it's 400 or greater
+	 * 
+	 * This will let the client process the data
+	 * 
+	 * @param res
+	 * @param jsonpFunction
+	 * @param text
+	 * @return
+	 */
+	private static String handleJSONPResponse(HttpResponse res, String jsonpFunction, String text, CallParameters params)
+	{
+		logger.info("-> Inject? " + (!"false".equals(params.get(ParamNames.json_response_code_inject))));
+		logger.info("-> Code? " + res.getStatus().getCode());
+		if (!"false".equals(params.get(ParamNames.json_response_code_inject)) && res.getStatus().getCode() >= 400) // respond w/ a 200 and jam in the error response code so the client side can process
+		{
+			text = String.format("{ \"httpResponseCode\" : %d,%s", res.getStatus().getCode(), text.substring(1));
+			res.setStatus(HttpResponseStatus.OK);
+		}
+		
+		StringBuffer json = new StringBuffer();
+		json.append(jsonpFunction);
+		json.append("(").append(text).append(");");
+		return json.toString();
 	}
 	
 	public static void httpResponse(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params)
@@ -82,12 +103,8 @@ public class APIResponse {
 		res.setHeader("Content-type", contentType);
 		addHeaders(channel, res, jsonpFunction);
 		if (jsonpFunction != null)
-		{
-			StringBuffer json = new StringBuffer();
-			json.append(jsonpFunction);
-			json.append("(").append(text).append(");");
-			text = json.toString();
-		}
+			text = handleJSONPResponse(res, jsonpFunction, text, params);
+		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
@@ -106,12 +123,7 @@ public class APIResponse {
 		res.setHeader("Content-type", contentType);
 		addHeaders(channel, res, jsonpFunction);
 		if (jsonpFunction != null)
-		{
-			StringBuffer json = new StringBuffer();
-			json.append(jsonpFunction);
-			json.append("(").append(text).append(");");
-			text = json.toString();
-		}
+			text = handleJSONPResponse(res, jsonpFunction, text, params);
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
