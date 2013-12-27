@@ -5,7 +5,11 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -78,6 +82,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     private String userName;
     private boolean realtimeEnabled;
     private List<UploadedFile> uploadedFiles;
+    private File targetFile;
+	private OutputStream targetOutputStream;
     private final StringBuilder buf = new StringBuilder();
 
     private static final HttpDataFactory factory = new DefaultHttpDataFactory(0); // Disk if size exceed MINSIZE
@@ -116,9 +122,19 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				}
 				
 				String uri = request.getUri().substring(5);
+				if (uri.indexOf("?") > -1)
+					uri = uri.substring(0, uri.indexOf("?"));
 				MethodDefinition cls = APICalls.getCallByURI(uri);
 				if (cls != null && cls.isExpectingFile())
-					decoder = new HttpPostRequestDecoder(factory, request);
+				{
+					if (isMultiPartOrForm(request))
+						decoder = new HttpPostRequestDecoder(factory, request);
+					else
+					{
+						targetFile = new File("/tmp/test");
+						targetOutputStream = new BufferedOutputStream(new FileOutputStream(targetFile));
+					}
+				}
 				
 				if (request.isChunked())
 					readingChunks = true;
@@ -141,10 +157,34 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				String params = getParamsFromRequest();
 				handleHttpRequest(ctx, request, params, null );
 			}
+			else if (targetOutputStream != null)
+			{
+				ChannelBuffer buffer = chunk.getContent();
+				buffer.readBytes(targetOutputStream, buffer.readableBytes());
+			}
 			else if (decoder == null) 
 				buf.append(chunk.getContent().toString(CharsetUtil.UTF_8));
-			
 		}
+	}
+	
+	private String getHeader(HttpRequest req, String headerName) {
+		List<String> headerValues = req.getHeaders(headerName);
+		if (headerValues.size() == 0)
+			return null;
+
+		return headerValues.get(0);
+	}
+	
+	private boolean isMultiPartOrForm(HttpRequest req) {
+		
+		String contentTypeStr = getHeader(req, "Content-Type");
+		if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentTypeStr))
+			return true;
+		else if ("multipart/form-data".equalsIgnoreCase(contentTypeStr))
+			return true;
+		
+		return false;
+		
 	}
 	
 	private void send100Continue(MessageEvent e) {
@@ -181,6 +221,32 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				}
 			} catch (EndOfDataDecoderException e) {}
 			params = paramBuf.toString();
+			
+			logger.info("Parameters: " + params);
+		}
+		else if (targetOutputStream != null)
+		{
+			ChannelBuffer buffer = request.getContent();
+			if (buffer.readableBytes() > 0)
+				buffer.readBytes(targetOutputStream, buffer.readableBytes());
+
+			targetOutputStream.flush();
+			targetOutputStream.close();
+			targetOutputStream = null;
+			
+			String fileName = getHeader(request, "X-Filename");
+			String contentType = getHeader(request, "Content-Type");
+			
+			if (fileName == null)
+				fileName = "Unknown-" + System.currentTimeMillis();
+			if (contentType == null)
+				contentType = "application/binary";
+			
+			if (uploadedFiles == null)
+				uploadedFiles = new ArrayList<UploadedFile>();
+			
+        	uploadedFiles.add( new UploadedFile(targetFile, fileName, contentType) );
+
 		}
 		else
 		{
@@ -232,7 +298,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		/*
 		 * Setup Parameters
 		 */
-		if (req.getMethod() == HttpMethod.POST)
+		if (req.getMethod() == HttpMethod.POST && paramStr != null)
 		{
 			if (!path.endsWith("?") && paramStr.length() > 0)
 				path += "?";
@@ -544,9 +610,18 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			}
 		}
 		
-        if (decoder != null) {
+        if (decoder != null) 
             decoder.cleanFiles();
-        }		
+        
+        if (targetFile != null)
+        {
+        	try { 
+        		targetOutputStream.close();
+        	} catch (Exception e) {}
+
+        	targetOutputStream = null;
+        	targetFile.delete();
+        }
 	}
 
 	@Override
