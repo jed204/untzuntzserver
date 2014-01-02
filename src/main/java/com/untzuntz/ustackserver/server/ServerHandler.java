@@ -154,7 +154,14 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 
 			if (chunk.isLast()) {
 				readingChunks = false;
-				String params = getParamsFromRequest();
+				String params = null;
+				if (decoder != null)
+					params = getParamsFromRequest();
+				else
+				{
+					buf.append(chunk.getContent().toString(CharsetUtil.UTF_8));
+					params = buf.toString();
+				}
 				handleHttpRequest(ctx, request, params, null );
 			}
 			else if (targetOutputStream != null)
