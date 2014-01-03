@@ -29,6 +29,7 @@ public class APIResponse {
 	public static final String ContentTypeTextPlain = "text/plain";
 	public static final String ContentTypeJSON = "application/json";
 	public static final String ContentTypeJSONP = "application/javascript";
+	public static final String ContentTypeCalendar = "text/calendar";
 	
 	private static void addHeaders(Channel channel, HttpResponse res, String jsonpFunction)
 	{
@@ -43,7 +44,7 @@ public class APIResponse {
 		if (channel.getAttachment() instanceof Long)
 			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
 	}
-
+	
 	public static void httpOk(Channel channel, String text, String contentType, CallParameters params, Cookie[] cookie)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
