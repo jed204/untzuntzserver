@@ -136,7 +136,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 						UFile directory = UOpts.getDirectory( UAppCfg.DIRECTORY_SCRATCH );
 						directory.mkdirs();
 
-						targetFile = new File(directory + "incoming-" + System.currentTimeMillis() + ".dat");
+						targetFile = new File(directory + "/incoming-" + System.currentTimeMillis() + ".dat");
+						logger.info("Receiving upload from caller, saving to: " + targetFile);
 						targetOutputStream = new BufferedOutputStream(new FileOutputStream(targetFile));
 					}
 				}
@@ -160,7 +161,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			if (chunk.isLast()) {
 				readingChunks = false;
 				String params = null;
-				if (decoder != null)
+				if (decoder != null || targetOutputStream != null)
 					params = getParamsFromRequest();
 				else
 				{
