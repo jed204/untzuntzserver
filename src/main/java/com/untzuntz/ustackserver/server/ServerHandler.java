@@ -52,6 +52,8 @@ import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
+import com.untzuntz.ustack.main.UAppCfg;
+import com.untzuntz.ustack.main.UFile;
 import com.untzuntz.ustack.main.UOpts;
 import com.untzuntz.ustackserver.peer.PeerDelivery;
 import com.untzuntz.ustackserver.peer.PeerHandler;
@@ -131,7 +133,10 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 						decoder = new HttpPostRequestDecoder(factory, request);
 					else
 					{
-						targetFile = new File("/tmp/test");
+						UFile directory = UOpts.getDirectory( UAppCfg.DIRECTORY_SCRATCH );
+						directory.mkdirs();
+
+						targetFile = new File(directory + "incoming-" + System.currentTimeMillis() + ".dat");
 						targetOutputStream = new BufferedOutputStream(new FileOutputStream(targetFile));
 					}
 				}
