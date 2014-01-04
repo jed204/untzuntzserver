@@ -82,6 +82,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     private HttpRequest request;
     private boolean readingChunks;
     private String userName;
+    private boolean noLogging;
     private boolean realtimeEnabled;
     private List<UploadedFile> uploadedFiles;
     private File targetFile;
@@ -485,6 +486,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		if (callInstance == null)
 			return;
 		
+		noLogging = callInstance.cls.isNoLogging();
+		
 		/*
 		 * Do the actual call
 		 */
@@ -531,7 +534,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		}
 		
 		long apiCallFinish = System.currentTimeMillis();
-		logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, callInstance.params.get(ParamNames.app_name), callInstance.params.get(ParamNames.client_ver), (apiCallFinish - callInstance.apiCallStart)));
+		if (!noLogging)
+			logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", callInstance.ctx.getChannel().getRemoteAddress(), callInstance.path, callInstance.params.get(ParamNames.app_name), callInstance.params.get(ParamNames.client_ver), (apiCallFinish - callInstance.apiCallStart)));
 
 	}
 	
@@ -645,7 +649,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		long timing = 0;
 		if (e.getChannel().getAttachment() != null)
 			timing = (System.currentTimeMillis() - (Long)e.getChannel().getAttachment());
-		logger.info(String.format("%s => Connection Closed [%d ms]", e.getChannel().getRemoteAddress(), timing));
+		if (!noLogging)
+			logger.info(String.format("%s => Connection Closed [%d ms]", e.getChannel().getRemoteAddress(), timing));
 	}
 
 	@Override

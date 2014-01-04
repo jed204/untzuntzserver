@@ -52,6 +52,15 @@ public class MethodDefinition {
 	private HashMap<Class,Object> objectInstances;
 	private HashMap<String,Method> methodInstances;
 	private boolean allowNoClientVer;
+	private boolean noLogging;
+	
+	public boolean isNoLogging() {
+		return noLogging;
+	}
+	
+	public void noLogging() {
+		noLogging = true;
+	}
 	
 	public boolean isExpectingFile() { 
 		return expectingFile;
