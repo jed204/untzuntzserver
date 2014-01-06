@@ -150,7 +150,7 @@ public class CallParameters {
         String sig = hmac(key, canonicalQS);
         String psig = percentEncodeRfc3986(sig);
 
-		logger.info("Full Request to Encode: " + canonicalQS + " => Signature: " + psig);
+		logger.debug(String.format("Full Request to Encode: %s => Signature: %s", canonicalQS, psig));
 
 		return psig;
 	}
