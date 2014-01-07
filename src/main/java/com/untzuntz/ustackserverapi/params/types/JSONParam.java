@@ -55,7 +55,7 @@ public class JSONParam extends BaseParam implements ParameterDefinitionInt<Basic
 		/*
 		 * Clear out fields that are filtered
 		 */
-		if (filterFields != null)
+		if (filterFields != null && bs != null)
 		{
 			for (String fieldName : filterFields)
 				bs.removeField(fieldName);
