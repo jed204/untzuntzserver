@@ -82,8 +82,6 @@ public class APIResponse {
 	 */
 	private static String handleJSONPResponse(HttpResponse res, String jsonpFunction, String text, CallParameters params)
 	{
-		logger.info("-> Inject? " + (!"false".equals(params.get(ParamNames.json_response_code_inject))));
-		logger.info("-> Code? " + res.getStatus().getCode());
 		if (!"false".equals(params.get(ParamNames.json_response_code_inject)) && res.getStatus().getCode() >= 400) // respond w/ a 200 and jam in the error response code so the client side can process
 		{
 			text = String.format("{ \"httpResponseCode\" : %d,%s", res.getStatus().getCode(), text.substring(1));
@@ -99,7 +97,6 @@ public class APIResponse {
 	public static void httpResponse(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
-		logger.warn("Returning API Response [" + channel.getRemoteAddress() + "] => " + text);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
 		addHeaders(channel, res, jsonpFunction);

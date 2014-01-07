@@ -343,7 +343,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				Cookie cookie = it.next();
 				if ("UNTZ".equals(cookie.getName()))
 				{
-					logger.info("\t Cookie for 'UNTZ' found => " + cookie.getValue());
+					logger.debug("\t Cookie for 'UNTZ' found => " + cookie.getValue());
 					params.setParameterValue(ParamNames.token.getName(), cookie.getValue());
 				}
 			}
