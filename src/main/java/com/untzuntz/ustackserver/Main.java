@@ -1,14 +1,24 @@
 package com.untzuntz.ustackserver;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.bson.types.ObjectId;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.mongodb.DBObject;
 import com.untzuntz.ustack.aaa.ResourceDefinition;
 import com.untzuntz.ustack.aaa.ResourceLink;
@@ -20,6 +30,30 @@ import com.untzuntz.ustackserverapi.util.APIPerms;
 public class Main {
 
     static Logger           		logger               	= Logger.getLogger(Main.class);
+
+	public static final Gson gson = new GsonBuilder()
+			.registerTypeAdapter(ObjectId.class, ObjectIdDeserializer.INSTANCE)
+			.registerTypeAdapter(JsonElement.class, JsonElementDeserializer.INSTANCE)
+			.setDateFormat("yyyyMMddHHmmssZ").create();
+
+	public enum ObjectIdDeserializer implements JsonDeserializer<ObjectId> {
+		INSTANCE;
+	
+		public ObjectId deserialize(JsonElement json, Type typeOfT,
+			JsonDeserializationContext context) throws JsonParseException {
+			return new ObjectId(json.getAsString());
+		}
+	}
+	
+	public enum JsonElementDeserializer implements
+		JsonDeserializer<JsonElement> {
+		INSTANCE;
+	
+		public JsonElement deserialize(JsonElement json, Type typeOfT,
+			JsonDeserializationContext context) throws JsonParseException {
+			return json;
+		}
+	}
 
     public static void main(String[] args) throws Exception {
 
@@ -108,6 +142,9 @@ public class Main {
 		
 		logger.info("Staring client server on port " + port);
 		
+		ExecutionHandler executionHandler = new ExecutionHandler(
+	             new OrderedMemoryAwareThreadPoolExecutor(16, 1048576, 1048576));
+		
 		ServerBootstrap bootstrap = new ServerBootstrap(
 											new NioServerSocketChannelFactory(
 													Executors.newCachedThreadPool(),
@@ -115,7 +152,7 @@ public class Main {
 				
 		bootstrap.setOption("backlog", 1000);
 		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new ServerFactory());
+		bootstrap.setPipelineFactory(new ServerFactory(executionHandler));
 		
 		// Bind and start to accept incoming connections.
 		bootstrap.bind(new InetSocketAddress(port));

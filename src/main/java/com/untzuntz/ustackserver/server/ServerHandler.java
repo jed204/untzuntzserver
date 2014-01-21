@@ -364,6 +364,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			cls = APICalls.getCallByURI(path);
 		if (cls == null)
 		{
+			logger.info(String.format("%s => UNKNOWN API Path: %s [Client Ver: %s]", params.getRemoteIpAddress(), path, params.get(ParamNames.client_ver)));
 			APIResponse.httpError(ctx.getChannel(), APIResponse.error("Unknown API Call Requested"), HttpResponseStatus.NOT_FOUND, params);
 			return null;
 		}

@@ -21,7 +21,6 @@ import com.untzuntz.ustackserverapi.exceptions.UnknownObjectException;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.util.APIPerms;
-import com.untzuntz.ustackserverapi.util.FormatUtil;
 import com.untzuntz.ustackserverapi.version.Versions;
 
 public class PermissionsAPI {
@@ -203,8 +202,9 @@ public class PermissionsAPI {
 	 */
 	public void listResourceDefinition(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams)
 	{
-		List<ResourceDefinition> resources = ResourceDefinition.getAll();
-		APIResponse.httpOk(channel, APIResponse.success(FormatUtil.asDBList("resources", resources)), callParams);
+		//List<ResourceDefinition> resources = ResourceDefinition.getAll();
+		//APIResponse.httpOk(channel, APIResponse.success(FormatUtil.asDBList("resources", resources)), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), callParams);
 	}
 	
 	/**
