@@ -31,6 +31,7 @@ import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.codec.http.Cookie;
 import org.jboss.netty.handler.codec.http.CookieDecoder;
+import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpChunk;
 import org.jboss.netty.handler.codec.http.HttpMethod;
@@ -109,6 +110,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 
+		logger.info("readingChunks = " + readingChunks);
 		if (!readingChunks) {
 
             if (decoder != null) {
@@ -147,6 +149,9 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					readingChunks = true;
 				else
 				{
+					if (decoder != null)
+						decoder.offer(new DefaultHttpChunk(request.getContent()));
+					
 					String params = getParamsFromRequest();
 					handleHttpRequest(ctx, (HttpRequest)msg, params, cls );
 				}
@@ -157,7 +162,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		{
 			HttpChunk chunk = (HttpChunk) e.getMessage();
 			if (decoder != null)
-                decoder.offer(chunk);
+				decoder.offer(chunk);
 
 			if (chunk.isLast()) {
 				readingChunks = false;
@@ -180,7 +185,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				buf.append(chunk.getContent().toString(CharsetUtil.UTF_8));
 		}
 	}
-	
+    
 	private String getHeader(HttpRequest req, String headerName) {
 		List<String> headerValues = req.getHeaders(headerName);
 		if (headerValues.size() == 0)
@@ -194,7 +199,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		String contentTypeStr = getHeader(req, "Content-Type");
 		if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentTypeStr))
 			return true;
-		else if ("multipart/form-data".equalsIgnoreCase(contentTypeStr))
+		else if (contentTypeStr != null && contentTypeStr.indexOf("multipart/form-data") > -1)
 			return true;
 		
 		return false;
@@ -215,6 +220,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 				while (decoder.hasNext())
 				{
 					InterfaceHttpData data = decoder.next();
+				
 					if (data.getHttpDataType() == HttpDataType.Attribute)
 					{
 						if (paramBuf.length() > 0)

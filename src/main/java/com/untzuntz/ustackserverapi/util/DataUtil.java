@@ -30,4 +30,20 @@ public class DataUtil {
 		return other;
 	}
 
+	/**
+	 * Closes a stream, handling all exceptions
+	 * @param in
+	 */
+	public static void close(java.io.Closeable in) 
+	{
+		if (in == null)
+			return;
+		
+		try {
+			in.close();
+		} catch (Exception e) { 
+			// do nothing
+		}
+	}
+
 }
