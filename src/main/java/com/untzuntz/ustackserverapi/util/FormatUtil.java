@@ -1,5 +1,7 @@
 package com.untzuntz.ustackserverapi.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 import com.mongodb.BasicDBList;
@@ -46,4 +48,35 @@ public class FormatUtil {
 	 
 	   return ret;
 	 }
+
+
+	/**
+	 * Formats a Date based on the provided format. If the date is null, 'Unknown' will be returned
+	 * 
+	 * @param date
+	 * @param format
+	 * @return
+	 */
+	public static String asDate(Date date, String format) 
+	{
+		return asDate(date, format, "Unknown");
+	}
+
+	/**
+	 * Formats a Date based on the provided format. If the date is null, the default value will be returned
+	 * 
+	 * @param date
+	 * @param format
+	 * @return
+	 */
+	
+	public static String asDate(Date date, String format, String dft){
+		if (date == null)
+			return dft;
+		
+		SimpleDateFormat sdf = new SimpleDateFormat(format);
+		return sdf.format(date);
+	}
+		 
+
 }

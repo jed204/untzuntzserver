@@ -110,7 +110,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
 
-		logger.info("readingChunks = " + readingChunks);
 		if (!readingChunks) {
 
             if (decoder != null) {
