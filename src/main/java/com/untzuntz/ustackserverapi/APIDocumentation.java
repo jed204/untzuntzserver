@@ -134,10 +134,16 @@ public class APIDocumentation {
         org.w3c.dom.Element methodsXml = doc.createElement("methods");
         docs.appendChild(methodsXml);
         
+        boolean showUnAuthenticatedCalls = false;
+        if ("true".equalsIgnoreCase(documentationDefaults.get("showUnAuthenticatedCalls")))
+        	showUnAuthenticatedCalls = true;
+        
         for (MethodDefinition method : methods) {
         	
         	if (method.getOrder() >= 0)
         	{
+        		if (method.getAuthenticationGroup() == null && !showUnAuthenticatedCalls)
+        			continue;
         		if (method.getAuthenticationGroup() != null && !Authorization.authorizeAPIBool(client_id, method.getAuthenticationGroup()))
         			continue;
         		

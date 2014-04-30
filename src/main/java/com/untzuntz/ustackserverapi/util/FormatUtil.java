@@ -78,5 +78,20 @@ public class FormatUtil {
 		return sdf.format(date);
 	}
 		 
+	/**
+	 * Provided two integers returns a percentage integer between 0 and 100
+	 * @param low
+	 * @param high
+	 * @return
+	 */
+	public static int percentage(int low, int high) {
+		
+		if (high == 0)
+			return 0;
+		
+		float percFloat = (float)((float)low / (float)high);
+		
+		return (int)(100.0f * percFloat);
+	}
 
 }

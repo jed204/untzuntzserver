@@ -35,6 +35,15 @@ public class CallParameters {
 	private String remoteIpAddress;
 	private String remoteIpCountry;
 	private List<UploadedFile> uploadedFiles;
+	private Long tokenTTL;
+	
+	public void setTokenTTL(Long ttl) {
+		tokenTTL = ttl;
+	}
+	
+	public Long getTokenTTL() {
+		return tokenTTL;
+	}
 	
 	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {

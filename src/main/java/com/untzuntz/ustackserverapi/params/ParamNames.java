@@ -4,6 +4,7 @@ import org.bson.BasicBSONObject;
 
 import com.untzuntz.ustackserverapi.params.types.IntParam;
 import com.untzuntz.ustackserverapi.params.types.JSONParam;
+import com.untzuntz.ustackserverapi.params.types.LongParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.params.types.StringArrayParam;
 import com.untzuntz.ustackserverapi.params.types.StringParam;
@@ -50,6 +51,7 @@ public class ParamNames {
 	public static final ParameterDefinitionInt<BasicBSONObject> x_object = new JSONParam("x_object", "A JSON Object");
 	public static final ParameterDefinitionInt<String> api_key = new StringParam("api_key", "Your API Key");
 	public static final ParameterDefinitionInt<String> client_id = new StringParam("client_id", "Your Client ID for the API");
+	public static final ParameterDefinitionInt<Long> token_life = new LongParam("token_life", "Time till token expires (ms)", 9999999L);
 	public static final ParameterDefinitionInt<String> token = new StringParam("token", "User Access Token");
 	public static final ParameterDefinitionInt<String> user_identifier = new StringParam("user_identifier", "User Identifier");
 	public static final ParameterDefinitionInt<String> secret = new StringParam("secret", "User Secret");

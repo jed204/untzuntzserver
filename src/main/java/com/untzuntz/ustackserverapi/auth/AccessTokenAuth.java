@@ -60,7 +60,9 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 			logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
 			throw new APIAuthenticationException("Invalid Token");
 		}
-		if (details.expirationAge < System.currentTimeMillis())
+		
+		long tokenLife = details.expirationAge - System.currentTimeMillis();
+		if (tokenLife < 0)
 		{
 			logger.info(String.format("%s/%s | Access Token expired at '%s'", details.userName, details.clientId, new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.expirationAge))));
 			throw new APIAuthenticationException("Token has expired");
@@ -69,6 +71,7 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 //		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
 		
 		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
+		params.setTokenTTL(tokenLife);
 		
 		return UserAccount.getUser(details.userName);
 	}

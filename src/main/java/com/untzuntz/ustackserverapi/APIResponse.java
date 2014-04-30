@@ -10,6 +10,8 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.handler.codec.http.Cookie;
 import org.jboss.netty.handler.codec.http.CookieEncoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpMethod;
+import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
@@ -45,7 +47,7 @@ public class APIResponse {
 			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
 	}
 	
-	public static void httpOk(Channel channel, String text, String contentType, CallParameters params, Cookie[] cookie)
+	public static void httpOk(Channel channel, String text, String contentType, CallParameters params, Cookie[] cookie, HttpRequest req, boolean enableCORS)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
@@ -64,6 +66,13 @@ public class APIResponse {
 		addHeaders(channel, res, jsonpFunction);
 		if (jsonpFunction != null)
 			text = handleJSONPResponse(res, jsonpFunction, text, params);
+		if (enableCORS)
+		{
+			res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+			if (req.getMethod().equals(HttpMethod.OPTIONS))
+				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
+		}
+		
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
@@ -87,6 +96,8 @@ public class APIResponse {
 			text = String.format("{ \"httpResponseCode\" : %d,%s", res.getStatus().getCode(), text.substring(1));
 			res.setStatus(HttpResponseStatus.OK);
 		}
+		
+		res.setHeader("Content-type", "text/javascript");
 		
 		StringBuffer json = new StringBuffer();
 		json.append(jsonpFunction);
@@ -131,7 +142,7 @@ public class APIResponse {
 
 	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params, Cookie[] cookies)
 	{
-		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies);
+		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, null, false);
 	}
 	
 	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params)

@@ -30,7 +30,7 @@ public class ServerFactory implements ChannelPipelineFactory {
 		// Create a default pipeline implementation.
 		ChannelPipeline pipeline = pipeline();
 		
-		pipeline.addLast("decoder", new HttpRequestDecoder());
+		pipeline.addLast("decoder", new HttpRequestDecoder(16384, 16384, 16384));
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("sencoder", new StringEncoder());
 		pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());

@@ -289,7 +289,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		
 		if ("index.html".equalsIgnoreCase(uri[1]))
 		{
-			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain", null, null);
+			APIResponse.httpOk(ctx.getChannel(), " ", "text/plain", null, null, null, false);
 		}
 		else if ("favicon.ico".equalsIgnoreCase(uri[1]) || uri.length < 1)
 		{
