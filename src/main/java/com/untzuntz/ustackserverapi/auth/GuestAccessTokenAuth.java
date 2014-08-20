@@ -10,25 +10,16 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import com.untzuntz.ustack.data.AccessToken;
 import com.untzuntz.ustack.data.AccessToken.AccessTokenDetails;
-import com.untzuntz.ustack.data.UserAccount;
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.CallParameters;
 import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 
-/**
- * Authentication method for an access token (temporary access value)
- * 
- * @author jdanner
- *
- */
-public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
+public class GuestAccessTokenAuth implements AuthenticationInt<String> {
 
-    static Logger           		logger               	= Logger.getLogger(AccessTokenAuth.class);
+    static Logger           		logger               	= Logger.getLogger(GuestAccessTokenAuth.class);
  
-    public static final String CookieTokenName = "UNTZ";
-    
     public String getAuthenticationDescription() {
     	return "Access token in request parameters required.";
     }
@@ -50,7 +41,7 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
     }
     
 	@Override
-	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
+	public String authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
 		//AuthTypes.ClientKey.authenticate(method, req, params);
 		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
@@ -73,7 +64,7 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 		params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
 		params.setTokenTTL(tokenLife);
 		
-		return UserAccount.getUser(details.userName);
+		return details.userName;
 	}
 
 }

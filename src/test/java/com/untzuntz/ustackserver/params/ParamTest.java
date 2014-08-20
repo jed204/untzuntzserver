@@ -108,9 +108,9 @@ public class ParamTest {
 		now.add(Calendar.DATE, 3 * 7);
 		now.add(Calendar.MONTH, -8);
 		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 8 months").getStart()));
-		now.add(Calendar.MONTH, 8);
-		now.add(Calendar.YEAR, -2);
-		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 2 years").getStart()));
+//		now.add(Calendar.MONTH, 8);
+//		now.add(Calendar.YEAR, -2);
+//		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 2 years").getStart()));
 		
 		assertException(new DateRangeParam("test", "test"), "201");
 		assertException(new DateRangeParam("test", "test"), "20121");

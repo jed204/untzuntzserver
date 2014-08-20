@@ -3,6 +3,9 @@ package com.untzuntz.ustackserverapi;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -25,6 +28,11 @@ public class APIResponse {
 
     static Logger           		logger               	= Logger.getLogger(APIResponse.class);
 
+    private static final Map<String,Boolean> legalOrigins = new HashMap<String,Boolean>();
+    public static void addCORSOrigin(String origin) {
+    	legalOrigins.put(origin, Boolean.TRUE);
+    }
+    
     public static String AccessControlAllowOrigin;
 	public static final String ContentTypeTextXML = "text/xml";
 	public static final String ContentTypeTextHTML = "text/html";
@@ -33,7 +41,7 @@ public class APIResponse {
 	public static final String ContentTypeJSONP = "application/javascript";
 	public static final String ContentTypeCalendar = "text/calendar";
 	
-	private static void addHeaders(Channel channel, HttpResponse res, String jsonpFunction)
+	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
 		if (AccessControlAllowOrigin != null)	
 			res.setHeader("Access-Control-Allow-Origin", AccessControlAllowOrigin);
@@ -41,6 +49,22 @@ public class APIResponse {
 		{
 			res.setHeader("Access-Control-Allow-Origin", "*");
 			res.setHeader("Content-type", ContentTypeJSONP);
+		}
+		
+		if (req != null)
+		{
+			String originHeader = req.getHeader("Origin");
+			if (originHeader != null && legalOrigins.get(originHeader))
+				res.setHeader("Access-Control-Allow-Origin", originHeader);
+		}
+		else
+		{
+			try {
+				Integer v = null;
+				v.intValue();
+			} catch (Exception e) {
+				logger.error("failed", e);
+			}
 		}
 		
 		if (channel.getAttachment() instanceof Long)
@@ -63,16 +87,18 @@ public class APIResponse {
 			}
 		}
 		
-		addHeaders(channel, res, jsonpFunction);
+		addHeaders(channel, req, res, jsonpFunction);
 		if (jsonpFunction != null)
 			text = handleJSONPResponse(res, jsonpFunction, text, params);
+		
 		if (enableCORS)
 		{
-			res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
-			if (req.getMethod().equals(HttpMethod.OPTIONS))
+			String originHeader = req.getHeader("Origin");
+			if (originHeader != null)
+				res.setHeader("Access-Control-Allow-Origin", originHeader);
+			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
-		
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
@@ -105,12 +131,12 @@ public class APIResponse {
 		return json.toString();
 	}
 	
-	public static void httpResponse(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params)
+	public static void httpResponse(Channel channel, String text, String contentType, HttpRequest req, HttpResponseStatus status, CallParameters params)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
-		addHeaders(channel, res, jsonpFunction);
+		addHeaders(channel, req, res, jsonpFunction);
 		if (jsonpFunction != null)
 			text = handleJSONPResponse(res, jsonpFunction, text, params);
 		
@@ -119,50 +145,63 @@ public class APIResponse {
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
 	}
 
-	public static void httpError(Channel channel, String text, String contentType, CallParameters params)
+	public static void httpError(Channel channel, String text, String contentType, HttpRequest req, CallParameters params)
 	{
-		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params);
+		httpError(channel, text, contentType, req, HttpResponseStatus.BAD_REQUEST, params);
+	}
+
+	public static void httpError(Channel channel, String text, String contentType, HttpRequest req, HttpResponseStatus status, CallParameters params)
+	{
+		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params, req, false);
 	}
 	
-	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params)
+	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params, HttpRequest req, boolean enableCORS)
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
 		logger.warn(String.format("Returning API Error [%d | %s] => %s", status.getCode(), channel.getRemoteAddress(), text));
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, status);
 		res.setHeader("Content-type", contentType);
-		addHeaders(channel, res, jsonpFunction);
+		addHeaders(channel, req, res, jsonpFunction);
 		if (jsonpFunction != null)
 			text = handleJSONPResponse(res, jsonpFunction, text, params);
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		
+		if (enableCORS)
+		{
+			res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+			if (req.getMethod().equals(HttpMethod.OPTIONS))
+				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
+		}
+
+		
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
 	}
 
-	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params, Cookie[] cookies)
+	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params, Cookie[] cookies)
 	{
-		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, null, false);
+		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, req, false);
 	}
 	
-	public static void httpOk(Channel channel, DBObject dbObject, CallParameters params)
+	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params)
 	{
-		httpOk(channel, dbObject, params, null);
+		httpOk(channel, dbObject, req, params, null);
 	}
 	
-	public static void httpResponse(Channel channel, DBObject dbObject, HttpResponseStatus status, CallParameters params)
+	public static void httpResponse(Channel channel, DBObject dbObject, HttpRequest req, HttpResponseStatus status, CallParameters params)
 	{
-		httpResponse(channel, JSON.serialize(dbObject), ContentTypeJSON, status, params);
+		httpResponse(channel, JSON.serialize(dbObject), ContentTypeJSON, req, status, params);
 	}
 	
-	public static void httpError(Channel channel, DBObject dbObject, CallParameters params)
+	public static void httpError(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params)
 	{
-		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON, params);
+		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON, req, params);
 	}
 
-	public static void httpError(Channel channel, DBObject dbObject, HttpResponseStatus status, CallParameters params)
+	public static void httpError(Channel channel, DBObject dbObject, HttpRequest req, HttpResponseStatus status, CallParameters params)
 	{
-		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON, status, params);
+		httpError(channel, JSON.serialize(dbObject), ContentTypeJSON, req, status, params);
 	}
 
 	public static DBObject getResponseObject(String status)

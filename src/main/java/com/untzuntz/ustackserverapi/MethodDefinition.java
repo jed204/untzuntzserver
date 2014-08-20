@@ -53,6 +53,29 @@ public class MethodDefinition {
 	private HashMap<String,Method> methodInstances;
 	private boolean allowNoClientVer;
 	private boolean noLogging;
+	private List<RateLimit> rateLimits;
+	
+	public void addRateLimit(String key, int timeframe, int maxRequests)
+	{
+		RateLimit rl = new RateLimit();
+		rl.key = key;
+		rl.timeframe = timeframe;
+		rl.maxRequests = maxRequests;
+		if (rateLimits == null)
+			rateLimits = new ArrayList<RateLimit>();
+		
+		rateLimits.add(rl);
+	}
+	
+	public List<RateLimit> getRateLimits() {
+		return rateLimits;
+	}
+	
+	public static class RateLimit {
+		public String key;
+		public int timeframe;
+		public int maxRequests;
+	}
 	
 	public boolean isNoLogging() {
 		return noLogging;

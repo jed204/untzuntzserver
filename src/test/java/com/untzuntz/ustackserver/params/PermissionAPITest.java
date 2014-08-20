@@ -94,7 +94,7 @@ public class PermissionAPITest extends BaseTest {
 		{
 			u = APIClient.createAPI("TestCase", clientId);
 			u.generateKey("TestCase");
-			u.addResourceLink(rl);
+			u.addResourceLink("TestCase", rl);
 			u.save("Test Case");
 		}
 		

@@ -30,6 +30,10 @@ public class APICalls {
     	return list;
     }
     
+    public static void clearRoutes() {
+    	routing.clear();
+    }
+    
     public static void addRoute(MethodDefinition def) {
     	routing.put(def.getPath(), def);
     }

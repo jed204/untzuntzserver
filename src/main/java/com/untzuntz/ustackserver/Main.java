@@ -131,7 +131,7 @@ public class Main {
 			ResourceDefinition rs = setupAPIResource();
 			
 			ResourceLink rl = new ResourceLink(rs, "API Manager");
-			client.addResourceLink(rl);
+			client.addResourceLink("Initial", rl);
 			client.save("Initial Run");
 			
 			DBObject k = (DBObject)client.getAPIKeys().get(0);

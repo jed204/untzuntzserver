@@ -140,13 +140,18 @@ public class APIDocumentation {
         
         for (MethodDefinition method : methods) {
         	
-        	if (method.getOrder() >= 0)
+        	int showMethod = 4;
+        	if (method.getAuthenticationGroup() == null && !showUnAuthenticatedCalls)
+        		showMethod = 3;
+        	if (method.getAuthenticationGroup() != null && !Authorization.authorizeAPIBool(client_id, method.getAuthenticationGroup()))
+        		showMethod = 2;
+        	if (method.getOrder() < 0)
+        		showMethod = 1;
+        	
+        	logger.info(String.format("Documentation [%s | %d | %d] %s", method.getDocumentationGroup(), method.getOrder(), showMethod, method.getPath()));
+        	
+        	if (showMethod == 4)
         	{
-        		if (method.getAuthenticationGroup() == null && !showUnAuthenticatedCalls)
-        			continue;
-        		if (method.getAuthenticationGroup() != null && !Authorization.authorizeAPIBool(client_id, method.getAuthenticationGroup()))
-        			continue;
-        		
 	            org.w3c.dom.Element methodXml = doc.createElement("method");
 	            methodsXml.appendChild(methodXml);
 	         
@@ -170,21 +175,21 @@ public class APIDocumentation {
         		parentToc.appendChild(tocEntry);
 	        	
 	            addMethodInformation(doc, methodXml, baseUrl, client_id, api_key, method, documentationDefaults);
-        	}
         	
-        	cnt++;
-        	if (cnt > methodsPerColumn)
-        	{
-        		cnt = 0;
-        		tocColIdx++;
-        		
-        		tocCol = doc.createElement("N" + tocColIdx);
-                toc.appendChild(tocCol);
-                
-                tocGroup = doc.createElement("group");
-                tocCol.appendChild(tocGroup);
-                
-                tocGroups.clear();
+	        	cnt++;
+	        	if (cnt > methodsPerColumn)
+	        	{
+	        		cnt = 0;
+	        		tocColIdx++;
+	        		
+	        		tocCol = doc.createElement("N" + tocColIdx);
+	                toc.appendChild(tocCol);
+	                
+	                tocGroup = doc.createElement("group");
+	                tocCol.appendChild(tocGroup);
+	                
+	                tocGroups.clear();
+	        	}
         	}
         }        
 
@@ -270,7 +275,8 @@ public class APIDocumentation {
 	    		addNode(doc, argument, "optionalRequired", "required");
 				addNode(doc, argument, "type", "Type: " + arg.getTypeDescription());
 				
-				reqParams.add(arg.getName() + "=" + getExampleParamValue(def.getMethodName(), arg.getName(), exampleParameterValues));
+				String val = getExampleParamValue(def.getMethodName(), arg.getName(), exampleParameterValues);
+				reqParams.add(arg.getName() + "=" + val);
 	        }
 	        
 	        for (AuthorizationInt ai : def.getAuthorizationMethods())
@@ -459,6 +465,8 @@ public class APIDocumentation {
 		if (def.isAuthenticationRequired())
 			cp.setAuthInfo(def.getAuthenticationMethod().authenticate(def, null, cp));
 
+		def.validateCall(cp);
+		
 		try {
 			def.handleCall(channel, req, cp);
 		} catch (InvalidAPIRequestException e) {

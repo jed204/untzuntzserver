@@ -204,7 +204,7 @@ public class PermissionsAPI {
 	public void listResourceDefinition(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams)
 	{
 		List<ResourceDefinition> resources = ResourceDefinition.getAll();
-		APIResponse.httpOk(channel, APIResponse.success(FormatUtil.asUDBList("resources", resources)), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(FormatUtil.asUDBList("resources", resources)), req, callParams);
 	}
 	
 	/**
@@ -216,7 +216,7 @@ public class PermissionsAPI {
 		if (rd == null)
 			throw new UnknownObjectException("Could not find resource");
 
-		APIResponse.httpOk(channel, APIResponse.success(rd), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(rd), req, callParams);
 	}
 	
 	/**
@@ -263,7 +263,7 @@ public class PermissionsAPI {
 		
 		rd.save(callParams.get(ParamNames.client_id));
 		
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 	
 	/**
@@ -277,7 +277,7 @@ public class PermissionsAPI {
 
 		rd.delete();
 		
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 
 	}
 	
@@ -298,7 +298,7 @@ public class PermissionsAPI {
 			rd.save(callParams.get(ParamNames.client_id));
 		}
 	
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 	
 	/**
@@ -317,7 +317,7 @@ public class PermissionsAPI {
 		rd.deleteRole(role);
 		rd.save(callParams.get(ParamNames.client_id));
 		
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 
 	/**
@@ -337,7 +337,7 @@ public class PermissionsAPI {
 		rd.setRole(role);
 		rd.save(callParams.get(ParamNames.client_id));
 		
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 
 	/**
@@ -356,7 +356,7 @@ public class PermissionsAPI {
 		role.deletePermission(callParams.get(ParamNames.permission));
 		rd.save(callParams.get(ParamNames.client_id));
 		
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 
 	public void savePlugin(MethodDefinition def, Channel channel, HttpRequest req, CallParameters callParams)
@@ -380,7 +380,7 @@ public class PermissionsAPI {
 		for (DBObject client : clients)
 			clientList.add(getAPIClientResponse(new APIClient(client)));
 		
-		APIResponse.httpOk(channel, APIResponse.success(new BasicDBObject("clients", clientList)), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(new BasicDBObject("clients", clientList)), req, callParams);
 	}
 	
 	/**
@@ -391,7 +391,7 @@ public class PermissionsAPI {
 		APIClient client = APIClient.createAPI(callParams.get(ParamNames.client_id), callParams.get(ParamNames.target_client_id));
 		client.save(callParams.get(ParamNames.client_id));
 		
-		APIResponse.httpOk(channel, APIResponse.success(getAPIClientResponse(client)), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(getAPIClientResponse(client)), req, callParams);
 	}
 	
 	/**
@@ -411,10 +411,10 @@ public class PermissionsAPI {
 		if (role == null)
 			throw new UnknownObjectException("Could not find role");
 
-		client.addResourceLink(new ResourceLink(rd, role.getName()));
+		client.addResourceLink("API", new ResourceLink(rd, role.getName()));
 		client.save(callParams.get(ParamNames.client_id));
 
-		APIResponse.httpOk(channel, APIResponse.success(), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(), req, callParams);
 	}
 	
 	/**
@@ -426,7 +426,7 @@ public class PermissionsAPI {
 		if (client == null)
 			throw new UnknownObjectException(String.format("Could not find API client '%s'", callParams.get(ParamNames.target_client_id)));
 
-		APIResponse.httpOk(channel, APIResponse.success(getAPIClientResponse(client)), callParams);
+		APIResponse.httpOk(channel, APIResponse.success(getAPIClientResponse(client)), req, callParams);
 	}
 
 	/**
