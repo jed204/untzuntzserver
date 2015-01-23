@@ -76,6 +76,11 @@ public class DateRange {
 				amount = Integer.valueOf( data.substring(5, data.length() - 6) );
 				field = Calendar.YEAR;
 			}
+			else if (data.toLowerCase().endsWith(" year"))
+			{
+				amount = Integer.valueOf( data.substring(5, data.length() - 5) );
+				field = Calendar.YEAR;
+			}
 			else
 				throw new ParseException("Cannot process 'last X timeframe'", 0);
 			
@@ -125,6 +130,17 @@ public class DateRange {
 		{
 			Calendar now = Calendar.getInstance();
 			now.add(Calendar.YEAR, Integer.valueOf( data.substring(0, data.length() - 6) ));
+			now.set(Calendar.HOUR_OF_DAY, 0);
+			now.set(Calendar.MINUTE, 0);
+			now.set(Calendar.SECOND, 0);
+			now.set(Calendar.MILLISECOND, 0);
+			
+			start = now.getTime();
+		}
+		else if (data.endsWith(" year"))
+		{
+			Calendar now = Calendar.getInstance();
+			now.add(Calendar.YEAR, Integer.valueOf( data.substring(0, data.length() - 5) ));
 			now.set(Calendar.HOUR_OF_DAY, 0);
 			now.set(Calendar.MINUTE, 0);
 			now.set(Calendar.SECOND, 0);
