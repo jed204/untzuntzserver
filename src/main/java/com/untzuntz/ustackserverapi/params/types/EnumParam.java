@@ -30,7 +30,7 @@ public abstract class EnumParam extends BaseParam
         return false;
 	}
 	
-	public <T extends Enum<T>> Enum getValue(Class<T> enumType, String data) {
+	public <T extends Enum<T>> Enum<?> getValue(Class<T> enumType, String data) {
         for (T c : enumType.getEnumConstants()) {
         	
         	if (c.name().equals(data))

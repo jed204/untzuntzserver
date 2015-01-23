@@ -13,36 +13,36 @@ import com.untzuntz.ustackserverapi.version.VersionInt;
  */
 public class APICallParam implements Validated {
 
-	public ParameterDefinitionInt paramDetails;
+	public ParameterDefinitionInt<?> paramDetails;
 	public String defaultValue;
 	public VersionInt since;
 	private String desc;
 	
-	public APICallParam(ParameterDefinitionInt param)
+	public APICallParam(ParameterDefinitionInt<?> param)
 	{
 		this.paramDetails = param;
 	}
 	
-	public APICallParam(ParameterDefinitionInt param, String defaultValue, String desc)
+	public APICallParam(ParameterDefinitionInt<?> param, String defaultValue, String desc)
 	{
 		this.paramDetails = param;
 		this.defaultValue = defaultValue;
 		this.desc = desc;
 	}
 	
-	public APICallParam(ParameterDefinitionInt param, String defaultValue)
+	public APICallParam(ParameterDefinitionInt<?> param, String defaultValue)
 	{
 		this.paramDetails = param;
 		this.defaultValue = defaultValue;
 	}
 	
-	public APICallParam(ParameterDefinitionInt param, VersionInt since)
+	public APICallParam(ParameterDefinitionInt<?> param, VersionInt since)
 	{
 		this.paramDetails = param;
 		this.since = since;
 	}
 	
-	public ParameterDefinitionInt getParamDetails() {
+	public ParameterDefinitionInt<?> getParamDetails() {
 		return paramDetails;
 	}
 	

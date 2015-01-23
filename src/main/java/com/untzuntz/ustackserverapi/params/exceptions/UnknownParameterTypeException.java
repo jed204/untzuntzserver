@@ -12,7 +12,7 @@ public class UnknownParameterTypeException extends APIException {
 	
 	private String paramTypeName;
 
-	public UnknownParameterTypeException(ParameterDefinitionInt pti) {
+	public UnknownParameterTypeException(ParameterDefinitionInt<?> pti) {
 		super();
 		paramTypeName = pti.getName();
 	}

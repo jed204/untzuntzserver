@@ -240,7 +240,7 @@ public class ParamTest {
 	}
 
 	
-	private void assertException(ParameterDefinitionInt pti, String data)
+	private void assertException(ParameterDefinitionInt<?> pti, String data)
 	{
 		try {
 			pti.validate(data);
@@ -250,7 +250,7 @@ public class ParamTest {
 		}
 	}
 
-	private void assertNoException(ParameterDefinitionInt pti, String data)
+	private void assertNoException(ParameterDefinitionInt<?> pti, String data)
 	{
 		try {
 			pti.validate(data);

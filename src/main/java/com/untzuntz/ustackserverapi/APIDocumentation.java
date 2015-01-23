@@ -520,7 +520,7 @@ public class APIDocumentation {
 			}
 			else if (val instanceof ParameterDefinitionInt)
 			{
-				if (((ParameterDefinitionInt)val).getName().equals(paramName))
+				if (((ParameterDefinitionInt<?>)val).getName().equals(paramName))
 					return true;
 			}
 		}

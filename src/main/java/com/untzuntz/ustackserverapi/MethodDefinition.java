@@ -322,7 +322,6 @@ public class MethodDefinition {
 		return variesParams;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public void validateCall(CallParameters callParams) throws APIException
 	{
 		for (Object val : paramVal)

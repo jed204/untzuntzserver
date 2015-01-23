@@ -14,7 +14,7 @@ public class ParamValueException extends APIException implements APIExceptionDoc
 	private String paramTypeName;
 	private String message;
 
-	public ParamValueException(ParameterDefinitionInt pti, String message) {
+	public ParamValueException(ParameterDefinitionInt<?> pti, String message) {
 		super();
 		this.paramTypeName = pti.getName();
 		this.message = pti.getName() + " - " + message;
