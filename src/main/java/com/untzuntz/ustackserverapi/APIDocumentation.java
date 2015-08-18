@@ -40,7 +40,9 @@ import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.mongodb.BasicDBList;
 import com.untzuntz.ustack.aaa.Authorization;
+import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.APICallParam;
 import com.untzuntz.ustackserverapi.params.ParamNames;
@@ -113,7 +115,31 @@ public class APIDocumentation {
             addErrorInformation(doc, errorXml, error);
         }
         
-        List<MethodDefinition> methods = APICalls.getMethods();
+		APIClient acct = APIClient.getAPIClient(client_id);
+		if (acct != null)
+			logger.info("Client ID: " + acct.getClientId());
+		else
+			logger.info("Client ID Not Provided");
+		
+		List<MethodDefinition> methods = APICalls.getMethods();
+		boolean allowAllMethods = false;
+		if (acct.get("apiDocLimiter") != null) {
+			BasicDBList limitedTo = (BasicDBList)acct.get("apiDocLimiter");
+
+			List<MethodDefinition> allowedList = new ArrayList<MethodDefinition>();
+			for (int i = 0; i < limitedTo.size(); i++) {
+				String allowed = (String)limitedTo.get(i);
+				
+				for (MethodDefinition md : methods) {
+					if (allowed.equals(md.getPath()))
+						allowedList.add(md);
+				}
+			}
+
+			logger.info(String.format("Client %s limited to %d methods", client_id, allowedList.size()));
+			methods = allowedList; // set the method list to the desired set of calls
+			allowAllMethods = true; // tell the output to show all curated method calls
+		}
         
         Collections.sort(methods, new MethodOrder());
 
@@ -150,7 +176,7 @@ public class APIDocumentation {
         	
         	logger.info(String.format("Documentation [%s | %d | %d] %s", method.getDocumentationGroup(), method.getOrder(), showMethod, method.getPath()));
         	
-        	if (showMethod == 4)
+        	if (allowAllMethods || showMethod == 4)
         	{
 	            org.w3c.dom.Element methodXml = doc.createElement("method");
 	            methodsXml.appendChild(methodXml);

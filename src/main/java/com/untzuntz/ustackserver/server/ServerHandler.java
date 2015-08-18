@@ -147,6 +147,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 					}
 				}
 				
+				
 				if (request.isChunked())
 					readingChunks = true;
 				else
@@ -402,6 +403,12 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			}
 		}
 		
+		if (req.getMethod().equals(HttpMethod.OPTIONS))
+		{
+			APIResponse.httpOk(ctx.getChannel(), JSON.serialize(APIResponse.success()), APIResponse.ContentTypeJSON, params, null, req, true);
+			return null;
+		}
+		
 		/*
 		 * Check if the client has provided a version #
 		 */
@@ -522,8 +529,8 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 			return;
 		
 		noLogging = callInstance.cls.isNoLogging();
-		
-		if (callInstance.cls.isExpectingFile() && callInstance.req.getMethod().equals(HttpMethod.OPTIONS))
+		//callInstance.cls.isExpectingFile() && 
+		if (callInstance.req.getMethod().equals(HttpMethod.OPTIONS))
 		{
 			// handle browser checks for access headers
 			APIResponse.httpOk(callInstance.ctx.getChannel(), JSON.serialize(APIResponse.success()), APIResponse.ContentTypeJSON, callInstance.params, null, callInstance.req, true);

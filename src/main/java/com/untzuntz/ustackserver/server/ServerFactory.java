@@ -5,6 +5,7 @@ import static org.jboss.netty.channel.Channels.pipeline;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.HttpContentCompressor;
+import org.jboss.netty.handler.codec.http.HttpContentDecompressor;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.codec.string.StringEncoder;
@@ -31,6 +32,7 @@ public class ServerFactory implements ChannelPipelineFactory {
 		ChannelPipeline pipeline = pipeline();
 		
 		pipeline.addLast("decoder", new HttpRequestDecoder(16384, 16384, 16384));
+		pipeline.addLast("inflater", new HttpContentDecompressor());
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		pipeline.addLast("sencoder", new StringEncoder());
 		pipeline.addLast("chunkedWriter", new ChunkedWriteHandler());

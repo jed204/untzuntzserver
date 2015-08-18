@@ -143,7 +143,7 @@ public class Main {
 		logger.info("Staring client server on port " + port);
 		
 		ExecutionHandler executionHandler = new ExecutionHandler(
-	             new OrderedMemoryAwareThreadPoolExecutor(16, 1048576, 1048576));
+	             new OrderedMemoryAwareThreadPoolExecutor(Integer.valueOf(System.getProperty("UStackServer.Threads", "48")), 4048576, 4048576));
 		
 		ServerBootstrap bootstrap = new ServerBootstrap(
 											new NioServerSocketChannelFactory(

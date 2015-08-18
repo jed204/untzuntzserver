@@ -43,15 +43,14 @@ public class APIResponse {
 	
 	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
-		if (AccessControlAllowOrigin != null)	
-			res.setHeader("Access-Control-Allow-Origin", AccessControlAllowOrigin);
 		if (jsonpFunction != null)
 		{
 			res.setHeader("Access-Control-Allow-Origin", "*");
 			res.setHeader("Content-type", ContentTypeJSONP);
 		}
-		
-		if (req != null)
+		else if (AccessControlAllowOrigin != null)	
+			res.setHeader("Access-Control-Allow-Origin", AccessControlAllowOrigin);
+		else if (req != null)
 		{
 			String originHeader = req.getHeader("Origin");
 			if (originHeader != null && legalOrigins.get(originHeader) != null)
@@ -84,9 +83,12 @@ public class APIResponse {
 		
 		if (enableCORS)
 		{
-			String originHeader = req.getHeader("Origin");
-			if (originHeader != null)
-				res.setHeader("Access-Control-Allow-Origin", originHeader);
+			if (res.getHeader("Access-Control-Allow-Origin") == null)
+			{
+				String originHeader = req.getHeader("Origin");
+				if (originHeader != null)
+					res.setHeader("Access-Control-Allow-Origin", originHeader);
+			}
 			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
@@ -161,7 +163,8 @@ public class APIResponse {
 		
 		if (enableCORS)
 		{
-			res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
+			if (res.getHeader("Access-Control-Allow-Origin") == null)
+				res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
 			if (req.getMethod().equals(HttpMethod.OPTIONS))
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
@@ -172,7 +175,7 @@ public class APIResponse {
 
 	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params, Cookie[] cookies)
 	{
-		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, req, false);
+		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, req, true);
 	}
 	
 	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params)

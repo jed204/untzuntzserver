@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 import org.apache.log4j.Logger;
 
@@ -36,6 +37,7 @@ public class DateRange {
 	public static final DateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");
 	static 
 	{
+		df.setTimeZone(TimeZone.getTimeZone("UTC"));
 		df.setLenient(false);
 	}
 	

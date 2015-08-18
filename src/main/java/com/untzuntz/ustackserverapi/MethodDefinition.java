@@ -92,7 +92,7 @@ public class MethodDefinition {
 	public void fileToBeUploaded() {
 		expectingFile = true;
 	}
-	
+
 	public String getDocumentationGroup() {
 		return docGroup;
 	}
