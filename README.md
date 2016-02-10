@@ -1,10 +1,10 @@
-ustackserver
+stackserver
 ============
 
 A server for API interaction
 
 
-The UStack API Server provides the base of the API with components such as:
+The Stack API Server provides the base of the API with components such as:
 
 * HTTP listener
 * API call setup/management
@@ -12,4 +12,4 @@ The UStack API Server provides the base of the API with components such as:
 * Parameter validation
 * Authentication
 
-Note: the UStack API Server utilizes Netty.io so we will encounter Netty.io classes (just a bit)
+Note: the Stack API Server utilizes Netty.io so we will encounter Netty.io classes (just a bit)
