@@ -6,13 +6,6 @@
 	<packaging>jar</packaging>
 	<version>2.1.47</version>
 	<name>UntzUntz UStack Server</name>
-	<licenses>
-		<license>
-			<name>The Apache Software License, Version 2.0</name>
-			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -47,10 +40,6 @@
 		</dependency>	    
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
-	<organization>
-		<url>http://www.untzuntz.com</url>
-		<name>UntzUntz, LLC.</name>
-	</organization>
 	<build>
 		<plugins>
 			<plugin>
@@ -119,14 +108,18 @@
             </plugin>
 		</plugins>
 	</build>
-	<url>www.untzuntz.com</url>
-    <developers>
-    	<developer>
-    		<id>jed204</id>
-    		<name>Jed Danner</name>
-    		<email>jdanner@untzuntz.com</email>
-    	</developer>
-    </developers>
+	<url>www.intelemage.com</url>
+	<organization>
+		<url>http://www.intelemage.com</url>
+		<name>Intelemage, LLC.</name>
+	</organization>
+	<developers>
+		<developer>
+			<id>jed204</id>
+			<name>Jed Danner</name>
+			<email>jdanner@intelemage.com</email>
+		</developer>
+	</developers>
 	<scm>
 		<url>git@github.com:jed204/ustackserver.git</url>
 		<connection>scm:git:git@github.com:jed204/ustackserver.git</connection>
