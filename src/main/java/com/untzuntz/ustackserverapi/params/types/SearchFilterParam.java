@@ -148,7 +148,10 @@ public class SearchFilterParam extends BaseParam implements ParameterDefinitionI
 				}
 				else
 				{
-					filters.add(map.classField, filter.getType(), map.valueType.getValue( filter.getValue() ));
+					if (filter.getValues() != null)
+						filters.add(map.classField, filter.getType(), filter.getValues());
+					else
+						filters.add(map.classField, filter.getType(), map.valueType.getValue( filter.getValue() ));
 				}
 			}
 			else

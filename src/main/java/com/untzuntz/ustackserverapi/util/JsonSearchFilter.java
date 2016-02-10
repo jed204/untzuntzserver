@@ -14,6 +14,7 @@ public class JsonSearchFilter {
 	String fieldName;
 	String type;
 	String value;
+	String[] values;
 	
 	public String getFieldName() {
 		return fieldName;
@@ -41,6 +42,14 @@ public class JsonSearchFilter {
 	
 	public void setValue(String value) {
 		this.value = value;
+	}
+
+	public String[] getValues() {
+		return values;
+	}
+
+	public void setValues(String[] values) {
+		this.values = values;
 	}
 	
 }

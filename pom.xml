@@ -4,7 +4,7 @@
 	<groupId>com.intelemage.stack</groupId>
 	<artifactId>stack-server</artifactId>
 	<packaging>jar</packaging>
-	<version>2.1.47</version>
+	<version>2.1.49</version>
 	<name>Stack Server</name>
 	<dependencies>
 		<dependency>
@@ -19,8 +19,8 @@
 			<version>3.5.4.Final</version>
 		</dependency>
 		<dependency>
-			<groupId>com.untzuntz.ustack</groupId>
-			<artifactId>ustack-core</artifactId>
+			<groupId>com.intelemage.stack</groupId>
+			<artifactId>stack-core</artifactId>
 			<version>1.0.40</version>
 		</dependency>
 		<dependency>
@@ -34,28 +34,14 @@
 	    	<version>0.0.7</version>
 	    </dependency>
 		<dependency>
-			<groupId>com.untzuntz.ustack</groupId>
-			<artifactId>ustack-core-data-java</artifactId>
-			<version>1.0.13</version>
+			<groupId>com.intelemage.stack</groupId>
+			<artifactId>stack-core-data-java</artifactId>
+			<version>1.0.37</version>
 		</dependency>	    
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.4</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -134,7 +120,7 @@
 	<distributionManagement>
 		<repository>
 			<id>intelemage</id>
-			<url>http://mvn.intelegrid.net/nexus/content/repositories/snapshots</url>
+			<url>http://mvn.intelegrid.net/nexus/content/repositories/releases</url>
 		</repository>
 	</distributionManagement>
 </project>
