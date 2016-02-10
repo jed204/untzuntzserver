@@ -121,8 +121,8 @@
 		</developer>
 	</developers>
 	<scm>
-		<url>git@github.com:jed204/ustackserver.git</url>
-		<connection>scm:git:git@github.com:jed204/ustackserver.git</connection>
+		<url>git@github.com:intelemage/stackserver.git</url>
+		<connection>scm:git:git@github.com:intelemage/stackserver.git</connection>
 	</scm>
 	<repositories>
 		<repository>
