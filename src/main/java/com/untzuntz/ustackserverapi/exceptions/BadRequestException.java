@@ -25,7 +25,8 @@ public class BadRequestException extends APIException implements APIExceptionDoc
 	public BadRequestException(String message, HttpResponseStatus status)
 	{
 		super(message);
-		this.status = status;
+		if (status != null)
+			this.status = status.getCode();
 		this.message = message;
 	}
 
