@@ -4,7 +4,7 @@
 	<groupId>com.intelemage.stack</groupId>
 	<artifactId>stack-server</artifactId>
 	<packaging>jar</packaging>
-	<version>2.1.53</version>
+	<version>2.1.55</version>
 	<name>Stack Server</name>
 	<dependencies>
 		<dependency>
@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>com.intelemage.stack</groupId>
 			<artifactId>stack-core-data-java</artifactId>
-			<version>1.0.44</version>
+			<version>1.0.46</version>
 		</dependency>	    
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
