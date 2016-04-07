@@ -91,6 +91,8 @@ public class APIResponse {
 			}
 			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
+			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Method") != null)
+				res.setHeader("Access-Control-Allow-Methods", req.getHeader("Access-Control-Request-Method"));
 		}
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
