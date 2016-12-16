@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
+import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustack.data.AccessToken;
 import com.untzuntz.ustack.data.AccessToken.AccessTokenDetails;
 import com.untzuntz.ustack.data.UserAccount;
@@ -52,7 +53,17 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 	@Override
 	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
 
-		//AuthTypes.ClientKey.authenticate(method, req, params);
+		if ("STATIC".equals(params.get(ParamNames.token))) {
+			AuthTypes.ClientKey.authenticate(method, req, params);
+			
+			APIClient acct = APIClient.getAPIClient(params.get(ParamNames.client_id));
+			String userEquiv = acct.getString("userEquivalent");
+			if (userEquiv == null)
+				throw new APIAuthenticationException("No API Client userEquivalent set");
+			
+			return UserAccount.getUser(userEquiv);
+		}
+			
 		AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
 		
 		if (details == null)

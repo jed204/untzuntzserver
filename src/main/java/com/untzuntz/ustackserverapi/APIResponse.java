@@ -45,7 +45,6 @@ public class APIResponse {
 	{
 		if (jsonpFunction != null)
 		{
-			res.setHeader("Access-Control-Allow-Origin", "*");
 			res.setHeader("Content-type", ContentTypeJSONP);
 		}
 		else if (AccessControlAllowOrigin != null)	
@@ -80,6 +79,13 @@ public class APIResponse {
 		addHeaders(channel, req, res, jsonpFunction);
 		if (jsonpFunction != null)
 			text = handleJSONPResponse(res, jsonpFunction, text, params);
+
+		if ("INVALID".equals(text)) {
+			res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
+			setContentLength(res, res.getContent().readableBytes());
+                	channel.write(res).addListener(ChannelFutureListener.CLOSE);
+			return;
+		}
 		
 		if (enableCORS)
 		{
@@ -110,6 +116,10 @@ public class APIResponse {
 	 */
 	private static String handleJSONPResponse(HttpResponse res, String jsonpFunction, String text, CallParameters params)
 	{
+		if (!jsonpFunction.matches("angular.callbacks._(\\w+)")) {
+			return "INVALID";
+		}
+
 		if (!"false".equals(params.get(ParamNames.json_response_code_inject)) && res.getStatus().getCode() >= 400) // respond w/ a 200 and jam in the error response code so the client side can process
 		{
 			text = String.format("{ \"httpResponseCode\" : %d,%s", res.getStatus().getCode(), text.substring(1));
