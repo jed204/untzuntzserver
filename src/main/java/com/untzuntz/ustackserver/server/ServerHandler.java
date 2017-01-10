@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.net.URLEncoder;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -230,7 +231,7 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 							paramBuf.append("&");
 	
 						Attribute attribute = (Attribute) data;
-						paramBuf.append(attribute.getName()).append("=").append(attribute.getValue());
+						paramBuf.append(attribute.getName()).append("=").append(URLEncoder.encode(attribute.getValue(), "UTF-8"));
 					}
 					else if (data.getHttpDataType() == HttpDataType.FileUpload)
 					{

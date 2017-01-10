@@ -48,8 +48,6 @@ public class CallParameters {
 	private Map<String,List<String>> qsdMap;
 	public CallParameters(String uri) {
 
-		uri = uri.replaceAll("\\%\"", "%25\"");
-		uri = uri.replaceAll("\\%;\"", "%25;\"");
 		qsd = new QueryStringDecoder(uri);
 		if (uri.indexOf("?") > -1)
 			path = uri.substring(0, uri.indexOf("?"));
