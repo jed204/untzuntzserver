@@ -46,20 +46,6 @@ public class PeerHandler extends SimpleChannelUpstreamHandler {
     
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) {
 		
-		if (e.getMessage() instanceof PeerDelivery)
-		{
-			PeerDelivery delivery = (PeerDelivery)e.getMessage();
-			
-			ChannelGroup tgt = ServerHandler.getChannel(delivery.getTarget(), false);
-			if (tgt != null)
-			{
-				logger.info("Delivery to : " + delivery.getTarget());
-				ServerHandler.sendToGroup(tgt, "Test Message");
-			}
-			else
-				logger.info("Delivery to unknown : " + delivery.getTarget());
-		}
-		
 	}
 
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) {

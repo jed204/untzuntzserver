@@ -12,11 +12,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.net.URLEncoder;
 
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -28,6 +28,7 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ChannelStateEvent;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
+import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.channel.group.ChannelGroup;
 import org.jboss.netty.channel.group.DefaultChannelGroup;
 import org.jboss.netty.handler.codec.http.Cookie;
@@ -49,8 +50,6 @@ import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import org.jboss.netty.handler.codec.http.multipart.HttpPostRequestDecoder.EndOfDataDecoderException;
 import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData;
 import org.jboss.netty.handler.codec.http.multipart.InterfaceHttpData.HttpDataType;
-import org.jboss.netty.handler.timeout.IdleStateAwareChannelUpstreamHandler;
-import org.jboss.netty.handler.timeout.IdleStateEvent;
 import org.jboss.netty.util.CharsetUtil;
 import org.jboss.netty.util.internal.ConcurrentHashMap;
 
@@ -59,8 +58,6 @@ import com.untzuntz.ustack.data.UDataCache;
 import com.untzuntz.ustack.main.UAppCfg;
 import com.untzuntz.ustack.main.UFile;
 import com.untzuntz.ustack.main.UOpts;
-import com.untzuntz.ustackserver.peer.PeerDelivery;
-import com.untzuntz.ustackserver.peer.PeerHandler;
 import com.untzuntz.ustackserverapi.APICalls;
 import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.APIResponse;
@@ -72,7 +69,7 @@ import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.util.UploadedFile;
 
-public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
+public class ServerHandler extends SimpleChannelUpstreamHandler {
 	
     static Logger           		logger               	= Logger.getLogger(ServerHandler.class);
     
@@ -88,7 +85,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
     private boolean readingChunks;
     private String userName;
     private boolean noLogging;
-    private boolean realtimeEnabled;
     private List<UploadedFile> uploadedFiles;
     private File targetFile;
 	private OutputStream targetOutputStream;
@@ -281,13 +277,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		return params;
 	}
 		
-	@Override
-	public void channelIdle(ChannelHandlerContext ctx, IdleStateEvent e) throws Exception {
-		super.channelIdle(ctx, e);
-		if (realtimeEnabled)
-			logger.info(e.getChannel().getRemoteAddress() + " => IDLE : " + e.getLastActivityTimeMillis() + " - " + e.getState());
-	}
-
 	private void handleHttpRequest(ChannelHandlerContext ctx, HttpRequest req, String params, MethodDefinition cls) throws Exception {
 		
 		String[] uri = req.getUri().split("/");
@@ -588,43 +577,6 @@ public class ServerHandler extends IdleStateAwareChannelUpstreamHandler {
 		long apiCallFinish = System.currentTimeMillis();
 		if (!noLogging)
 			logger.info(String.format("%s => API Path: %s [Client Ver: %s|%s] -> %d ms", callInstance.params.getRemoteIpAddress(), callInstance.path, callInstance.params.get(ParamNames.app_name), callInstance.params.get(ParamNames.client_ver), (apiCallFinish - callInstance.apiCallStart)));
-
-	}
-	
-	public void handleRealtime(ChannelHandlerContext ctx, String[] uri)
-	{
-		realtimeEnabled = true;
-		userName = uri[2];
-		String targetName = uri[3];
-		
-		logger.info("LOGIN: " + userName);
-		ChannelGroup cg = getChannel(userName, true);
-		cg.add(ctx.getChannel());
-		
-		ChannelGroup tgt = getChannel(targetName, false);
-		if (tgt == null)
-		{
-			logger.info("Sending message to target via peers: " + targetName);
-			PeerHandler.sendToPeers(new PeerDelivery(targetName));
-			return;
-		}
-		
-		logger.info("Sending message to target: " + targetName + " (" + tgt.size() + " connections)");
-		
-		sendToGroup(tgt, targetName);
-	}
-	
-	public static void sendToGroup(ChannelGroup tgt, String message) {
-		
-		Iterator<Channel> it = tgt.iterator();
-		while (it.hasNext())
-		{
-			Channel c = it.next();
-			HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
-			res.setContent(ChannelBuffers.copiedBuffer(message + "\r\n", CharsetUtil.UTF_8));
-			setContentLength(res, res.getContent().readableBytes());
-			c.write(res).addListener(ChannelFutureListener.CLOSE);
-		}
 
 	}
 	
