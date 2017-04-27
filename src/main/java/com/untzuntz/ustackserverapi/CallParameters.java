@@ -32,11 +32,20 @@ public class CallParameters {
 
 	private QueryStringDecoder qsd;
 	private String path;
+	private String postData;
 	private String remoteIpAddress;
 	private String remoteIpCountry;
 	private List<UploadedFile> uploadedFiles;
 	private Long tokenTTL;
 	
+	public String getPostData() {
+		return postData;
+	}
+
+	public void setPostData(String postData) {
+		this.postData = postData;
+	}
+
 	public void setTokenTTL(Long ttl) {
 		tokenTTL = ttl;
 	}
@@ -54,10 +63,11 @@ public class CallParameters {
 		else
 			path = uri;
 		
-		if (qsd.getParameters() == null)
+		Map<String,List<String>> map = qsd.getParameters();
+		if (map == null)
 			qsdMap = new HashMap<String,List<String>>();
 		else
-			qsdMap = new HashMap<String,List<String>>(qsd.getParameters());
+			qsdMap = new HashMap<String,List<String>>(map);
 		
 		if (qsdMap.get("x_object") != null)
 		{

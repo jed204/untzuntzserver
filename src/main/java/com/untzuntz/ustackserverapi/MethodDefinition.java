@@ -34,6 +34,7 @@ public class MethodDefinition {
 	private boolean methodPUT;
 	private boolean methodDELETE;
 	private boolean expectingFile;
+	private boolean disablePostParam = false;
 	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
@@ -85,6 +86,14 @@ public class MethodDefinition {
 		noLogging = true;
 	}
 	
+	public boolean isDisablePostParam() {
+		return disablePostParam;
+	}
+
+	public void setDisablePostParam(boolean disablePostParam) {
+		this.disablePostParam = disablePostParam;
+	}
+
 	public boolean isExpectingFile() { 
 		return expectingFile;
 	}

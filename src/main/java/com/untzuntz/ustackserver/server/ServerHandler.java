@@ -308,19 +308,30 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 	{
 		String path = req.getUri().substring(5);
 		
+		if (cls == null) {
+			if (path.indexOf("?") > -1) {
+				cls = APICalls.getCallByURI(path.substring(0, path.indexOf("?")));
+			} else { 
+				cls = APICalls.getCallByURI(path);
+			}
+		}
+		
 		/*
 		 * Setup Parameters
 		 */
 		if (req.getMethod() == HttpMethod.POST && paramStr != null)
 		{
-			if (!path.endsWith("?") && paramStr.length() > 0)
-				path += "?";
-			
-			path += paramStr;
+			if (cls == null || !cls.isDisablePostParam()) {
+				if (!path.endsWith("?") && paramStr.length() > 0)
+					path += "?";
+				
+				path += paramStr;
+			}
 		}
 		
 		CallParameters params = new CallParameters(path);
 		params.setRemoteIpAddress( ((InetSocketAddress)ctx.getChannel().getRemoteAddress()).getAddress().getHostAddress() );
+		params.setPostData(paramStr);
 		if (req.getHeader("X-Real-IP") != null)
 			params.setRemoteIpAddress( req.getHeader("X-Real-IP") );
 		if (req.getHeader("X-Forwarded-For") != null)
@@ -499,7 +510,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		return ret;
 	}
 	
-	private class CallInstance {
+	public class CallInstance {
 		MethodDefinition cls;
 		ChannelHandlerContext ctx;
 		HttpRequest req;
