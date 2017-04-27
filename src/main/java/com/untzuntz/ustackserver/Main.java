@@ -4,13 +4,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.bson.types.ObjectId;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
+import org.jboss.netty.handler.execution.ExecutionHandler;
+import org.jboss.netty.handler.execution.OrderedMemoryAwareThreadPoolExecutor;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -141,22 +144,41 @@ public class Main {
 		
 		logger.info("Staring client server on port " + port);
 		
+		ExecutionHandler executionHandler = new ExecutionHandler(
+							new OrderedMemoryAwareThreadPoolExecutor(
+									Integer.valueOf(System.getProperty("UStackServer.Threads", "48")), 
+									4048576, 4048576));
+		
 		ServerBootstrap bootstrap = new ServerBootstrap(
 											new NioServerSocketChannelFactory(
-													Executors.newCachedThreadPool(),
-													Executors.newCachedThreadPool()));
+													Executors.newCachedThreadPool(new NamedThreadFactory("netty-boss")),
+													Executors.newCachedThreadPool(new NamedThreadFactory("netty-worker"))));
 				
-		bootstrap.setOption("backlog", 8024);
-		bootstrap.setOption("child.tcpNoDelay", true);
-	    bootstrap.setOption("child.keepAlive", false);
-	    bootstrap.setOption("child.connectTimeoutMillis", TimeUnit.SECONDS.toMillis(5000));
-	    bootstrap.setOption("reuseAddress", true);
-	    bootstrap.setOption("tcpNoDelay", true);
-	    
+		bootstrap.setOption("backlog", 1000);
+		bootstrap.setOption("reuseAddress", true);
+
 		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new ServerFactory());
+		bootstrap.setPipelineFactory(new ServerFactory(executionHandler));
 		
 		// Bind and start to accept incoming connections.
 		bootstrap.bind(new InetSocketAddress(port));
 	}
+	
+	public class NamedThreadFactory implements ThreadFactory {
+		  private final String baseName;
+		  private final AtomicInteger threadNum = new AtomicInteger(0); 
+
+		  public NamedThreadFactory(String baseName) {
+		    this.baseName = baseName;
+		  }
+
+		  @Override
+		  public synchronized Thread newThread(Runnable r) {
+		    Thread t = Executors.defaultThreadFactory().newThread(r);
+		    
+		    t.setName(baseName + "-" + threadNum.getAndIncrement());
+		    
+		    return t; 
+		  }
+		}
 }
