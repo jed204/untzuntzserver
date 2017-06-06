@@ -66,6 +66,7 @@ import com.untzuntz.ustackserverapi.InvalidAPIRequestException;
 import com.untzuntz.ustackserverapi.MethodDefinition;
 import com.untzuntz.ustackserverapi.MethodDefinition.RateLimit;
 import com.untzuntz.ustackserverapi.auth.AuthorizationInt;
+import com.untzuntz.ustackserverapi.exceptions.APIStatusException;
 import com.untzuntz.ustackserverapi.params.ParamNames;
 import com.untzuntz.ustackserverapi.util.UploadedFile;
 
@@ -393,14 +394,15 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 			{
 				long block = (System.currentTimeMillis() / 1000L / limit.timeframe);
 				String key = String.format("%s_%s_%d_%d", params.getRemoteIpAddress(), limit.key, limit.timeframe, block);
-				long reqs = UDataCache.getInstance().incr(key, limit.timeframe, 1);
-				if (reqs > limit.maxRequests)
-				{
-					logger.error(String.format("%s requested '%s' %d times in %d seconds, allowed max requests is %d", params.getRemoteIpAddress(), limit.key, reqs, limit.timeframe, limit.maxRequests));
-					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Too many requests"), req, HttpResponseStatus.NOT_FOUND, params);
-					return null;
-				}
-					
+				if (UDataCache.getInstance() != null) {
+					long reqs = UDataCache.getInstance().incr(key, limit.timeframe, 1);
+					if (reqs > limit.maxRequests)
+					{
+						logger.error(String.format("%s requested '%s' %d times in %d seconds, allowed max requests is %d", params.getRemoteIpAddress(), limit.key, reqs, limit.timeframe, limit.maxRequests));
+						APIResponse.httpError(ctx.getChannel(), APIResponse.error("Too many requests"), req, HttpResponseStatus.NOT_FOUND, params);
+						return null;
+					}
+				}					
 			}
 		}
 		
@@ -491,8 +493,11 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 				logger.error(String.format("%s [%s] Authorization failed due to an invalid authentication/authorization combo", params.getRemoteIpAddress(), path), cce);
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error("Invalid Authentication/Authorization Combo"), req, HttpResponseStatus.FORBIDDEN, params);
 				return null;
-			} catch (APIException e) {
+			} catch (APIStatusException e) {
 				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), req, e.getHttpStatus(), params);
+				return null;
+			} catch (APIException e) {
+				APIResponse.httpError(ctx.getChannel(), APIResponse.error(e.toDBObject()), req, HttpResponseStatus.BAD_GATEWAY, params);
 				return null;
 			}
 		}

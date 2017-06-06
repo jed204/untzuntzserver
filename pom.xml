@@ -26,11 +26,6 @@
 			<version>3.5.4.Final</version>
 		</dependency>
 		<dependency>
-			<groupId>com.untzuntz.ustack</groupId>
-			<artifactId>ustack-core</artifactId>
-			<version>2.0.3</version>
-		</dependency>
-		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
 			<version>5.3.1</version>
@@ -43,11 +38,11 @@
 		<dependency>
 			<groupId>com.untzuntz.ustack</groupId>
 			<artifactId>ustack-core-data-java</artifactId>
-			<version>1.0.13</version>
+			<version>1.0.41</version>
 		</dependency>	    
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
-	<organization>
+	<organization> 
 		<url>http://www.untzuntz.com</url>
 		<name>UntzUntz, LLC.</name>
 	</organization>
