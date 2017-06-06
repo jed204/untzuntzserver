@@ -2,7 +2,6 @@ package com.untzuntz.ustackserverapi.exceptions;
 
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import com.untzuntz.ustackserverapi.APIException;
 import com.untzuntz.ustackserverapi.APIExceptionDocumentation;
 
 /**
@@ -11,7 +10,7 @@ import com.untzuntz.ustackserverapi.APIExceptionDocumentation;
  * @author jdanner
  *
  */
-public class BadRequestException extends APIException implements APIExceptionDocumentation {
+public class BadRequestException extends APIStatusException implements APIExceptionDocumentation {
 	
 	private static final long serialVersionUID = 1L;
 	private String message;
