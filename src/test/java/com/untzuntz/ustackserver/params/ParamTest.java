@@ -22,6 +22,7 @@ import com.untzuntz.ustackserverapi.params.types.IntParam;
 import com.untzuntz.ustackserverapi.params.types.JSONParam;
 import com.untzuntz.ustackserverapi.params.types.LongArrayParam;
 import com.untzuntz.ustackserverapi.params.types.LongParam;
+import com.untzuntz.ustackserverapi.params.types.ObjectIdParam;
 import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 import com.untzuntz.ustackserverapi.params.types.RegexParam;
 import com.untzuntz.ustackserverapi.params.types.StringArrayParam;
@@ -81,19 +82,19 @@ public class ParamTest {
 		assertNoException(new URLParam("test", "test", "https"), "https://test.url.com"); // should pass - valid url and type
 		
 		// DateRange
-		assertEquals("20121201000000", DateRange.fixDate("20121201", true));
-		assertEquals("20121201050000", DateRange.fixDate("2012120105", true));
+		assertEquals("20121201000000000", DateRange.fixDate("20121201", true));
+		assertEquals("20121201050000000", DateRange.fixDate("2012120105", true));
 		try { DateRange.fixDate("201", true); fail(); } catch (ParseException pe) { }
 		try { DateRange.fixDate("20120", true); fail(); } catch (ParseException pe) { }
-		assertEquals("20121201235959", DateRange.fixDate("20121201", false));
+		assertEquals("20121201235959999", DateRange.fixDate("20121201", false));
 
-		assertEquals("20121201235959", DateRange.df.format(new DateRange("20121201").getEnd()));
-		assertEquals("20121201000000", DateRange.df.format(new DateRange("20121201=>20121205").getStart()));
-		assertEquals("20121205235959", DateRange.df.format(new DateRange("20121201=>20121205").getEnd()));
+		assertEquals("20121201235959999", DateRange.df.format(new DateRange("20121201").getEnd()));
+		assertEquals("20121201000000000", DateRange.df.format(new DateRange("20121201=>20121205").getStart()));
+		assertEquals("20121205235959999", DateRange.df.format(new DateRange("20121201=>20121205").getEnd()));
 		assertNull(new DateRange(">20121201").getEnd());
-		assertEquals("20121201235959", DateRange.df.format(new DateRange(">20121201").getStart()));
+		assertEquals("20121201235959999", DateRange.df.format(new DateRange(">20121201").getStart()));
 		assertNull(new DateRange("<20121201").getStart());
-		assertEquals("20121201000000", DateRange.df.format(new DateRange("<20121201").getEnd()));
+		assertEquals("20121201000000000", DateRange.df.format(new DateRange("<20121201").getEnd()));
 		
 		Calendar now = Calendar.getInstance();
 		now.set(Calendar.HOUR_OF_DAY, 0);
@@ -128,16 +129,16 @@ public class ParamTest {
 		DateRange range = null;
 		
 		range = new DateRange("201301");
-		assertEquals("20130101000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130131235959", DateRange.df.format(range.getEnd()));
+		assertEquals("20130101000000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130131235959999", DateRange.df.format(range.getEnd()));
 		
 		range = new DateRange("201302");
-		assertEquals("20130201000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130228235959", DateRange.df.format(range.getEnd()));
+		assertEquals("20130201000000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130228235959999", DateRange.df.format(range.getEnd()));
 		
 		range = new DateRange("201304");
-		assertEquals("20130401000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130430235959", DateRange.df.format(range.getEnd()));
+		assertEquals("20130401000000000", DateRange.df.format(range.getStart()));
+		assertEquals("20130430235959999", DateRange.df.format(range.getEnd()));
 		
 		// JSON
 		assertException(new JSONParam("test", "test"), "RANDODATA"); // should fail - not a valid JSON string
@@ -167,6 +168,13 @@ public class ParamTest {
 		assertException(new RegexParam("test", "test", "[a-z]+", true), "2ab");
 		assertException(new RegexParam("test", "test", "[A-Z]+", true), "1AB");
 		assertNoException(new RegexParam("test", "test", "[A-Za-z0-9]+", true), "itemTest1");
+		
+		// Object ID
+		assertNoException(new ObjectIdParam("test", "test"), "59835fedb96c312de99824e7"); // proper
+		assertNoException(new ObjectIdParam("test", "test"), "59894002b96c317e4a425ece"); // proper
+		assertException(new ObjectIdParam("test", "test"), "59894002b96c317e4a425ece12"); // too long
+		assertException(new ObjectIdParam("test", "test"), "59894002b96c317e4a425e"); // too short
+		assertException(new ObjectIdParam("test", "test"), "59894002b96c317e4a425ecZ"); // invalid format (the Z)
 	}
 	
 	@Test public void testORParams()
@@ -256,6 +264,7 @@ public class ParamTest {
 			pti.validate(data);
 		} catch (APIException e) {
 			System.out.println("Exception: " + e);
+			e.printStackTrace();
 			fail();
 		}
 	}
