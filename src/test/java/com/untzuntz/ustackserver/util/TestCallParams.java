@@ -11,13 +11,17 @@ import com.untzuntz.ustackserverapi.params.types.ParameterDefinitionInt;
 public class TestCallParams
 {
     SortedMap<String, String> sortedParamMap = new TreeMap<String, String>();
-
+	String postData;
 	
 	public TestCallParams(String name, String val)
 	{
 		append(name, val);
 	}
-	
+
+	public TestCallParams(String pd) {
+		postData = pd;
+	}
+
 	public TestCallParams(ParameterDefinitionInt<?> name, String val)
 	{
 		append(name, val);
@@ -34,7 +38,23 @@ public class TestCallParams
 		sortedParamMap.put(name.getName(), val);
 		return this;
 	}
-	
+
+	public String getPostData() {
+		return postData;
+	}
+
+	public void setPostData(String postData) {
+		this.postData = postData;
+	}
+
+	public SortedMap<String, String> getSortedParamMap() {
+		return sortedParamMap;
+	}
+
+	public void setSortedParamMap(SortedMap<String, String> sortedParamMap) {
+		this.sortedParamMap = sortedParamMap;
+	}
+
 	public String getQueryString() throws UnsupportedEncodingException
 	{
 		StringBuffer q = new StringBuffer();

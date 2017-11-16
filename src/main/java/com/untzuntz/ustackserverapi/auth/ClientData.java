@@ -10,6 +10,13 @@ import com.untzuntz.ustack.data.APIClient;
  */
 public class ClientData {
 
-	public APIClient api;
-	
+	private APIClient api;
+
+	public APIClient getApi() {
+		return api;
+	}
+
+	public void setApi(APIClient api) {
+		this.api = api;
+	}
 }

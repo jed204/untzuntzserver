@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.UUID;
 
+import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelConfig;
@@ -18,6 +19,8 @@ import org.jboss.netty.handler.stream.ChunkedInput;
 import org.jboss.netty.handler.stream.ChunkedStream;
 
 public class TestHttpChannel implements Channel {
+
+	static Logger logger                  = Logger.getLogger(TestHttpChannel.class);
 
 	public int compareTo(Channel arg0) {
 		
@@ -148,9 +151,9 @@ public class TestHttpChannel implements Channel {
 					out.write(((String)arg0).getBytes());	
 					out.flush();
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Failed to write output file", e);
 				} finally {
-					try { out.close(); } catch (Exception e) {}
+					try { if (out != null) { out.close(); } } catch (Exception e) {}
 				}
 			}
 		}
@@ -173,13 +176,13 @@ public class TestHttpChannel implements Channel {
 						out.write(buf.array());
 					}
 					else
-						System.err.println("Unknown chunk type => " + nc.getClass().getName());
+						System.err.println("Unknown write chunk => " + nc.getClass().getName());
 				}
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to write chunk", e);
 			} finally {
-				try { out.close(); } catch (Exception e) {}
+				try { if (out != null) { out.close(); } } catch (Exception e) {}
 			}
 		}
 		else if (arg0 instanceof ChunkedStream)
@@ -201,13 +204,13 @@ public class TestHttpChannel implements Channel {
 						out.write(buf.array());
 					}
 					else
-						System.err.println("Unknown chunk type => " + nc.getClass().getName());
+						System.err.println("Unknown chunk stream type => " + nc.getClass().getName());
 				}
 				
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("Failed to write chunk stream", e);
 			} finally {
-				try { out.close(); } catch (Exception e) {}
+				try { if (out != null) { out.close(); } } catch (Exception e) {}
 			}
 		}
 		else

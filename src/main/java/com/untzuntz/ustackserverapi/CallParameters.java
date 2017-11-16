@@ -2,14 +2,7 @@ package com.untzuntz.ustackserverapi;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -159,7 +152,7 @@ public class CallParameters {
 					valStr = val.get(0);
 				
 				//logger.info("\t" + param + " => " + valStr);
-				
+
 				sortedParamMap.put(param, valStr);
 			}
 		}
@@ -168,11 +161,11 @@ public class CallParameters {
         String canonicalQS = path + "?" + canonicalize(sortedParamMap);
         
         String sig = hmac(key, canonicalQS);
-        String psig = percentEncodeRfc3986(sig);
+        //String psig = percentEncodeRfc3986(sig);
 
-		logger.debug(String.format("Full Request to Encode: %s => Signature: %s", canonicalQS, psig));
+		logger.info(String.format("Full Request to Encode: %s => Signature: %s", canonicalQS, sig));
 
-		return psig;
+		return sig;
 	}
 	
     /**
@@ -191,9 +184,12 @@ public class CallParameters {
 
         while (iter.hasNext()) {
             Map.Entry<String, String> kvpair = iter.next();
-            buffer.append(percentEncodeRfc3986(kvpair.getKey()));
-            buffer.append("=");
-            buffer.append(percentEncodeRfc3986(kvpair.getValue()));
+			buffer.append(kvpair.getKey());
+			buffer.append("=");
+			buffer.append(kvpair.getValue());
+//            buffer.append(percentEncodeRfc3986(kvpair.getKey()));
+//            buffer.append("=");
+//            buffer.append(percentEncodeRfc3986(kvpair.getValue()));
             if (iter.hasNext()) {
                 buffer.append("&");
             }
@@ -264,7 +260,29 @@ public class CallParameters {
         }
         return signature;
     }
-    
+
+    public String getQueryString() {
+
+		Map<String,List<String>> paramsAsArray = getParameters();
+
+		StringBuffer paramStr = new StringBuffer();
+
+		Iterator var3 = paramsAsArray.keySet().iterator();
+
+		while(var3.hasNext()) {
+			Map.Entry<String, String[]> param = (Map.Entry)var3.next();
+			String[] vals = new String[1];
+			vals[0] = param.getValue().toString();
+			paramStr.append(String.format("%s=%s", param.getKey(), vals[0]));
+		}
+
+		return paramStr.toString();
+	}
+
+    public Map<String,List<String>> getParameters() {
+    	return qsd.getParameters();
+	}
+
     public BasicDBList getParameterList() 
     {
     	BasicDBList ret = new BasicDBList();

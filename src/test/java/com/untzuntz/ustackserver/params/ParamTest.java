@@ -88,13 +88,13 @@ public class ParamTest {
 		try { DateRange.fixDate("20120", true); fail(); } catch (ParseException pe) { }
 		assertEquals("20121201235959999", DateRange.fixDate("20121201", false));
 
-		assertEquals("20121201235959999", DateRange.df.format(new DateRange("20121201").getEnd()));
-		assertEquals("20121201000000000", DateRange.df.format(new DateRange("20121201=>20121205").getStart()));
-		assertEquals("20121205235959999", DateRange.df.format(new DateRange("20121201=>20121205").getEnd()));
+		assertEquals("20121201235959999",  DateRange.getDateFormat().format(new DateRange("20121201").getEnd()));
+		assertEquals("20121201000000000",  DateRange.getDateFormat().format(new DateRange("20121201=>20121205").getStart()));
+		assertEquals("20121205235959999",  DateRange.getDateFormat().format(new DateRange("20121201=>20121205").getEnd()));
 		assertNull(new DateRange(">20121201").getEnd());
-		assertEquals("20121201235959999", DateRange.df.format(new DateRange(">20121201").getStart()));
+		assertEquals("20121201235959999",  DateRange.getDateFormat().format(new DateRange(">20121201").getStart()));
 		assertNull(new DateRange("<20121201").getStart());
-		assertEquals("20121201000000000", DateRange.df.format(new DateRange("<20121201").getEnd()));
+		assertEquals("20121201000000000",  DateRange.getDateFormat().format(new DateRange("<20121201").getEnd()));
 		
 		Calendar now = Calendar.getInstance();
 		now.set(Calendar.HOUR_OF_DAY, 0);
@@ -102,17 +102,31 @@ public class ParamTest {
 		now.set(Calendar.SECOND, 0);
 		now.set(Calendar.MILLISECOND, 0);
 		now.add(Calendar.DATE, -10);
-		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 10 days").getStart()));
+		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("Last 10 days").getStart()));
 		now.add(Calendar.DATE, 10);
 		now.add(Calendar.DATE, 3 * -7);
-		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 3 weeks").getStart()));
+		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("Last 3 weeks").getStart()));
 		now.add(Calendar.DATE, 3 * 7);
 		now.add(Calendar.MONTH, -8);
-		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 8 months").getStart()));
+		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("Last 8 months").getStart()));
 //		now.add(Calendar.MONTH, 8);
 //		now.add(Calendar.YEAR, -2);
-//		assertEquals(DateRange.df.format(now.getTime()), DateRange.df.format(new DateRange("Last 2 years").getStart()));
-		
+//		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("Last 2 years").getStart()));
+
+		now = Calendar.getInstance();
+		now.set(Calendar.MINUTE, 0);
+		now.set(Calendar.SECOND, 0);
+		now.set(Calendar.MILLISECOND, 0);
+		now.add(Calendar.HOUR, 5);
+		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("5 hours").getStart()));
+
+		now = Calendar.getInstance();
+		now.add(Calendar.MINUTE, 5);
+		now.set(Calendar.SECOND, 0);
+		now.set(Calendar.MILLISECOND, 0);
+		assertEquals( DateRange.getDateFormat().format(now.getTime()),  DateRange.getDateFormat().format(new DateRange("5 minutes").getStart()));
+
+
 		assertException(new DateRangeParam("test", "test"), "201");
 		assertException(new DateRangeParam("test", "test"), "20121");
 		assertException(new DateRangeParam("test", "test"), "201213");
@@ -129,16 +143,16 @@ public class ParamTest {
 		DateRange range = null;
 		
 		range = new DateRange("201301");
-		assertEquals("20130101000000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130131235959999", DateRange.df.format(range.getEnd()));
+		assertEquals("20130101000000000",  DateRange.getDateFormat().format(range.getStart()));
+		assertEquals("20130131235959999",  DateRange.getDateFormat().format(range.getEnd()));
 		
 		range = new DateRange("201302");
-		assertEquals("20130201000000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130228235959999", DateRange.df.format(range.getEnd()));
+		assertEquals("20130201000000000",  DateRange.getDateFormat().format(range.getStart()));
+		assertEquals("20130228235959999",  DateRange.getDateFormat().format(range.getEnd()));
 		
 		range = new DateRange("201304");
-		assertEquals("20130401000000000", DateRange.df.format(range.getStart()));
-		assertEquals("20130430235959999", DateRange.df.format(range.getEnd()));
+		assertEquals("20130401000000000",  DateRange.getDateFormat().format(range.getStart()));
+		assertEquals("20130430235959999",  DateRange.getDateFormat().format(range.getEnd()));
 		
 		// JSON
 		assertException(new JSONParam("test", "test"), "RANDODATA"); // should fail - not a valid JSON string

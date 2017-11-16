@@ -50,9 +50,40 @@ public class FieldDatabaseMap {
 		this.valueType = valueType;
 	}
 
-	public String fieldName;
-	public Class<?> typeClass;
-	public String classField;
-	public ParameterDefinitionInt<?> valueType;
+	private String fieldName;
+	private Class<?> typeClass;
+	private String classField;
+	private ParameterDefinitionInt<?> valueType;
 
+	public String getFieldName() {
+		return fieldName;
+	}
+
+	public void setFieldName(String fieldName) {
+		this.fieldName = fieldName;
+	}
+
+	public Class<?> getTypeClass() {
+		return typeClass;
+	}
+
+	public void setTypeClass(Class<?> typeClass) {
+		this.typeClass = typeClass;
+	}
+
+	public String getClassField() {
+		return classField;
+	}
+
+	public void setClassField(String classField) {
+		this.classField = classField;
+	}
+
+	public ParameterDefinitionInt<?> getValueType() {
+		return valueType;
+	}
+
+	public void setValueType(ParameterDefinitionInt<?> valueType) {
+		this.valueType = valueType;
+	}
 }

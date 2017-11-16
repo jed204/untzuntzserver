@@ -63,19 +63,19 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 				throw new APIAuthenticationException("Invalid Token");
 			}
 			
-			long tokenLife = details.expirationAge - System.currentTimeMillis();
+			long tokenLife = details.getExpirationAge() - System.currentTimeMillis();
 			if (tokenLife < 0)
 			{
-				logger.info(String.format("%s -- %s/%s | Access Token expired at '%s'", method.getPath(), details.userName, details.clientId, new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.expirationAge))));
+				logger.info(String.format("%s -- %s/%s | Access Token expired at '%s'", method.getPath(), details.getUserName(), details.getClientId(), new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.getExpirationAge()))));
 				throw new APIAuthenticationException("Token has expired");
 			}
 	
 	//		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
 			
-			params.setParameterValue(ParamNames.client_id.getName(), details.clientId);
+			params.setParameterValue(ParamNames.client_id.getName(), details.getClientId());
 			params.setTokenTTL(tokenLife);
 			
-			userName = details.userName;
+			userName = details.getUserName();
 		}
 		else if (params.get(ParamNames.client_id) != null) {
 			

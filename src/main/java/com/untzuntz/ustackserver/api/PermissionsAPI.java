@@ -25,7 +25,18 @@ import com.untzuntz.ustackserverapi.util.FormatUtil;
 import com.untzuntz.ustackserverapi.version.Versions;
 
 public class PermissionsAPI {
-	
+
+	private void defaultDefinition(MethodDefinition def, boolean overrideDocs) {
+		def.setSinceVersion(Versions.Version100);
+		def.setDocumentationGroup("Roles & Permissions");
+		def.authenticationMethod(AuthTypes.ClientKey);
+		def.authenticationGroup(APIPerms.APIResourceManager);
+
+		if (overrideDocs) {
+			def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		}
+	}
+
 	public void setup(String prefix)
 	{
 		/*
@@ -33,32 +44,21 @@ public class PermissionsAPI {
 		 */
 		MethodDefinition def = new MethodDefinition(prefix + "/resource/list", PermissionsAPI.class, "listResourceDefinition");
 		def.enableGET(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIResourceManager);
 		def.setOrder(110);
 		def.setDescription("Returns a list of all resource definitions");
+		defaultDefinition(def, false);
 		APICalls.addRoute(def);
 		
 		def = new MethodDefinition(prefix + "/resource", PermissionsAPI.class, "getResourceDefinition");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIResourceManager);
 		def.setOrder(100);
 		def.setDescription("Returns info/roles/permissions/etc for a resource definition");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		def = new MethodDefinition(prefix + "/resource/save", PermissionsAPI.class, "saveResourceDefinition");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIResourceManager);
 		def.setOrder(100);
 		def.setDescription("Saves/creates a resource definition");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
@@ -68,19 +68,15 @@ public class PermissionsAPI {
 		def.addParameter(new APICallParam(ParamNames.can_manage));
 		def.addParameter(new APICallParam(ParamNames.support_email));
 		def.addParameter(new APICallParam(ParamNames.internal_name));
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		def = new MethodDefinition(prefix + "/resource/delete", PermissionsAPI.class, "deleteResourceDefinition");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIResourceManager);
 		def.setOrder(120);
 		def.setDescription("Removes a resource definition");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		/*
@@ -88,28 +84,20 @@ public class PermissionsAPI {
 		 */
 		def = new MethodDefinition(prefix + "/resource/role/save", PermissionsAPI.class, "saveRole");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIRoleManager);
 		def.setOrder(130);
 		def.setDescription("Saves/creates a role on a resource");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
 		def.addParameter(new APICallParam(ParamNames.role_name), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		def = new MethodDefinition(prefix + "/resource/role/delete", PermissionsAPI.class, "deleteRole");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIRoleManager);
 		def.setOrder(140);
 		def.setDescription("Removes an existing role from a resource");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
 		def.addParameter(new APICallParam(ParamNames.role_name), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		/*
@@ -117,30 +105,22 @@ public class PermissionsAPI {
 		 */
 		def = new MethodDefinition(prefix + "/resource/role/permission/add", PermissionsAPI.class, "addPermission");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIRoleManager);
 		def.setOrder(150);
 		def.setDescription("Adds a permission to a role");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
 		def.addParameter(new APICallParam(ParamNames.role_name), true);
 		def.addParameter(new APICallParam(ParamNames.permission), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		def = new MethodDefinition(prefix + "/resource/role/permission/delete", PermissionsAPI.class, "deletePermission");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIRoleManager);
 		def.setOrder(160);
 		def.setDescription("Removes an existing permission from a role");
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
 		def.addParameter(new APICallParam(ParamNames.role_name), true);
 		def.addParameter(new APICallParam(ParamNames.permission), true);
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 		
 		/*
@@ -148,52 +128,37 @@ public class PermissionsAPI {
 		 */
 		def = new MethodDefinition(prefix + "/api/client/list", PermissionsAPI.class, "getApiClientList");
 		def.enableGET(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIClientManager);
 		def.setOrder(170);
 		def.setDescription("Returns a list of all api clients");
 		def.addParameter(new APICallParam(ParamNames.page, "0"));
 		def.addParameter(new APICallParam(ParamNames.items_per_page, "10"));
+		defaultDefinition(def, false);
 		APICalls.addRoute(def);
 
 		def = new MethodDefinition(prefix + "/api/client", PermissionsAPI.class, "getApiClient");
 		def.enableGET(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIClientManager);
 		def.addParameter(new APICallParam(ParamNames.target_client_id), true);
 		def.setOrder(180);
 		def.setDescription("Returns the information about a single API client");
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 
 		def = new MethodDefinition(prefix + "/api/client/create", PermissionsAPI.class, "createApiClient");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIClientManager);
 		def.addParameter(new APICallParam(ParamNames.target_client_id), true);
 		def.setOrder(190);
 		def.setDescription("Creates a new API client");
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 
 		def = new MethodDefinition(prefix + "/api/client/add_resource", PermissionsAPI.class, "addApiClientResource");
 		def.enablePOST(true);
-		def.setSinceVersion(Versions.Version100);
-		def.setDocumentationGroup("Roles & Permissions");
-		def.authenticationMethod(AuthTypes.ClientKey);
-		def.authenticationGroup(APIPerms.APIClientManager);
 		def.addParameter(new APICallParam(ParamNames.target_client_id), true);
 		def.addParameter(new APICallParam(ParamNames.resource_name), true);
 		def.addParameter(new APICallParam(ParamNames.role_name), true);
 		def.setOrder(200);
 		def.setDescription("Adds a Resource to an existing API client");
-		def.overrideDocumentationResponse("{\"apiResult\": {\"status\": \"SUCCESS\"}}");
+		defaultDefinition(def, true);
 		APICalls.addRoute(def);
 
 	}

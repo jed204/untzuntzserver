@@ -78,6 +78,10 @@ public class StringParam extends BaseParam implements ParameterDefinitionInt<Str
 		if (data == null && minLen != null)
 			throw new ParamValueException(this, "String must be at least " + minLen + " characters");
 
+		if (data == null) {
+			data = "";
+		}
+
 		if (minLen != null && data.length() < minLen)
 			throw new ParamValueException(this, "String must be at least " + minLen + " characters");
 	

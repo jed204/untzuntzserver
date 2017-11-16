@@ -35,7 +35,6 @@ public class StringArrayParam extends BaseParam implements ParameterDefinitionIn
 
 	/**
 	 * Setup a string parameter with just a minimum length
-	 * @param minLen
 	 */
 	public StringArrayParam(String n, String d, Integer minSize)
 	{
@@ -63,6 +62,10 @@ public class StringArrayParam extends BaseParam implements ParameterDefinitionIn
 		
 		if (data == null && minSize != null)
 			throw new ParamValueException(this, "String array must have at least " + minSize + " items");
+
+		if (data == null) {
+			data = "";
+		}
 
 		String[] ret = data.split(",");
 		if (minSize != null && ret.length < minSize)

@@ -43,7 +43,7 @@ public class OrderByParam extends BaseParam implements ParameterDefinitionInt<Or
 	
 	public OrderByParam addFilterField(FieldDatabaseMap fdm)
 	{
-		validFields.put(fdm.valueType.getName(), fdm);
+		validFields.put(fdm.getValueType().getName(), fdm);
 		return this;
 	}
 
@@ -95,7 +95,7 @@ public class OrderByParam extends BaseParam implements ParameterDefinitionInt<Or
 		if (map == null)
 			return null;
 		
-		orderBy.setFieldName(map.fieldName);
+		orderBy.setFieldName(map.getFieldName());
 		
 		return orderBy;
 		

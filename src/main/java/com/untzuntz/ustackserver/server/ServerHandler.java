@@ -198,11 +198,9 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 	private boolean isMultiPartOrForm(HttpRequest req) {
 		
 		String contentTypeStr = getHeader(req, "Content-Type");
-		if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentTypeStr))
+		if ("application/x-www-form-urlencoded".equalsIgnoreCase(contentTypeStr) || contentTypeStr != null && contentTypeStr.indexOf("multipart/form-data") > -1) {
 			return true;
-		else if (contentTypeStr != null && contentTypeStr.indexOf("multipart/form-data") > -1)
-			return true;
-		
+		}
 		return false;
 		
 	}
@@ -323,7 +321,11 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		if (req.getMethod() == HttpMethod.POST && paramStr != null)
 		{
 			if (cls == null || !cls.isDisablePostParam()) {
-				if (!path.endsWith("?") && paramStr.length() > 0)
+
+				if (path.indexOf("?") > -1 && paramStr.length() > 0) {
+					path += "&";
+				}
+				else if (!path.endsWith("?") && paramStr.length() > 0)
 					path += "?";
 				
 				path += paramStr;
@@ -392,13 +394,13 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		{
 			for (RateLimit limit : cls.getRateLimits())
 			{
-				long block = (System.currentTimeMillis() / 1000L / limit.timeframe);
-				String key = String.format("%s_%s_%d_%d", params.getRemoteIpAddress(), limit.key, limit.timeframe, block);
+				long block = (System.currentTimeMillis() / 1000L / limit.getTimeframe());
+				String key = String.format("%s_%s_%d_%d", params.getRemoteIpAddress(), limit.getKey(), limit.getTimeframe(), block);
 				if (UDataCache.getInstance() != null) {
-					long reqs = UDataCache.getInstance().incr(key, limit.timeframe, 1);
-					if (reqs > limit.maxRequests)
+					long reqs = UDataCache.getInstance().incr(key, limit.getTimeframe(), 1);
+					if (reqs > limit.getMaxRequests())
 					{
-						logger.error(String.format("%s requested '%s' %d times in %d seconds, allowed max requests is %d", params.getRemoteIpAddress(), limit.key, reqs, limit.timeframe, limit.maxRequests));
+						logger.error(String.format("%s requested '%s' %d times in %d seconds, allowed max requests is %d", params.getRemoteIpAddress(), limit.getKey(), reqs, limit.getTimeframe(), limit.getMaxRequests()));
 						APIResponse.httpError(ctx.getChannel(), APIResponse.error("Too many requests"), req, HttpResponseStatus.NOT_FOUND, params);
 						return null;
 					}
@@ -459,9 +461,9 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 			
 			if (failed)
 			{ 
-				if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
+				if (cls.getHashEnforcement() == MethodDefinition.HASH_ENFORCEMENT_WARN)
 					logger.warn(String.format("%s [%s] Request Signature Mismatch -> Client Sent [%s], we expected [%s]", params.getRemoteIpAddress(), path, params.get(ParamNames.RequestSignature), sig));
-				else if (cls.getHashEnforcement() > MethodDefinition.HASH_ENFORCEMENT_REJECT)
+				else if (cls.getHashEnforcement() == MethodDefinition.HASH_ENFORCEMENT_REJECT)
 				{
 					APIResponse.httpError(ctx.getChannel(), APIResponse.error("Bad Request Signature"), req, HttpResponseStatus.BAD_REQUEST, params);
 					return null;
@@ -657,7 +659,9 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
         	} catch (Exception e) {}
 
         	targetOutputStream = null;
-        	targetFile.delete();
+        	if (!targetFile.delete()) {
+        		logger.info("Failed to delete the target file: " + targetFile);
+			}
         }
 	}
 

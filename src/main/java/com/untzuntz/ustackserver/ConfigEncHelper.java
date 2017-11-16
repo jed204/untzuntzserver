@@ -67,22 +67,27 @@ public class ConfigEncHelper {
 		
 
 		ConfigEnc ce = new ConfigEnc(passphrase);
-		
-		File inFile = new File(args[0]);
-		FileInputStream in = new FileInputStream(inFile);
-		int readLen = 0;
-		int toRead = (int)inFile.length();
-		byte[] buf = new byte[8192];
+
 		StringBuffer srcData = new StringBuffer();
-		while ((readLen = in.read(buf, 0, toRead)) != -1)
-		{
-			srcData.append( new String(Arrays.copyOfRange(buf, 0, readLen)) );
-			toRead = toRead - readLen;
-			if (toRead == 0)
-				break;
+		File inFile = new File(args[0]);
+		FileInputStream in = null;
+		try {
+			in = new FileInputStream(inFile);
+			int readLen = 0;
+			int toRead = (int) inFile.length();
+			byte[] buf = new byte[8192];
+			while ((readLen = in.read(buf, 0, toRead)) != -1) {
+				srcData.append(new String(Arrays.copyOfRange(buf, 0, readLen)));
+				toRead = toRead - readLen;
+				if (toRead == 0)
+					break;
+			}
+		} finally {
+			if (in != null) {
+				in.close();
+			}
 		}
-		in.close();
-		
+
 		String readBack = null;
 		if (name != null)
 		{

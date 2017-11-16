@@ -33,14 +33,22 @@ public class APIResponse {
     	legalOrigins.put(origin, Boolean.TRUE);
     }
     
-    public static String AccessControlAllowOrigin;
+    private static String AccessControlAllowOrigin;
 	public static final String ContentTypeTextXML = "text/xml";
 	public static final String ContentTypeTextHTML = "text/html";
 	public static final String ContentTypeTextPlain = "text/plain";
 	public static final String ContentTypeJSON = "application/json";
 	public static final String ContentTypeJSONP = "application/javascript";
 	public static final String ContentTypeCalendar = "text/calendar";
-	
+
+	public static String getAccessControlAllowOrigin() {
+		return AccessControlAllowOrigin;
+	}
+
+	public static void setAccessControlAllowOrigin(String accessControlAllowOrigin) {
+		AccessControlAllowOrigin = accessControlAllowOrigin;
+	}
+
 	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
 		if (jsonpFunction != null)
@@ -91,11 +99,11 @@ public class APIResponse {
 		{
 			if (res.getHeader("Access-Control-Allow-Origin") == null)
 			{
-				String originHeader = req.getHeader("Origin");
+				String originHeader = req == null ? null : req.getHeader("Origin");
 				if (originHeader != null)
 					res.setHeader("Access-Control-Allow-Origin", originHeader);
 			}
-			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
+			if (req != null && req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
 		
@@ -171,7 +179,7 @@ public class APIResponse {
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		
-		if (enableCORS)
+		if (enableCORS && res != null && req != null)
 		{
 			if (res.getHeader("Access-Control-Allow-Origin") == null)
 				res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));

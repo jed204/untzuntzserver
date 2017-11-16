@@ -24,16 +24,7 @@ public class ObjectIdParam extends BaseParam implements ParameterDefinitionInt<O
 	}
 	
 	public String getTypeDescription() {
-		
-		String msg = "";
-		if (minLen != null && maxLen == null)
-			msg = " at least " + minLen + " chars long";
-		else if (minLen == null && maxLen != null)
-			msg = " at max " + minLen + " chars long";
-		else if (minLen != null && maxLen != null)
-			msg = " between " + minLen + " and " + maxLen + " chars long";
-		
-		return "A string of text" + msg;
+		return "A string of text between " + minLen + " and " + maxLen + " chars long";
 	}
 	
 	@Override

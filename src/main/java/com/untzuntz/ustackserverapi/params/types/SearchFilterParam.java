@@ -52,7 +52,7 @@ public class SearchFilterParam extends BaseParam implements ParameterDefinitionI
 	
 	public SearchFilterParam addFilterField(FieldDatabaseMap fdm)
 	{
-		validFields.put(fdm.valueType.getName(), fdm);
+		validFields.put(fdm.getValueType().getName(), fdm);
 		return this;
 	}
 
@@ -118,7 +118,7 @@ public class SearchFilterParam extends BaseParam implements ParameterDefinitionI
 			
 			// check for valid typing
 			try {
-				map.valueType.validate(filter.getValue());
+				map.getValueType().validate(filter.getValue());
 			} catch (APIException apiErr) {
 				throw new ParamValueException(this, "Invalid value type for filter (" + filter.getFieldName() + ")");
 			}
@@ -142,16 +142,16 @@ public class SearchFilterParam extends BaseParam implements ParameterDefinitionI
 			FieldDatabaseMap map = validFields.get( filter.getFieldName() );
 			if (map != null) // ignore unknown params
 			{
-				if (map.typeClass != null) // sql fields have this, mongodb fields do not
+				if (map.getTypeClass() != null) // sql fields have this, mongodb fields do not
 				{
-					filters.add(map.typeClass, map.classField, filter.getType(), map.valueType.getValue( filter.getValue() ));
+					filters.add(map.getTypeClass(), map.getClassField(), filter.getType(), map.getValueType().getValue( filter.getValue() ));
 				}
 				else
 				{
 					if (filter.getValues() != null)
-						filters.add(map.classField, filter.getType(), filter.getValues());
+						filters.add(map.getClassField(), filter.getType(), filter.getValues());
 					else
-						filters.add(map.classField, filter.getType(), map.valueType.getValue( filter.getValue() ));
+						filters.add(map.getClassField(), filter.getType(), map.getValueType().getValue( filter.getValue() ));
 				}
 			}
 			else

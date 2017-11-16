@@ -67,15 +67,39 @@ public class MethodDefinition {
 		
 		rateLimits.add(rl);
 	}
-	
+
 	public List<RateLimit> getRateLimits() {
 		return rateLimits;
 	}
 	
 	public static class RateLimit {
-		public String key;
-		public int timeframe;
-		public int maxRequests;
+		private String key;
+		private int timeframe;
+		private int maxRequests;
+
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		public int getTimeframe() {
+			return timeframe;
+		}
+
+		public void setTimeframe(int timeframe) {
+			this.timeframe = timeframe;
+		}
+
+		public int getMaxRequests() {
+			return maxRequests;
+		}
+
+		public void setMaxRequests(int maxRequests) {
+			this.maxRequests = maxRequests;
+		}
 	}
 	
 	public boolean isNoLogging() {
@@ -294,15 +318,13 @@ public class MethodDefinition {
 	
 	public boolean isMethodEnabled(HttpMethod method) {
 		
-		if (method == HttpMethod.DELETE && !methodDELETE)
+		if ((method == HttpMethod.DELETE && !methodDELETE) ||
+				(method == HttpMethod.PUT && !methodPUT) ||
+				(method == HttpMethod.POST && !methodPOST) ||
+				(method == HttpMethod.GET && !methodGET)) {
 			return false;
-		else if (method == HttpMethod.PUT && !methodPUT)
-			return false;
-		else if (method == HttpMethod.POST && !methodPOST)
-			return false;
-		else if (method == HttpMethod.GET && !methodGET)
-			return false;
-		
+		}
+
 		return true;
 	}
 
@@ -361,10 +383,10 @@ public class MethodDefinition {
 		// Setup Default Values
 		for (APICallParam param : apiParams)
 		{
-			if (param.defaultValue != null &&
+			if (param.getDefaultValue() != null &&
 				callParams.getParameter(param.getParamDetails().getName()) == null)
 			{
-				callParams.setParameterValue(param.getParamDetails().getName(), param.defaultValue);
+				callParams.setParameterValue(param.getParamDetails().getName(), param.getDefaultValue());
 			}
 		}
 		

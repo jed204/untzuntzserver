@@ -53,10 +53,34 @@ public class APIDocumentation {
 	
     static Logger           		logger               	= Logger.getLogger(APIDocumentation.class);
 
-	public static String SystemName;
-	public static String logoUrl;
-	public static String version;
-	
+	private static String SystemName;
+	private static String logoUrl;
+	private static String version;
+
+	public static String getSystemName() {
+		return SystemName;
+	}
+
+	public static void setSystemName(String systemName) {
+		SystemName = systemName;
+	}
+
+	public static String getLogoUrl() {
+		return logoUrl;
+	}
+
+	public static void setLogoUrl(String logoUrl) {
+		APIDocumentation.logoUrl = logoUrl;
+	}
+
+	public static String getVersion() {
+		return version;
+	}
+
+	public static void setVersion(String version) {
+		APIDocumentation.version = version;
+	}
+
 	public static String getStringFromDoc(org.w3c.dom.Document doc) {
 	    DOMImplementationLS domImplementation = (DOMImplementationLS) doc.getImplementation();
 	    LSSerializer lsSerializer = domImplementation.createLSSerializer();
