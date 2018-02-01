@@ -62,7 +62,9 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 				logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
 				throw new APIAuthenticationException("Invalid Token");
 			}
-			
+
+			LogoutUtil.checkTokenLogout(details);
+
 			long tokenLife = details.getExpirationAge() - System.currentTimeMillis();
 			if (tokenLife < 0)
 			{

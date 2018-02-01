@@ -71,7 +71,9 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 			logger.warn(String.format("Invalid Token => '%s' (%s)", params.get(ParamNames.token), method.getPath()));
 			throw new APIAuthenticationException("Invalid Token");
 		}
-		
+
+		LogoutUtil.checkTokenLogout(details);
+
 		long tokenLife = details.getExpirationAge() - System.currentTimeMillis();
 		if (tokenLife < 0)
 		{
