@@ -564,7 +564,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 					{
 						APIException apiErr = (APIException)ierr.getCause();
 						logger.warn(String.format("%s [%s] API Exception => %s", callInstance.params.getRemoteIpAddress(), callInstance.path, apiErr));
-						APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error(apiErr.toDBObject()), callInstance.req, HttpResponseStatus.BAD_REQUEST, callInstance.params);
+						APIResponse.httpError(callInstance.ctx.getChannel(), APIResponse.error(apiErr.toDBObject(), apiErr.getMessage()), callInstance.req, HttpResponseStatus.BAD_REQUEST, callInstance.params);
 					}
 					else
 					{
