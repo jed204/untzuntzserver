@@ -223,22 +223,22 @@ public class APIResponse {
 	
 	public static DBObject getResponseObject(String status, String msg)
 	{
-		DBObject obj = new BasicDBObject();
-		DBObject result = new BasicDBObject();
-		obj.put("apiResult", result);
-		result.put("status", status);
-		if (msg != null)	
-			result.put("message", msg);
-
-		return obj;
+		return getResponseObject(status, null, msg);
 	}
-	
+
 	public static DBObject getResponseObject(String status, DBObject ret)
+	{
+		return getResponseObject(status, ret, null);
+	}
+
+	public static DBObject getResponseObject(String status, DBObject ret, String msg)
 	{
 		DBObject obj = new BasicDBObject();
 		DBObject result = new BasicDBObject();
 		obj.put("apiResult", result);
 		result.put("status", status);
+		if (msg != null)
+			result.put("message", msg);
 		if (ret != null)	
 			obj.putAll(ret);
 
@@ -251,6 +251,10 @@ public class APIResponse {
 	
 	public static DBObject error(DBObject ret) {
 		return getResponseObject("ERROR", ret);
+	}
+
+	public static DBObject error(DBObject ret, String msg) {
+		return getResponseObject("ERROR", ret, msg);
 	}
 	
 	public static DBObject success(String msg) {
