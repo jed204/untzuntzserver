@@ -1,10 +1,10 @@
 package com.untzuntz.ustackserverapi.auth;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import com.mongodb.DBObject;
+import com.untzuntz.ustack.data.APIClient;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
@@ -80,9 +80,43 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 			userName = details.getUserName();
 		}
 		else if (params.get(ParamNames.client_id) != null) {
-			
+			/*
+			 * Make sure that the ApiClient record has a resourceLink with a customerId that the given username also has.
+			 * Don't trust the username here.
+			 */
+
 			ClientKeyAuthBase.authenticate(method, req, params);
+
+			// Get set of API Client's customer IDs.
+			APIClient acct = APIClient.getAPIClient(params.get(ParamNames.client_id));
+			if (acct == null) {
+				throw new APIAuthenticationException("Could not find API client");
+			}
+			if (acct.getResourceLinkList().isEmpty()) {
+				throw new APIAuthenticationException("API client's resource list is empty.");
+			}
+			Set<String> apiClientCustomerIds = new HashSet<String>();
+			for (Object apiClientResourceLinkObj : acct.getResourceLinkList()) {
+				apiClientCustomerIds.add((String) ((DBObject)apiClientResourceLinkObj).get("customerId"));
+			}
+
+			// Fetch user object.
 			userName = params.get(ParamNames.username);
+			UserAccount user = UserAccount.getUser(userName);
+			if (user == null) {
+				throw new APIAuthenticationException("API does not have access to given username");
+			}
+
+			// Make sure a common customer ID exists between API Client and User.
+			boolean commonCustomerIdsExist = false;
+			for (Object apiClientResourceLinkObj : user.getResourceLinkList()) {
+				if (apiClientCustomerIds.contains((String)((DBObject)apiClientResourceLinkObj).get("customerId"))) {
+					commonCustomerIdsExist = true;
+				}
+			}
+			if (!commonCustomerIdsExist) {
+				throw new APIAuthenticationException("API does not have access to given username");
+			}
 		}
 		else
 			throw new APIAuthenticationException("Authentication Parameters Not Provided");
