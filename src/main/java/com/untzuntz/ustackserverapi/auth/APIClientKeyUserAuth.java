@@ -109,8 +109,8 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 
 			// Make sure a common customer ID exists between API Client and User.
 			boolean commonCustomerIdsExist = false;
-			for (Object apiClientResourceLinkObj : user.getResourceLinkList()) {
-				if (apiClientCustomerIds.contains((String)((DBObject)apiClientResourceLinkObj).get("customerId"))) {
+			for (Object userResourceLinkObj : user.getResourceLinkList()) {
+				if (apiClientCustomerIds.contains((String)((DBObject)userResourceLinkObj).get("customerId"))) {
 					commonCustomerIdsExist = true;
 				}
 			}
