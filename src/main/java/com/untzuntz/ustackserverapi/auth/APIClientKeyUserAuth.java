@@ -104,7 +104,8 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 			userName = params.get(ParamNames.username);
 			UserAccount user = UserAccount.getUser(userName);
 			if (user == null) {
-				throw new APIAuthenticationException("API does not have access to given username");
+				// If there's no user, we will support the previous behavior and return null.
+				return null;
 			}
 
 			// Make sure a common customer ID exists between API Client and User.
