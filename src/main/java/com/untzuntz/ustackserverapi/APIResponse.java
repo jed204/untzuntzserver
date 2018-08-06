@@ -163,7 +163,7 @@ public class APIResponse {
 
 	public static void httpError(Channel channel, String text, String contentType, HttpRequest req, HttpResponseStatus status, CallParameters params)
 	{
-		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params, req, false);
+		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params, req, true);
 	}
 	
 	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params, HttpRequest req, boolean enableCORS)
@@ -181,9 +181,9 @@ public class APIResponse {
 		
 		if (enableCORS && res != null && req != null)
 		{
-			if (res.getHeader("Access-Control-Allow-Origin") == null)
+			if (res.getHeader("Access-Control-Allow-Origin") == null && req.getHeader("Origin") != null)
 				res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
-			if (req.getMethod().equals(HttpMethod.OPTIONS))
+			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
 
