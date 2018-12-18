@@ -27,7 +27,12 @@ public class MethodDefinition {
     public static final int HASH_ENFORCEMENT_NONE = 0;
     public static final int HASH_ENFORCEMENT_WARN = 1;
     public static final int HASH_ENFORCEMENT_REJECT = 2;
-    
+
+    public enum TokenCheckMode {
+    	Warn,
+		Enforce;
+	}
+
 	private String path;
 	private boolean methodGET;
 	private boolean methodPOST;
@@ -35,6 +40,7 @@ public class MethodDefinition {
 	private boolean methodDELETE;
 	private boolean expectingFile;
 	private boolean disablePostParam = false;
+	private TokenCheckMode tokenMode;
 	private AuthenticationInt authMethod;
 	private Class apiClass;
 	private HashMap<String,Object> data;
@@ -66,6 +72,14 @@ public class MethodDefinition {
 			rateLimits = new ArrayList<RateLimit>();
 		
 		rateLimits.add(rl);
+	}
+
+	public TokenCheckMode getTokenMode() {
+		return tokenMode;
+	}
+
+	public void setTokenMode(TokenCheckMode tokenMode) {
+		this.tokenMode = tokenMode;
 	}
 
 	public List<RateLimit> getRateLimits() {

@@ -54,30 +54,32 @@ public class APIClientKeyUserAuth implements AuthenticationInt<UserAccount> {
 		String userName = null;
 		if ( params.get(ParamNames.token) != null)
 		{
-			//AuthTypes.ClientKey.authenticate(method, req, params);
-			AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
-			
-			if (details == null)
-			{
-				logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
-				throw new APIAuthenticationException("Invalid Token");
-			}
-
-			LogoutUtil.checkTokenLogout(details);
-
-			long tokenLife = details.getExpirationAge() - System.currentTimeMillis();
-			if (tokenLife < 0)
-			{
-				logger.info(String.format("%s -- %s/%s | Access Token expired at '%s'", method.getPath(), details.getUserName(), details.getClientId(), new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.getExpirationAge()))));
-				throw new APIAuthenticationException("Token has expired");
-			}
-	
-	//		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
-			
-			params.setParameterValue(ParamNames.client_id.getName(), details.getClientId());
-			params.setTokenTTL(tokenLife);
-			
-			userName = details.getUserName();
+			AccessTokenAuth auth = new AccessTokenAuth();
+			return auth.authenticate(method, req, params);
+//			//AuthTypes.ClientKey.authenticate(method, req, params);
+//			AccessTokenDetails details = AccessToken.decode( params.get(ParamNames.token) );
+//
+//			if (details == null)
+//			{
+//				logger.warn(String.format("Invalid Token => '%s'", params.get(ParamNames.token)));
+//				throw new APIAuthenticationException("Invalid Token");
+//			}
+//
+//			LogoutUtil.checkTokenLogout(details);
+//
+//			long tokenLife = details.getExpirationAge() - System.currentTimeMillis();
+//			if (tokenLife < 0)
+//			{
+//				logger.info(String.format("%s -- %s/%s | Access Token expired at '%s'", method.getPath(), details.getUserName(), details.getClientId(), new SimpleDateFormat("MM/dd/yyyy h:mm:ss a").format(new Date(details.getExpirationAge()))));
+//				throw new APIAuthenticationException("Token has expired");
+//			}
+//
+//	//		logger.info(String.format("%s -> Expiration %d -> Now: %d", details.userName, details.expirationAge, System.currentTimeMillis()));
+//
+//			params.setParameterValue(ParamNames.client_id.getName(), details.getClientId());
+//			params.setTokenTTL(tokenLife);
+//
+//			userName = details.getUserName();
 		}
 		else if (params.get(ParamNames.client_id) != null) {
 			/*

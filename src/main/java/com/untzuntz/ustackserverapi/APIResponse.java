@@ -63,7 +63,8 @@ public class APIResponse {
 			if (originHeader != null && legalOrigins.get(originHeader) != null)
 				res.setHeader("Access-Control-Allow-Origin", originHeader);
 		}
-		
+
+		res.setHeader("Vary", "Origin");
 		if (channel.getAttachment() instanceof Long)
 			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
 	}

@@ -4,7 +4,7 @@
 	<groupId>com.untzuntz.ustack</groupId>
 	<artifactId>ustack-server</artifactId>
 	<packaging>jar</packaging>
-	<version>2.1.85</version>
+	<version>2.1.89</version>
 	<name>UntzUntz UStack Server</name>
 	<licenses>
 		<license>
@@ -38,8 +38,8 @@
 		<dependency>
 			<groupId>com.untzuntz.ustack</groupId>
 			<artifactId>ustack-core-data-java</artifactId>
-			<version>1.0.54</version>
-		</dependency>	    
+			<version>1.0.56</version>
+		</dependency>
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
 	<organization> 
