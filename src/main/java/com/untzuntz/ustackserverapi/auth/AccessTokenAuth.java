@@ -10,11 +10,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTCreationException;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustack.data.AccessToken;
@@ -75,8 +70,14 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
 			}
 
 			if (jwt.getClaim("ipAddress") != null && jwt.getClaim("ipAddress").asString() != null) {
-				boolean mismatch = !jwt.getClaim("ipAddress").asString().equals( params.getRemoteIpAddress() );
-				if (mismatch) {
+				String[] ips = params.getRemoteIpAddress().split(", ");
+				boolean match = false;
+				for (String ip : ips) {
+					if (jwt.getClaim("ipAddress").asString().equals( ip )) {
+						match = true;
+					}
+				}
+				if (!match) {
 					if (MethodDefinition.TokenCheckMode.Enforce.equals(method.getTokenMode())) {
 						throw new APIAuthenticationException("Invalid Token - IP Mismatch");
 					}
