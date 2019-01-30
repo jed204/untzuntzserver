@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -233,6 +235,13 @@ public class TestHttpChannel implements Channel {
 			return null;
 		
 		return resp.getHeader(name);
+	}
+
+	public List<Map.Entry<String, String>> getHeaders(){
+		if(resp == null)
+			return null;
+
+		return resp.getHeaders();
 	}
 	
 	public int getResponseCode() {
