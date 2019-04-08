@@ -53,6 +53,7 @@ public class APIResponse {
 	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
 		res.addHeader(CACHE_CONTROL, "no-cache, no-store");
+		res.addHeader("X-Content-Type-Options", "nosniff");
 		if (jsonpFunction != null)
 		{
 			res.setHeader("Content-type", ContentTypeJSONP);
