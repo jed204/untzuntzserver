@@ -104,7 +104,7 @@ public class APIResponse {
 			if (res.getHeader("Access-Control-Allow-Origin") == null)
 			{
 				String originHeader = req == null ? null : req.getHeader("Origin");
-				if (originHeader != null)
+				if (originHeader != null && legalOrigins.get(originHeader) != null)
 					res.setHeader("Access-Control-Allow-Origin", originHeader);
 			}
 			if (req != null && req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
