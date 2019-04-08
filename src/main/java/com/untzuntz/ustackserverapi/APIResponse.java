@@ -1,5 +1,6 @@
 package com.untzuntz.ustackserverapi;
 
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CACHE_CONTROL;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -51,6 +52,7 @@ public class APIResponse {
 
 	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
+		res.addHeader(CACHE_CONTROL, "no-cache, no-store");
 		if (jsonpFunction != null)
 		{
 			res.setHeader("Content-type", ContentTypeJSONP);
