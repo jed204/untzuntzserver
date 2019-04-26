@@ -8,6 +8,7 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.bson.BasicBSONObject;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
@@ -100,6 +101,11 @@ public class CallParameters {
 	}
 	
 	public void setRemoteIpAddress(String remoteIpAddress) {
+		if (StringUtils.isNotEmpty(remoteIpAddress) && remoteIpAddress.indexOf(",") > -1) {
+			// user is proxied. Take the left most or 'first' ip address in the list as their remote ip
+			String[] ips = remoteIpAddress.split(",");
+			remoteIpAddress = ips[0].trim();
+		}
 		this.remoteIpAddress = remoteIpAddress;
 	}
 
