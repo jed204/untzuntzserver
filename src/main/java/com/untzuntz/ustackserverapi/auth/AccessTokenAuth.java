@@ -5,9 +5,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.untzuntz.ustack.exceptions.AuthExceptionAuthError;
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.untzuntz.ustack.data.APIClient;
 import com.untzuntz.ustack.data.AccessToken;
 import com.untzuntz.ustack.data.AccessToken.AccessTokenDetails;
@@ -52,6 +55,43 @@ public class AccessTokenAuth implements AuthenticationInt<UserAccount> {
     
 	@Override
 	public UserAccount authenticate(MethodDefinition method, HttpRequest req, CallParameters params) throws APIException {
+
+    	if (StringUtils.isNotEmpty(params.get(ParamNames.token)) && params.get(ParamNames.token).startsWith("JWT_")) {
+    		// do JWT auth check
+			DecodedJWT jwt = null;
+			try {
+				jwt = AccessToken.decodeJwt(params.get(ParamNames.token).substring(4));
+			} catch (AuthExceptionAuthError authExceptionAuthError) {
+				if (authExceptionAuthError.getMessage() != null && authExceptionAuthError.getMessage().indexOf("The Token has expired") > -1) {
+					logger.info("Token Expired: " + authExceptionAuthError.getMessage());
+					throw new APIAuthenticationException("Token has expired");
+				}
+				throw new APIAuthenticationException("Invalid Token");
+			}
+
+			if (jwt.getClaim("ipAddress") != null && jwt.getClaim("ipAddress").asString() != null) {
+				String[] ips = params.getRemoteIpAddress().split(", ");
+				boolean match = false;
+				for (String ip : ips) {
+					if (jwt.getClaim("ipAddress").asString().equals( ip )) {
+						match = true;
+					}
+				}
+				if (!match) {
+					if (MethodDefinition.TokenCheckMode.Enforce.equals(method.getTokenMode())) {
+						throw new APIAuthenticationException("Invalid Token - IP Mismatch");
+					}
+					logger.warn(String.format("Token ID [%s] for user [%s] has a token IP Address mismatch | [%s] expected, but got [%s]", jwt.getClaim("id").asString(), jwt.getClaim("userName").asString(), jwt.getClaim("ipAddress").asString(), params.getRemoteIpAddress()));
+				}
+			}
+
+			LogoutUtil.checkTokenLogout(jwt);
+
+			params.setParameterValue(ParamNames.client_id.getName(), jwt.getClaim("clientId").asString());
+			params.setTokenTTL(jwt.getExpiresAt().getTime() - System.currentTimeMillis());
+
+			return UserAccount.getUser(jwt.getClaim("userName").asString());
+		}
 
 		if ("STATIC".equals(params.get(ParamNames.token))) {
 			AuthTypes.ClientKey.authenticate(method, req, params);

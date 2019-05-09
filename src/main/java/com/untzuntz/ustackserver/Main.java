@@ -156,6 +156,8 @@ public class Main {
 				
 		bootstrap.setOption("backlog", 1000);
 		bootstrap.setOption("reuseAddress", true);
+//		bootstrap.setOption("keepAlive", true);
+//		bootstrap.setOption("child.keepAlive", true);
 
 		// Set up the event pipeline factory.
 		bootstrap.setPipelineFactory(new ServerFactory(executionHandler));

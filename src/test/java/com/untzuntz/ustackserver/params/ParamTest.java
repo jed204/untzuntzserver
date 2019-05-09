@@ -88,6 +88,9 @@ public class ParamTest {
 		try { DateRange.fixDate("20120", true); fail(); } catch (ParseException pe) { }
 		assertEquals("20121201235959999", DateRange.fixDate("20121201", false));
 
+		assertEquals("20170101000000000",  DateRange.getDateFormat().format(new DateRange("2017").getStart()));
+		assertEquals("20171231235959999",  DateRange.getDateFormat().format(new DateRange("2017").getEnd()));
+
 		assertEquals("20121201235959999",  DateRange.getDateFormat().format(new DateRange("20121201").getEnd()));
 		assertEquals("20121201000000000",  DateRange.getDateFormat().format(new DateRange("20121201=>20121205").getStart()));
 		assertEquals("20121205235959999",  DateRange.getDateFormat().format(new DateRange("20121201=>20121205").getEnd()));

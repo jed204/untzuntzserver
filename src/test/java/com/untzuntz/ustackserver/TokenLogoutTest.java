@@ -12,9 +12,31 @@ import org.junit.Test;
 
 import java.util.UUID;
 
+import static junit.framework.Assert.assertNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 public class TokenLogoutTest {
+
+    @Test
+    public void testTokenFormat() throws Exception {
+        // create standard token
+        String token1 = AccessToken.encode("Test1", "Test1@test.com", 500000);
+
+        // create token w/ custom data
+        String token2 = AccessToken.encodeJwt("Test2", "Test2@test.com", 500000, "1.2.3.4", null);
+
+        assertFalse(token1.equals(token2));
+
+        AccessToken.AccessTokenDetails d1 = AccessToken.decode(token1);
+
+        assertEquals("Test1", d1.getClientId());
+        assertEquals("Test1@test.com", d1.getUserName());
+        assertNull(d1.getIpAddress());
+        assertNull(d1.getCustomData());
+
+    }
 
     @Test
     public void testTokenLogout() throws Exception {

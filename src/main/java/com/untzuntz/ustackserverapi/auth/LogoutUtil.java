@@ -1,7 +1,9 @@
 package com.untzuntz.ustackserverapi.auth;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.untzuntz.ustack.data.AccessToken;
 import com.untzuntz.ustack.data.UDataCache;
+import com.untzuntz.ustack.main.UOpts;
 import com.untzuntz.ustackserverapi.exceptions.UserAuthenticationException;
 import org.apache.log4j.Logger;
 
@@ -15,8 +17,9 @@ public class LogoutUtil {
         int remainingTokenLifeSec = (int)(remainingTokenLife / 1000L);
 
         String key = String.format("logout_%s_%d", token.getUserName(), token.getExpirationAge());
-        UDataCache.getInstance().set(key, remainingTokenLifeSec, "T");
-
+        if (UOpts.getCacheEnabled()) {
+            UDataCache.getInstance().set(key, remainingTokenLifeSec, "T");
+        }
         logger.info("Logging out : " + key + " (" + remainingTokenLifeSec + ")");
 
     }
@@ -24,7 +27,15 @@ public class LogoutUtil {
     public static void checkTokenLogout(AccessToken.AccessTokenDetails token) throws UserAuthenticationException {
 
         String key = String.format("logout_%s_%d", token.getUserName(), token.getExpirationAge());
-        if (UDataCache.getInstance().get(key) != null) {
+        if (UOpts.getCacheEnabled() && UDataCache.getInstance().get(key) != null) {
+            throw new UserAuthenticationException("User Logged Out", "LoggedOut");
+        }
+    }
+
+    public static void checkTokenLogout(DecodedJWT token) throws UserAuthenticationException {
+
+        String key = String.format("logout_jwt_%s", token.getClaim("id"));
+        if (UOpts.getCacheEnabled() && UDataCache.getInstance().get(key) != null) {
             throw new UserAuthenticationException("User Logged Out", "LoggedOut");
         }
     }

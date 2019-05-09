@@ -1,11 +1,15 @@
 package com.untzuntz.ustackserverapi;
 
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CACHE_CONTROL;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -28,11 +32,40 @@ public class APIResponse {
 
     static Logger           		logger               	= Logger.getLogger(APIResponse.class);
 
-    private static final Map<String,Boolean> legalOrigins = new HashMap<String,Boolean>();
-    public static void addCORSOrigin(String origin) {
-    	legalOrigins.put(origin, Boolean.TRUE);
-    }
-    
+	private static final Map<String,Boolean> legalOrigins = new HashMap<String,Boolean>();
+	private static final List<String> legalOriginsEndsWith = new ArrayList<>();
+	public static void addCORSOrigin(String origin) {
+		legalOrigins.put(origin, Boolean.TRUE);
+	}
+
+	/**
+	 * If the origin header value ends with the provided value, allow CORS
+	 * @param origin
+	 */
+	public static void addEndsWithCORSOrigin(String origin) {
+		legalOriginsEndsWith.add(origin);
+	}
+
+	public static boolean isCORSAllowed(String originHeader) {
+
+		if (StringUtils.isEmpty(originHeader)) {
+			return false;
+		}
+
+		if (legalOrigins.get(originHeader) != null) {
+			return true;
+		}
+
+		for (String wildcard : legalOriginsEndsWith) {
+			if (originHeader.endsWith(wildcard)) {
+				return true;
+			}
+		}
+
+		return false;
+
+	}
+
     private static String AccessControlAllowOrigin;
 	public static final String ContentTypeTextXML = "text/xml";
 	public static final String ContentTypeTextHTML = "text/html";
@@ -51,6 +84,10 @@ public class APIResponse {
 
 	private static void addHeaders(Channel channel, HttpRequest req, HttpResponse res, String jsonpFunction)
 	{
+		if (req != null && !req.getMethod().equals(HttpMethod.OPTIONS)) {
+			res.addHeader(CACHE_CONTROL, "no-cache, no-store");
+			res.addHeader("X-Content-Type-Options", "nosniff");
+		}
 		if (jsonpFunction != null)
 		{
 			res.setHeader("Content-type", ContentTypeJSONP);
@@ -60,10 +97,11 @@ public class APIResponse {
 		else if (req != null)
 		{
 			String originHeader = req.getHeader("Origin");
-			if (originHeader != null && legalOrigins.get(originHeader) != null)
+			if (isCORSAllowed(originHeader))
 				res.setHeader("Access-Control-Allow-Origin", originHeader);
 		}
-		
+
+		res.setHeader("Vary", "Origin");
 		if (channel.getAttachment() instanceof Long)
 			res.setHeader("X-Processing-Time", System.currentTimeMillis() - (Long)channel.getAttachment());
 	}
@@ -72,8 +110,12 @@ public class APIResponse {
 	{
 		String jsonpFunction = params.get(ParamNames.json_callback);
 		HttpResponse res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.OK);
-		res.setHeader("Content-type", contentType);
-		
+		if (req != null && !req.getMethod().equals(HttpMethod.OPTIONS)) {
+			res.setHeader("Content-type", contentType);
+		} else if (req == null) {
+			res.setHeader("Content-type", contentType);
+		}
+
 		if (cookie != null)
 		{
 			for (int i = 0; i < cookie.length; i++)
@@ -94,19 +136,29 @@ public class APIResponse {
                 	channel.write(res).addListener(ChannelFutureListener.CLOSE);
 			return;
 		}
-		
-		if (enableCORS)
+
+		if (res.getHeader("Access-Control-Allow-Origin") == null)
 		{
-			if (res.getHeader("Access-Control-Allow-Origin") == null)
-			{
-				String originHeader = req == null ? null : req.getHeader("Origin");
-				if (originHeader != null)
+			String originHeader = req == null ? null : req.getHeader("Origin");
+			if (originHeader != null) {
+				if (enableCORS || isCORSAllowed(originHeader)) {
 					res.setHeader("Access-Control-Allow-Origin", originHeader);
+				}
 			}
-			if (req != null && req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
-				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
-		
+		if (req != null && req.getMethod().equals(HttpMethod.OPTIONS)) {
+			if (req.getHeader("Access-Control-Request-Headers") != null) {
+				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
+			}
+			if (req.getHeader("Access-Control-Request-Method") != null) {
+				res.setHeader("Access-Control-Allow-Methods", req.getHeader("Access-Control-Request-Method"));
+			}
+			res.setContent(ChannelBuffers.copiedBuffer("", CharsetUtil.UTF_8));
+			setContentLength(res, 0);
+			channel.write(res).addListener(ChannelFutureListener.CLOSE);
+			return;
+		}
+
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
 		channel.write(res).addListener(ChannelFutureListener.CLOSE);
@@ -163,7 +215,7 @@ public class APIResponse {
 
 	public static void httpError(Channel channel, String text, String contentType, HttpRequest req, HttpResponseStatus status, CallParameters params)
 	{
-		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params, req, false);
+		httpError(channel, text, contentType, HttpResponseStatus.BAD_REQUEST, params, req, true);
 	}
 	
 	public static void httpError(Channel channel, String text, String contentType, HttpResponseStatus status, CallParameters params, HttpRequest req, boolean enableCORS)
@@ -181,9 +233,9 @@ public class APIResponse {
 		
 		if (enableCORS && res != null && req != null)
 		{
-			if (res.getHeader("Access-Control-Allow-Origin") == null)
+			if (res.getHeader("Access-Control-Allow-Origin") == null && req.getHeader("Origin") != null)
 				res.setHeader("Access-Control-Allow-Origin", req.getHeader("Origin"));
-			if (req.getMethod().equals(HttpMethod.OPTIONS))
+			if (req.getMethod().equals(HttpMethod.OPTIONS) && req.getHeader("Access-Control-Request-Headers") != null)
 				res.setHeader("Access-Control-Allow-Headers", req.getHeader("Access-Control-Request-Headers"));
 		}
 
@@ -193,7 +245,7 @@ public class APIResponse {
 
 	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params, Cookie[] cookies)
 	{
-		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, req, true);
+		httpOk(channel, JSON.serialize(dbObject), ContentTypeJSON, params, cookies, req, false);
 	}
 	
 	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params)
