@@ -133,7 +133,7 @@ public class APIResponse {
 		if ("INVALID".equals(text)) {
 			res = new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.BAD_REQUEST);
 			setContentLength(res, res.getContent().readableBytes());
-                	channel.write(res).addListener(ChannelFutureListener.CLOSE);
+                	channel.write(res);
 			return;
 		}
 
@@ -155,13 +155,13 @@ public class APIResponse {
 			}
 			res.setContent(ChannelBuffers.copiedBuffer("", CharsetUtil.UTF_8));
 			setContentLength(res, 0);
-			channel.write(res).addListener(ChannelFutureListener.CLOSE);
+			channel.write(res);
 			return;
 		}
 
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
-		channel.write(res).addListener(ChannelFutureListener.CLOSE);
+		channel.write(res);
 	}
 
 	/**
@@ -205,7 +205,7 @@ public class APIResponse {
 		
 		res.setContent(ChannelBuffers.copiedBuffer(text, CharsetUtil.UTF_8));
 		setContentLength(res, res.getContent().readableBytes());
-		channel.write(res).addListener(ChannelFutureListener.CLOSE);
+		channel.write(res);
 	}
 
 	public static void httpError(Channel channel, String text, String contentType, HttpRequest req, CallParameters params)
@@ -240,7 +240,7 @@ public class APIResponse {
 		}
 
 		
-		channel.write(res).addListener(ChannelFutureListener.CLOSE);
+		channel.write(res);
 	}
 
 	public static void httpOk(Channel channel, DBObject dbObject, HttpRequest req, CallParameters params, Cookie[] cookies)

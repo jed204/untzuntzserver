@@ -293,6 +293,9 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		else
 			sendHttpResponse(ctx, req, new DefaultHttpResponse(HTTP_1_1, HttpResponseStatus.NOT_FOUND));
 
+		if (uploadedFiles != null) {
+			uploadedFiles.clear();
+		}
 	}
 	
 	/**
@@ -618,7 +621,7 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		
 		// Send the response and close the connection if necessary.
 		ChannelFuture f = ctx.getChannel().write(res);
-		if (!isKeepAlive(req) || res.getStatus().getCode() != 200) {
+		if (!isKeepAlive(req)) {
 			f.addListener(ChannelFutureListener.CLOSE);
 		}
 	}
@@ -631,7 +634,6 @@ public class ServerHandler extends SimpleChannelUpstreamHandler {
 		else
 			logger.warn(String.format("%s => Error during API handling [%s]", e.getChannel().getRemoteAddress(), e.getCause()), e.getCause());
 		
-		e.getChannel().close();
 		cleanup(e.getChannel());
 	}
 	
