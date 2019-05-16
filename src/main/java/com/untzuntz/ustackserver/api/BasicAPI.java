@@ -1,19 +1,15 @@
 package com.untzuntz.ustackserver.api;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringWriter;
-import java.util.HashMap;
-
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+import com.untzuntz.ustack.data.UniqueReference;
+import com.untzuntz.ustack.data.UserAccount;
+import com.untzuntz.ustack.main.UForgotPasswordSvc;
+import com.untzuntz.ustackserverapi.APIDocumentation;
+import com.untzuntz.ustackserverapi.APIResponse;
+import com.untzuntz.ustackserverapi.CallParameters;
+import com.untzuntz.ustackserverapi.MethodDefinition;
+import com.untzuntz.ustackserverapi.params.ParamNames;
 import org.apache.log4j.Logger;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
@@ -27,16 +23,18 @@ import org.jboss.netty.handler.stream.ChunkedStream;
 import org.jboss.netty.util.CharsetUtil;
 import org.w3c.dom.Document;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.untzuntz.ustack.data.UniqueReference;
-import com.untzuntz.ustack.data.UserAccount;
-import com.untzuntz.ustack.main.UForgotPasswordSvc;
-import com.untzuntz.ustackserverapi.APIDocumentation;
-import com.untzuntz.ustackserverapi.APIResponse;
-import com.untzuntz.ustackserverapi.CallParameters;
-import com.untzuntz.ustackserverapi.MethodDefinition;
-import com.untzuntz.ustackserverapi.params.ParamNames;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+
+import static org.jboss.netty.handler.codec.http.HttpHeaders.setContentLength;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 public class BasicAPI {
 
@@ -50,7 +48,7 @@ public class BasicAPI {
     	channel.write(response);
 
         // Write the content.
-        ChannelFuture writeFuture = channel.write(new ChunkedStream(ClassLoader.class.getResourceAsStream("/com/untzuntz/ustackserver/docs/apidocs.css")));
+        ChannelFuture writeFuture = channel.write(new ChunkedStream(BasicAPI.class.getResourceAsStream("/com/untzuntz/ustackserver/docs/apidocs.css")));
         writeFuture.addListener(ChannelFutureListener.CLOSE);
     }
     
@@ -69,7 +67,7 @@ public class BasicAPI {
     	
 	    InputStream input = null;
 	    try {
-	    	input = ClassLoader.class.getResourceAsStream(docHtmlResourcePath);
+	    	input = BasicAPI.class.getResourceAsStream(docHtmlResourcePath);
 		    InputStreamReader xslReader = new InputStreamReader( input );
 		    
 		    String clientId = callParams.get(ParamNames.client_id);
