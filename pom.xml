@@ -38,7 +38,7 @@
 		<dependency>
 			<groupId>com.untzuntz.ustack</groupId>
 			<artifactId>ustack-core-data-java</artifactId>
-			<version>1.0.67</version>
+			<version>1.0.70</version>
 		</dependency>
 	</dependencies>
 	<description>UntzUntz UStack Server</description>
